@@ -15,7 +15,9 @@ import javax.persistence.TypedQuery;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
+import filters.TokenFilter;
 import models.Test;
+import ninja.FilterWith;
 import ninja.Result;
 import ninja.Results;
 import ninja.jaxy.GET;
@@ -24,6 +26,7 @@ import ninja.jpa.UnitOfWork;
 import ninja.params.PathParam;
 
 @Path("/api")
+@FilterWith(TokenFilter.class)
 @Singleton
 public class TestDataController {
   @Inject
@@ -31,7 +34,6 @@ public class TestDataController {
 
   @Path("/testdata")
   @GET
-  @UnitOfWork
   public Result getAll() {
     EntityManager entityManager = entityManagerProvider.get();
 
@@ -43,7 +45,6 @@ public class TestDataController {
 
   @Path("/testdata/{id}")
   @GET
-  @UnitOfWork
   public Result get(@PathParam("id") long id) {
     EntityManager entityManager = entityManagerProvider.get();
 

@@ -35,12 +35,17 @@ var Auth = function() {
 	var logOut = function() {
 		delete localStorage.token;
 		this.onChange(false);
+	};
+
+	var getToken = function() {
+		return localStorage.token;
 	}
 
 	return {
 		logIn:logIn,
 		loggedIn: loggedIn,
 		logOut: logOut,
+		getToken: getToken,
 		onChange: function(authenticated) {}
 	}
 }();

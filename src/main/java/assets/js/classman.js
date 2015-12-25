@@ -35,6 +35,9 @@ var MainPanel = React.createClass({
 	loadDataFromServer() {
     $.ajax({
       url: "/api/testdata",
+      headers: {
+        'X-AUTH-TOKEN':Auth.getToken()
+    	},
       dataType: 'json',
       cache: false,
       success: function(data) {
