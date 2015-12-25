@@ -1,9 +1,6 @@
 /**
  * Copyright (C) 2016 AppDynamics
  */
- window.__CM__ ={
-
- }
 
 // Main Application component
 var App = React.createClass({
@@ -57,7 +54,7 @@ var MainPanel = React.createClass({
 
 	componentDidMount() {
     this.loadDataFromServer();
-    setInterval(this.loadCommentsFromServer, 3000);
+    setInterval(this.loadDataFromServer, 3000);
   },
 
 	render() {
