@@ -1,0 +1,8 @@
+#build directory
+target
+
+#configuration files
+.classpath
+.project
+.settings
+
