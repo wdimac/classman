@@ -15,7 +15,7 @@ import org.junit.Test;
 import ninja.NinjaDocTester;
 
 public class AuthenticationControllerTest extends NinjaDocTester {
-  static String TEST_DATA_URL = "/api/authenticate";
+  static String AUTH_URL = "/api/authenticate";
 
   @Before
   public void resetDb() {
@@ -26,9 +26,9 @@ public class AuthenticationControllerTest extends NinjaDocTester {
   public void testSuccessfulAuth() {
     sayNextSection("Authenication request.");
 
-    say("User authentication is a POST request to " + TEST_DATA_URL);
+    say("User authentication is a POST request to " + AUTH_URL);
     Response response = sayAndMakeRequest(
-      Request.POST().url(testServerUrl().path(TEST_DATA_URL + "?username=admin&password=admin"))
+      Request.POST().url(testServerUrl().path(AUTH_URL + "?username=admin&password=admin"))
       );
 
     AuthenticationController.AuthenicationResponse auth =
@@ -41,7 +41,7 @@ public class AuthenticationControllerTest extends NinjaDocTester {
   @Test
   public void testInvalidAuth() {
     Response response = makeRequest(
-      Request.POST().url(testServerUrl().path(TEST_DATA_URL + "?username=admin&password=foo"))
+      Request.POST().url(testServerUrl().path(AUTH_URL + "?username=admin&password=foo"))
       );
 
 
