@@ -2,8 +2,10 @@ package models;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Table;
 
 @Entity
+@Table(name="images")
 public class Images {
   @Id
   String id;

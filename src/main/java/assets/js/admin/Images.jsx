@@ -104,12 +104,14 @@ window.__APP__.Images = React.createClass({
     });
   },
   addImage(image) {
+  	console.debug(JSON.stringify({id: image.imageId, description: image.name, region: this.refs.region.value}));
   	$.ajax({
   		url: "/api/admin/images",
   		type: "POST",
       headers: {
         'X-AUTH-TOKEN':Auth.getToken()
        },
+      contentType: 'application/json',
       dataType: 'json',
       data:JSON.stringify({id: image.imageId, description: image.name, region: this.refs.region.value}),
       cache: false,
