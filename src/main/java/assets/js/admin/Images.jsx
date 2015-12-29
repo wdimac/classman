@@ -252,7 +252,7 @@ window.__APP__.Images = React.createClass({
     );
 		return(
 			<div>
-				<div style={{marginBottom:"10px;"}}>
+				<div style={{marginBottom:"10px"}}>
 					<button className="btn btn-sm btn-primary" onClick={this.openModal}>
 						Lookup Images
 					</button>
