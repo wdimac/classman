@@ -20,7 +20,6 @@ import ninja.Results;
 import ninja.jaxy.GET;
 import ninja.jaxy.POST;
 import ninja.jaxy.Path;
-import ninja.params.Param;
 import ninja.params.PathParam;
 
 @Path("/api/admin")
@@ -44,7 +43,6 @@ public class ImagesController {
   @Transactional
   public Result addImage(Images image) {
 
-    System.out.println(image);
     imagesDao.persist(image);
 
     return Results.json().render(image);

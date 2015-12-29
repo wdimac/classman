@@ -111,7 +111,7 @@ window.__APP__.Images = React.createClass({
         'X-AUTH-TOKEN':Auth.getToken()
        },
       dataType: 'json',
-      data:{Images:{id: image.imageId, description: image.name, region: this.refs.region.value}},
+      data:JSON.stringify({id: image.imageId, description: image.name, region: this.refs.region.value}),
       cache: false,
       success: function(data) {
       	this.loadDataFromServer();
