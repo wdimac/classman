@@ -20,6 +20,13 @@ create database classman_test;
 grant all on classman_dev to 'appd'@'localhost';
 grant all on classman_test to 'appd'@'localhost';
 ```
+Save your aws credentials (create a key in aws) in ~/.aws/credentials
+
+```
+[default]
+aws_access_key_id = <your key id>
+aws_secret_access_key = <your key>
+```
 
 To import project into eclipse, just import as a maven project.
 
