@@ -20,7 +20,7 @@ public class ConfigController {
 
 
   @Path("/config")
-  public Result getImages(@PathParam("class") String clazz) {
+  public Result getConfig() {
     HashMap<String, Object> config = new HashMap<>();
 
     config.put("regions", AwsAdaptor.Region.getNameList());
