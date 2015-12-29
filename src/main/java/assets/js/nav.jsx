@@ -26,7 +26,7 @@ window.__APP__.NavBar = React.createClass({
 window.__APP__.FooterBar = React.createClass({
 	render() {
 		return(
-			<div className="navbar navbar-full navbar-dark bg-inverse">
+			<div className="navbar navbar-full navbar-fixed-bottom navbar-dark bg-inverse">
 				<small>
 					Copyright &copy; 2016 AppDynamics, Inc.
 				</small>

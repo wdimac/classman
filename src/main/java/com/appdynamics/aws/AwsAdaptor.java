@@ -1,5 +1,6 @@
 package com.appdynamics.aws;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.amazonaws.services.ec2.AmazonEC2Client;
@@ -8,10 +9,8 @@ import com.amazonaws.services.ec2.model.DescribeImagesResult;
 import com.amazonaws.services.ec2.model.Filter;
 import com.amazonaws.services.ec2.model.Image;
 import com.amazonaws.services.ec2.model.Instance;
-import com.amazonaws.services.ec2.model.InstanceType;
 import com.amazonaws.services.ec2.model.RunInstancesRequest;
 import com.amazonaws.services.ec2.model.RunInstancesResult;
-import com.appdynamics.aws.AwsAdaptor.Region;
 import com.google.inject.Singleton;
 
 @Singleton
@@ -49,6 +48,16 @@ public class AwsAdaptor {
       this.endpoint = endpoint;
     }
     Region(){};
+
+    public static ArrayList<String[]> getNameList() {
+
+      ArrayList<String[]> nameList = new ArrayList<>();
+      for (Region region: Region.values()){
+        String[] foo = {region.toString(), region.getName()};
+        nameList.add(foo);
+      }
+      return nameList;
+    }
   }
 
   private static final String DEFAULT_SECURITY_GROUP = "EDU_HTTP-RDP";
@@ -66,6 +75,20 @@ public class AwsAdaptor {
             new DescribeImagesRequest().withFilters(
                 new Filter("is-public").withValues("false")
             ));
+    return result.getImages();
+  }
+
+  /**
+   * Return all items listed
+   * AmazonEC2Client amazonClient = getClient(region);
+   * @param ids
+   * @return
+   */
+  public List<Image> getImages(String[] ids, String region) {
+    AmazonEC2Client amazonClient = getClient(Region.valueOf(region));
+    DescribeImagesResult result = amazonClient
+        .describeImages(
+            new DescribeImagesRequest().withImageIds(ids));
     return result.getImages();
   }
 

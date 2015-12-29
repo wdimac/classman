@@ -1,8 +1,8 @@
 /**
  * Copyright (C) 2016 AppDynamics
  */
-
 var LoginPanel = window.__APP__.LoginPanel;
+var Admin = window.__APP__.Admin;
 
 // Main Application component
 var App = React.createClass({
@@ -34,49 +34,12 @@ var App = React.createClass({
 
 // Main display panel
 var MainPanel = React.createClass({
-	loadDataFromServer() {
-    $.ajax({
-      url: "/api/testdata",
-      headers: {
-        'X-AUTH-TOKEN':Auth.getToken()
-    	},
-      dataType: 'json',
-      cache: false,
-      success: function(data) {
-        this.setState({data: data});
-      }.bind(this),
-      error: function(xhr, status, err) {
-        console.error(this.props.url, status, err.toString());
-      }.bind(this)
-    });
-  },
-
-	getInitialState() {
-		return {
-			data: []
-		}
-	},
-
-	componentDidMount() {
-    this.loadDataFromServer();
-    setInterval(this.loadDataFromServer, 3000);
-  },
-
 	render() {
-		var testlist = this.state.data.map(function(test) {
-      return (
-        <div key={test.id}>
-          {test.title}
-        </div>
-      );
-    });
 		return(
 			<div className="card" style={{padding:"20px"}}>
-				Data found in the Test table (this is polled every 3 sec.):
-				{testlist}
+				<Admin />
 			</div>
 		);
-
 	}
 });
 

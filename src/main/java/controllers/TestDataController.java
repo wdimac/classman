@@ -22,7 +22,6 @@ import ninja.Result;
 import ninja.Results;
 import ninja.jaxy.GET;
 import ninja.jaxy.Path;
-import ninja.jpa.UnitOfWork;
 import ninja.params.PathParam;
 
 @Path("/api")

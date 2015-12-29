@@ -11,24 +11,10 @@ import java.util.List;
 import org.doctester.testbrowser.Request;
 import org.doctester.testbrowser.Response;
 import org.hamcrest.CoreMatchers;
-import org.junit.Before;
 import org.junit.Test;
 
-import com.gargoylesoftware.htmlunit.javascript.host.Console;
-
-import ninja.NinjaDocTester;
-
-public class TestDataControllerDocTesterTest extends NinjaDocTester {
+public class TestDataControllerDocTesterTest extends AuthenticatedDocTesterBase {
   static String TEST_DATA_URL = "/api/testdata";
-  private AuthenticationController.AuthenicationResponse auth = null;
-
-  @Before
-  public void init() {
-    Response response = makeRequest(
-        Request.POST().url(testServerUrl().path("/api/authenticate?username=admin&password=admin"))
-        );
-    auth =response.payloadAs(AuthenticationController.AuthenicationResponse.class);
-  }
 
   @Test
   public void testGetAll () {
@@ -62,7 +48,7 @@ public class TestDataControllerDocTesterTest extends NinjaDocTester {
 
     models.Test test = response.payloadAs(models.Test.class);
 
-    sayAndAssertThat("We get back correct item",
+    sayAndAssertThat("We get back the requested item.",
         test.getTitle(), CoreMatchers.is("First"));
   }
 
