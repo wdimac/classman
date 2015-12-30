@@ -17,6 +17,7 @@ import models.Images;
 import ninja.FilterWith;
 import ninja.Result;
 import ninja.Results;
+import ninja.jaxy.DELETE;
 import ninja.jaxy.GET;
 import ninja.jaxy.POST;
 import ninja.jaxy.Path;
@@ -31,6 +32,10 @@ public class ImagesController {
   @Inject
   AwsAdaptor aws;
 
+  /**
+   * Get list of images
+   * @return
+   */
   @Path("/images")
   @GET
   @Transactional
@@ -38,6 +43,12 @@ public class ImagesController {
     return Results.json().render(imagesDao.getAllImages());
   }
 
+  /**
+   * Insert new image information.
+   *
+   * @param image
+   * @return
+   */
   @Path("/images")
   @POST
   @Transactional
@@ -47,6 +58,19 @@ public class ImagesController {
 
     return Results.json().render(image);
   }
+
+  @Path("/images/{id}")
+  @DELETE
+  @Transactional
+  public Result deleteImage(@PathParam("id") String id) {
+    Images image = imagesDao.delete(id);
+
+    return Results.json().render(image);
+  }
+
+  /*
+   * AWS calls
+   */
 
   @Path("/aws/images/{region}/{id}")
   @GET

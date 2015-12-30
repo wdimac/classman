@@ -184,7 +184,8 @@ window.__APP__.Images = React.createClass({
 	      dataType: 'json',
 	      cache: false,
 	      success: function(data) {
-	      	this.setState({detailImage: null});
+	      	this.setState({detailItem: null});
+	      	this.loadDataFromServer();
 	      }.bind(this),
 	      error: function(xhr, status, err) {
 	        console.error("DELETE " + url, status, err.toString());

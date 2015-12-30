@@ -92,6 +92,31 @@ public class ImagesControllerDocTest extends AuthenticatedDocTesterBase{
   }
 
   @Test
+  public void deleteImage() {
+    sayNextSection("Removing an image reference from the application.");
+
+    say("Removing an image in the appilcation is a DELETE request to " + IMAGES_URL + "/<image_id>");
+
+    Images image = new Images();
+    image.setId("TEST_ID");
+    image.setRegion("REGION");
+    image.setDescription("DESCRIPTION");
+    Response response = sayAndMakeRequest(
+      Request.DELETE()
+        .url(testServerUrl().path(IMAGES_URL + "/ID-1"))
+        .contentTypeApplicationJson()
+        .payload(image)
+        .addHeader("X-AUTH-TOKEN", auth.auth_token)
+      );
+
+    Images resultImage = response.payloadAs(Images.class);
+
+    sayAndAssertThat("Deleted image is returned.",
+        resultImage.getId(), CoreMatchers.is("ID-1"));
+
+  }
+
+  @Test
   public void getAwsImages() {
     ArrayList<Image> images = getImageList();
     when(aws.getImages(Mockito.any(Region.class))).thenReturn(images);

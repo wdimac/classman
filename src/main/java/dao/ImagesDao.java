@@ -34,4 +34,16 @@ public class ImagesDao {
       throw e;
     }
   }
+
+  public Images delete(String imageId) {
+    try {
+      EntityManager entityManager = entityManagerProvider.get();
+      Images image = entityManager.find(Images.class, imageId);
+      entityManager.remove(image);
+      return image;
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw e;
+    }
+  }
 }
