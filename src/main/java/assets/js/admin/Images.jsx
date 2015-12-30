@@ -1,5 +1,7 @@
+var Accordian = window.__APP__.Accordian;
 var BootstrapModal = window.__APP__.BootstrapModal;
 
+//Display of image detail
 var ImageDetail = React.createClass({
 	getInitialState() {
 		return {
@@ -40,11 +42,14 @@ var ImageDetail = React.createClass({
 		}
 	},
 	render() {
-		console.debug(this.state.detailImage);
 		return (
 			<div className="card">
 				<div className="card-header bg-info">
 					Image: {this.props.image.id}
+					<a href="javascript:void(0);" title="Delete this image"
+						onClick={this.props.handleDelete}>
+						<i className="fa fa-lg fa-minus-square text-danger pull-right"></i>
+					</a>
 				</div>
 				<div className="card-body p-a-1">
 					<div><strong>AMI Name: </strong> {this.props.image.description}</div>
@@ -77,6 +82,8 @@ var ImageDetail = React.createClass({
 		)
 	}
 });
+
+// Main images panel
 window.__APP__.Images = React.createClass({
 	getInitialState() {
 		return {
@@ -104,7 +111,6 @@ window.__APP__.Images = React.createClass({
     });
   },
   addImage(image) {
-  	console.debug(JSON.stringify({id: image.imageId, description: image.name, region: this.refs.region.value}));
   	$.ajax({
   		url: "/api/admin/images",
   		type: "POST",
@@ -156,6 +162,36 @@ window.__APP__.Images = React.createClass({
   viewDetail(item) {
   	this.setState({detailItem:item});
   },
+  formatImageRow(item) {
+		var boundClick = function(item){
+			this.viewDetail(item);
+		}.bind(this, item);
+		return(
+			<div key={item.id} className="truncate">
+				<i className='fa fa-file-text btn btn-info btn-sm'
+					onClick={boundClick} /> &ensp;
+				<strong>{item.id}:</strong> {item.description}
+			</div>
+		)
+	},
+	deleteDetailItem() {
+		if (this.state.detailItem) {
+			var url = '/api/admin/images/' + this.state.detailItem.id;
+			$.ajax({
+	      url: url,
+	      headers: {'X-AUTH-TOKEN':Auth.getToken()},
+	      type: 'DELETE',
+	      dataType: 'json',
+	      cache: false,
+	      success: function(data) {
+	      	this.setState({detailImage: null});
+	      }.bind(this),
+	      error: function(xhr, status, err) {
+	        console.error("DELETE " + url, status, err.toString());
+	      }.bind(this)
+	    });
+		}
+	},
 	render() {
 		var cRegion = "";
 		var sorted = {};
@@ -166,33 +202,11 @@ window.__APP__.Images = React.createClass({
 			}
 			sorted[cRegion].push( item);
 		})
-		var rows = [];
-		for (var region in sorted) {
-    	if (sorted.hasOwnProperty(region)) {
-    		var itemRows = sorted[region].map(function(item){
-    			var boundClick = function(item){
-    				this.viewDetail(item);
-    			}.bind(this, item);
-					return(
-						<div key={item.id} className="truncate">
-							<i className='fa fa-file-text btn btn-info btn-sm'
-								onClick={boundClick} /> &ensp;
-							<strong>{item.id}:</strong> {item.description}
-						</div>
-					)
-				}.bind(this));
-				rows.push(
-					<div key={region} className="m-b-1">
-						<div>
-							<strong>{region}</strong>
-						</div>
-						<div className="p-l-1"> 
-							{itemRows}
-						</div>
-					</div>
-					)
-    	}
-    }
+		var rows = (
+			<Accordian id="region_list" 
+				formatItemRow={this.formatImageRow}
+				map={sorted} />
+		);
 		var regionSelect = this.props.awsConfig.regions ?
 			(
 				<select ref="region" placeholder="Select one">
@@ -230,7 +244,7 @@ window.__APP__.Images = React.createClass({
 				}.bind(this));
 		};
 		var detail = this.state.detailItem ?
-			(<ImageDetail image={this.state.detailItem} />)
+			(<ImageDetail image={this.state.detailItem} handleDelete={this.deleteDetailItem}/>)
 			:
 			(<div>Select an Item at left to view details</div>);
 		
