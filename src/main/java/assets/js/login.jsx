@@ -30,8 +30,8 @@ window.__APP__.LoginPanel = React.createClass({
 				<div className='card-header bg-primary'>
 					Login
 				</div>
-				<div className="card-body" style={{padding:"10px"}}>
-										<form onSubmit={this.handleSubmit}>
+				<div className="card-body p-a-1">
+					<form onSubmit={this.handleSubmit}>
 						<div className='form-group'>
 							<input id='username' ref='username' 
 								className='form-control'

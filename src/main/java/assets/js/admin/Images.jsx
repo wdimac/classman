@@ -46,7 +46,7 @@ var ImageDetail = React.createClass({
 				<div className="card-header bg-info">
 					Image: {this.props.image.id}
 				</div>
-				<div className="card-body" style={{padding:"1rem"}}>
+				<div className="card-body p-a-1">
 					<div><strong>AMI Name: </strong> {this.props.image.description}</div>
 					{this.state.detailImage ?
 						<div>
@@ -182,11 +182,11 @@ window.__APP__.Images = React.createClass({
 					)
 				}.bind(this));
 				rows.push(
-					<div key={region} style={{marginBottom:"1rem"}}>
+					<div key={region} className="m-b-1">
 						<div>
 							<strong>{region}</strong>
 						</div>
-						<div style={{paddingLeft:"1rem"}}> 
+						<div className="p-l-1"> 
 							{itemRows}
 						</div>
 					</div>
@@ -239,7 +239,7 @@ window.__APP__.Images = React.createClass({
         ref="modal"
         onCancel={this.onCancel}
         title="Lookup Images">
-        <div style={{marginBottom: "20px"}}>
+        <div className="m-b-1">
 	        {regionSelect} &emsp;
 	        <button className="btn btn-sm btn-primary" onClick={this.searchImages}>
 	        	Search
@@ -252,7 +252,7 @@ window.__APP__.Images = React.createClass({
     );
 		return(
 			<div>
-				<div style={{marginBottom:"10px"}}>
+				<div className="m-b-1">
 					<button className="btn btn-sm btn-primary" onClick={this.openModal}>
 						Lookup Images
 					</button>

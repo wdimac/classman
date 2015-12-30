@@ -47,7 +47,7 @@ window.__APP__.Admin = React.createClass({
 						</a>
 					</span>
 				</div>
-				<div className="card-body" style={{padding:"1rem"}}>
+				<div className="card-body p-a-1">
 					{panel}
 				</div>
 			</div>

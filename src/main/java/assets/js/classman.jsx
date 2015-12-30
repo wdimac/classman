@@ -36,7 +36,7 @@ var App = React.createClass({
 var MainPanel = React.createClass({
 	render() {
 		return(
-			<div className="card" style={{padding:"20px"}}>
+			<div className="card p-a-1" >
 				<Admin />
 			</div>
 		);
