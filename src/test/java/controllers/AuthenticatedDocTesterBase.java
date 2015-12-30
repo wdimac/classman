@@ -8,7 +8,6 @@ package controllers;
 import org.doctester.testbrowser.Request;
 import org.doctester.testbrowser.Response;
 import org.junit.Before;
-import org.junit.BeforeClass;
 
 import ninja.NinjaDocTester;
 

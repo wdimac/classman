@@ -11,7 +11,6 @@ import ninja.FilterWith;
 import ninja.Result;
 import ninja.Results;
 import ninja.jaxy.Path;
-import ninja.params.PathParam;
 
 @Path("/api/admin")
 @FilterWith(TokenFilter.class)
