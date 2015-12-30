@@ -7,7 +7,6 @@ window.__APP__.Accordian = React.createClass({
     		var itemRows = myMap[section].map(function(item){
     			return this.props.formatItemRow(item);
 				}.bind(this));
-				console.debug(itemRows);
 				var panelName = section + '_panel';
 				rows.push(
 				  <div className="panel panel-default" key={section}>
