@@ -11,6 +11,13 @@ Software required:
 - Maven (3.11 or better)
 - mysql database running locally (you will need to change config if you run elsewhere)
 
+Configure mysql to use transaction isolation level of READ-COMMITTED. Add the following to /etc/my.cnf:
+
+```
+[mysqld]
+transaction-isolation = READ-COMMITTED
+```
+
 Run the following in mysql to create the user and databases for dev and testing
 
 ```
