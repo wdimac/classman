@@ -17,15 +17,23 @@ var Auth = function() {
   };
 
 	var loggedIn = function(){
-		return !!localStorage.token;
+		if (this.localAvailable) {
+			return !!localStorage.token;
+		} else {
+			return !!this.token;
+		}
 	};
 
 	var logIn = function(username, password, callback) {
 		authenticateUser (username, password, function(res) {
       var authenticated = false
       if (res.authenticated){
-        localStorage.token = res.token;
-        authenticated = true;
+      	if (this.localAvailable) {
+	        localStorage.token = res.token;
+        } else {
+        	this.token = res.token;
+        }
+      	authenticated = true;
       }
       if (callback) callback(authenticated);
     });
@@ -38,14 +46,31 @@ var Auth = function() {
 	};
 
 	var getToken = function() {
-		return localStorage.token;
+		if (this.localAvailable) {
+			return localStorage.token;
+		} else {
+			return this.token;
+		}
 	}
 
+	var localAvailable = function() {
+		try {
+	    var x = 'test-localstorage-' + Date.now();
+	    localStorage.setItem(x, x);
+	    var y = localStorage.getItem(x);
+	    localStorage.removeItem(x);
+	    if (y !== x) {throw new Error();}
+	    return true; // localStorage is fully functional!
+		} catch (e) {
+			return false;
+		}
+	}
 	return {
 		logIn:logIn,
 		loggedIn: loggedIn,
 		logOut: logOut,
 		getToken: getToken,
-		onChange: function(authenticated) {}
+		onChange: function(authenticated) {},
+		localAvailable: localAvailable()
 	}
 }();
