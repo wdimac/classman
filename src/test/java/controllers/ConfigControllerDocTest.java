@@ -29,10 +29,12 @@ public class ConfigControllerDocTest extends AuthenticatedDocTesterBase{
         .addHeader("X-AUTH-TOKEN", auth.auth_token)
       );
 
-    HashMap<String, Object> config = response.payloadAs(HashMap.class);
+    HashMap<String, ArrayList<Object>> config = response.payloadAs(HashMap.class);
 
-    sayAndAssertThat("Config contains 9 regions.",
-        ((ArrayList)config.get("regions")).size(), CoreMatchers.is(9));
+    sayAndAssertThat("Config contains 9 Regions.",
+        ((ArrayList<Object>)config.get("regions")).size(), CoreMatchers.is(9));
+    sayAndAssertThat("Config contains 38 Instance Types.",
+        ((ArrayList<Object>)config.get("instanceTypes")).size(), CoreMatchers.is(38));
 
   }
 

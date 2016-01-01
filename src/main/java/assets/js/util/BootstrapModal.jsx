@@ -19,11 +19,13 @@ window.__APP__.BootstrapModal = React.createClass({
     var cancelButton = null;
 
     if (this.props.confirm) {
+      var color = " btn-primary";
+      if (this.props.disabled) color = " btn-faded";
       confirmButton = (
         <a
-          onClick={this.handleConfirm}
+          onClick={this.props.disabled ? this.noop : this.handleConfirm}
           id="confirm_modal"
-          className="btn-primary">
+          className={"btn btn-sm" + color}>
           {this.props.confirm}
         </a>
       );
@@ -32,7 +34,7 @@ window.__APP__.BootstrapModal = React.createClass({
       cancelButton = (
         <a onClick={this.handleCancel} 
           id="cancel_modal"
-          className="btn-default">
+          className="btn btn-sm btn-default">
           {this.props.cancel}
         </a>
       );
@@ -55,6 +57,7 @@ window.__APP__.BootstrapModal = React.createClass({
               {this.props.children}
             </div>
             <div className="modal-footer">
+              <span className='pull-left'>{this.props.message || ""}</span>
               {cancelButton}
               {confirmButton}
             </div>
@@ -72,5 +75,6 @@ window.__APP__.BootstrapModal = React.createClass({
     if (this.props.onConfirm) {
       this.props.onConfirm();
     }
-  }
+  },
+  noop: function() {}
 });

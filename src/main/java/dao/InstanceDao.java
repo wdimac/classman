@@ -10,48 +10,50 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import models.Images;
+import models.Instance;
 
 @Singleton
-public class ImagesDao {
+public class InstanceDao {
   @Inject
   Provider<EntityManager> entityManagerProvider;
 
-  public List<Images> getAllImages() {
+  public List<Instance> getAllInstances() {
     EntityManager entityManager = entityManagerProvider.get();
 
-    TypedQuery<Images> query = entityManager.createQuery("Select i from Images i order by region, description	", Images.class);
-    List<Images> images = query.getResultList();
+    TypedQuery<Instance> query = entityManager.createQuery("Select i from Instance i order by region, description	", Instance.class);
+    List<Instance> images = query.getResultList();
     return images;
   }
 
-  public void persist(Images image) {
+  public void persist(Instance instance) {
     try {
       EntityManager entityManager = entityManagerProvider.get();
 
-      entityManager.persist(image);
+      entityManager.persist(instance);
     } catch (Exception e) {
       e.printStackTrace();
       throw e;
     }
   }
 
-  public Images delete(String imageId) {
+  public Instance delete(String instanceId) {
     try {
       EntityManager entityManager = entityManagerProvider.get();
-      Images image = entityManager.find(Images.class, imageId);
-      entityManager.remove(image);
-      return image;
+      Instance instance = entityManager.find(Instance.class, instanceId);
+      entityManager.remove(instance);
+      return instance;
     } catch (Exception e) {
       e.printStackTrace();
       throw e;
     }
   }
 
-  public Images find(String id) {
+  public Instance find(String id) {
     EntityManager entityManager = entityManagerProvider.get();
 
-    TypedQuery<Images> query = entityManager.createQuery("Select i from Images i where i.id=:idParam", Images.class);
-    Images image = query.setParameter("idParam", id).getSingleResult();
+    TypedQuery<Instance> query = entityManager.createQuery("Select i from Instance i where i.id=:idParam", Instance.class);
+    Instance image = query.setParameter("idParam", id).getSingleResult();
     return image;
   }
+
 }

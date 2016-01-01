@@ -3,8 +3,8 @@
  */
 
 // Store auth token locally
-var Auth = function() {
-	var authenticateUser = function(username, password, callback) {
+var Auth = {
+	authenticateUser: function(username, password, callback) {
 	  $.ajax({
 	  		url:'/api/authenticate',
 	    	type: 'POST',
@@ -14,46 +14,48 @@ var Auth = function() {
   	    error: function(resp) {
   	          callback({authenticated:false});}
   	});
-  };
+  },
 
-	var loggedIn = function(){
-		if (this.localAvailable) {
+	loggedIn: function(){
+		if (Auth.localAvailable) {
 			return !!localStorage.token;
 		} else {
-			return !!this.token;
+			return !!Auth.token;
 		}
-	};
+	},
 
-	var logIn = function(username, password, callback) {
-		authenticateUser (username, password, function(res) {
+	logIn: function(username, password, callback) {
+		Auth.authenticateUser (username, password, function(res) {
       var authenticated = false
       if (res.authenticated){
-      	if (this.localAvailable) {
+      	if (Auth.localAvailable) {
 	        localStorage.token = res.token;
         } else {
-        	this.token = res.token;
+        	Auth.token = res.token;
         }
       	authenticated = true;
       }
       if (callback) callback(authenticated);
     });
 
-	};
+	},
 
-	var logOut = function() {
+	logOut: function() {
 		delete localStorage.token;
-		this.onChange(false);
-	};
+		Auth.onChange(false);
+	},
 
-	var getToken = function() {
-		if (this.localAvailable) {
+	getToken: function() {
+		if (Auth.localAvailable) {
 			return localStorage.token;
 		} else {
-			return this.token;
+			return Auth.token;
 		}
-	}
+	},
 
-	var localAvailable = function() {
+  onChange: function(authenticated) {},
+
+	localAvailable: function() {
 		try {
 	    var x = 'test-localstorage-' + Date.now();
 	    localStorage.setItem(x, x);
@@ -64,13 +66,5 @@ var Auth = function() {
 		} catch (e) {
 			return false;
 		}
-	}
-	return {
-		logIn:logIn,
-		loggedIn: loggedIn,
-		logOut: logOut,
-		getToken: getToken,
-		onChange: function(authenticated) {},
-		localAvailable: localAvailable()
-	}
-}();
+	}()
+};

@@ -1,5 +1,7 @@
 var Accordian = window.__APP__.Accordian;
 var BootstrapModal = window.__APP__.BootstrapModal;
+var Launcher = window.__APP__.Launcher;
+var PropsSpewer = window.__APP__.PropsSpewer;
 
 //Display of image detail
 var ImageDetail = React.createClass({
@@ -9,8 +11,8 @@ var ImageDetail = React.createClass({
 		}
 	},
 	loadDataFromServer() {
-		var url = "/api/admin/aws/images/"
-			+ this.props.image.region + '/' + this.props.image.id;
+		var url = "/api/admin/aws/"
+			+ this.props.image.region + '/images/' + this.props.image.id;
 		$.ajax({
       url: url,
       headers: {
@@ -55,21 +57,9 @@ var ImageDetail = React.createClass({
 					<div><strong>AMI Name: </strong> {this.props.image.description}</div>
 					{this.state.detailImage ?
 						<div>
-							<div>
-								<strong>Owner:</strong> {this.state.detailImage.ownerId}
-							</div>
-							<div>
-								<strong>Status:</strong> {this.state.detailImage.state}
-							</div>
-							<div>
-								<strong>Platform:</strong> {this.state.detailImage.platform}
-							</div>
-							<div>
-								<strong>Root Device Type:</strong> {this.state.detailImage.rootDeviceType}
-							</div>
-							<div>
-								<strong>Virtualization:</strong> {this.state.detailImage.virtualizationType}
-							</div>
+							<PropsSpewer 
+                  item={this.state.detailImage}
+                  omit={["imageId", "name"]}/>
 						</div>
 						:
 						<span>
@@ -102,7 +92,7 @@ var ImageLookup = React.createClass({
   	if (this.refs.region.value !== this.state.currentModalRegion) {
 	  	this.setState({searchState:"searching"});
 	  	$.ajax({
-	      url: "/api/admin/aws/images/" + this.refs.region.value,
+	      url: "/api/admin/aws/" + this.refs.region.value + "/images",
 	      headers: {'X-AUTH-TOKEN':Auth.getToken()},
 	      dataType: 'json',
 	      cache: false,
@@ -202,7 +192,8 @@ window.__APP__.Images = React.createClass({
 	getInitialState() {
 		return {
 			data:[],
-			detailItem:null
+			detailItem:null,
+			launchItem:{}
 		}
 	},
   loadDataFromServer() {
@@ -224,25 +215,36 @@ window.__APP__.Images = React.createClass({
   componentDidMount() {
     this.loadDataFromServer();
   },
-  //Callback for Accordian
-  formatImageRow(item) {
-		var boundClick = function(item){
-			this.viewDetail(item);
-		}.bind(this, item);
-		return(
-			<div key={item.id} className="truncate">
-				<i className='fa fa-file-text btn btn-info btn-sm'
-					onClick={boundClick} /> &ensp;
-				<strong>{item.id}:</strong> {item.description}
-			</div>
-		)
-	},
   viewDetail(item) {
   	this.setState({detailItem:item});
   },
   openLookup() {
   	this.refs.lookup.open();
   },
+  launch(item) {
+  	this.setState({
+  		launchItem: item
+  	});
+  	this.refs.launcher.open();
+  },
+  //Callback for Accordian
+  formatImageRow(item) {
+		var boundClick = function(item){
+			this.viewDetail(item);
+		}.bind(this, item);
+		var launchClick = function(item){
+			this.launch(item);
+		}.bind(this, item);
+		return(
+			<div key={item.id} className="truncate">
+				<i className='fa fa-file-text btn btn-info btn-sm'
+					onClick={boundClick} /> &ensp;
+				<i className='fa fa-rocket btn btn-success btn-sm'
+					onClick={launchClick} /> &ensp;
+				<strong>{item.id}:</strong> {item.description}
+			</div>
+		)
+	},
 	//Callback for detail panel
 	deleteDetailItem() {
 		if (this.state.detailItem) {
@@ -265,16 +267,7 @@ window.__APP__.Images = React.createClass({
 	},
 	render() {
 		var cRegion = "";
-		var sorted = {};
-		//Create data structure for Accordian
-		this.state.data.forEach(function(item){
-			if (item.region !== cRegion) {
-				cRegion = item.region;
-				sorted[cRegion] = [];
-			}
-			sorted[cRegion].push( item);
-		})
-
+    var sorted = window.__APP__.sortByRegion(this.state.data);
 		//Create detail panel
 		var detail = this.state.detailItem ?
 			(<ImageDetail image={this.state.detailItem} handleDelete={this.deleteDetailItem}/>)
@@ -306,6 +299,9 @@ window.__APP__.Images = React.createClass({
       		existing={this.state.data}
       		awsConfig={this.props.awsConfig}
       		updateParent={this.loadDataFromServer} />
+      	<Launcher ref="launcher" 
+	      	awsConfig={this.props.awsConfig}
+      		target={this.state.launchItem} />
 			</div>
 		);
 	}

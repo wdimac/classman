@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import javax.inject.Singleton;
 
+import com.amazonaws.services.ec2.model.InstanceType;
 import com.appdynamics.aws.AwsAdaptor;
 
 import filters.TokenFilter;
@@ -23,6 +24,7 @@ public class ConfigController {
     HashMap<String, Object> config = new HashMap<>();
 
     config.put("regions", AwsAdaptor.Region.getNameList());
+    config.put("instanceTypes", InstanceType.values());
     return Results.json().render(config);
   }
 }

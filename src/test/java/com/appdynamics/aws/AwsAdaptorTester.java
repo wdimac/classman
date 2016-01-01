@@ -32,7 +32,7 @@ public class AwsAdaptorTester {
     System.out.print("\nEnter ID of image to start:");
     String imageId = System.console().readLine();
 
-    List<Instance> instances = adaptor.startInstance(testRegion,
+    List<Instance> instances = adaptor.runInstances(testRegion,
         adaptor.getRunRequest()
           .withImageId(imageId)
           .withInstanceType(InstanceType.M3Xlarge)

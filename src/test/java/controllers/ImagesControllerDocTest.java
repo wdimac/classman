@@ -5,7 +5,9 @@
  */
 package controllers;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,17 +22,21 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.amazonaws.services.ec2.model.Image;
+import com.amazonaws.services.ec2.model.InstanceType;
+import com.amazonaws.services.ec2.model.RunInstancesRequest;
 import com.appdynamics.aws.AwsAdaptor;
 import com.appdynamics.aws.AwsAdaptor.Region;
 import com.google.inject.Inject;
 
+import controllers.ImagesController.RunConfiguration;
 import models.Images;
+import models.Instance;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ImagesControllerDocTest extends AuthenticatedDocTesterBase{
 
   private static final String IMAGES_URL = "/api/admin/images";
-  private static final String AWS_IMAGES_URL  = "/api/admin/aws/images";
+  private static final String AWS_IMAGES_URL  = "/api/admin/aws/[region]/images";
 
   @Inject
   ImagesController controller;
@@ -117,19 +123,53 @@ public class ImagesControllerDocTest extends AuthenticatedDocTesterBase{
   }
 
   @Test
+  public void runImage() {
+    List<com.amazonaws.services.ec2.model.Instance> mock = new ArrayList<>();
+    com.amazonaws.services.ec2.model.Instance in = new com.amazonaws.services.ec2.model.Instance();
+    in.setImageId("ID-1");
+    in.setInstanceId("i-test");
+    mock.add(in);
+    when(aws.runInstances(any(Region.class), any(RunInstancesRequest.class))).thenReturn(mock);
+    when(aws.getRunRequest()).thenReturn(new RunInstancesRequest());
+
+    sayNextSection("Running instances of an image.");
+
+    say("Running instances of an image is a POST request to " + IMAGES_URL + "/<image_id>/run");
+
+    say("Pass additional information in payload: <pre>{\n  type:'T1Micro',\n  count:'1'\n}\n</pre>");
+
+    RunConfiguration run = new RunConfiguration();
+    run.type = InstanceType.T1Micro.name();
+    run.count= 1;
+    Response response = sayAndMakeRequest(
+      Request.POST()
+        .url(testServerUrl().path(IMAGES_URL + "/ID-1/run"))
+        .contentTypeApplicationJson()
+        .payload(run)
+        .addHeader("X-AUTH-TOKEN", auth.auth_token)
+      );
+
+    List<Instance> resultImage = response.payloadAs(List.class);
+
+    sayAndAssertThat("List of instances is returned.",
+        resultImage.size(), CoreMatchers.is(1));
+
+  }
+
+  @Test
   public void getAwsImages() {
     ArrayList<Image> images = getImageList();
     when(aws.getImages(Mockito.any(Region.class))).thenReturn(images);
 
     sayNextSection("Retrieve all available AWS images in a region.");
 
-    say("Retrieving all available AWS images in a region is a GET request to " + AWS_IMAGES_URL + "/<region>");
+    say("Retrieving all available AWS images in a region is a GET request to " + AWS_IMAGES_URL);
 
     say("This retrieves only private images.");
 
     Response response = sayAndMakeRequest(
       Request.GET()
-        .url(testServerUrl().path(AWS_IMAGES_URL + "/" + Region.AP_SOUTHEAST_2))
+        .url(testServerUrl().path(AWS_IMAGES_URL.replaceAll("\\[region\\]", Region.AP_SOUTHEAST_2.toString())))
         .addHeader("X-AUTH-TOKEN", auth.auth_token)
       );
 
@@ -148,11 +188,11 @@ public class ImagesControllerDocTest extends AuthenticatedDocTesterBase{
 
     sayNextSection("Retrieve one AWS images.");
 
-    say("Retrieving one AWS image is a GET request to " + AWS_IMAGES_URL + "/<region>/<image_id>");
+    say("Retrieving one AWS image is a GET request to " + AWS_IMAGES_URL + "/<image_id>");
 
     Response response = sayAndMakeRequest(
       Request.GET()
-        .url(testServerUrl().path(AWS_IMAGES_URL + "/" + Region.AP_SOUTHEAST_2 + "/" + testId))
+        .url(testServerUrl().path(AWS_IMAGES_URL.replaceAll("\\[region\\]", Region.AP_SOUTHEAST_2.toString()) + "/" + testId))
         .addHeader("X-AUTH-TOKEN", auth.auth_token)
       );
 

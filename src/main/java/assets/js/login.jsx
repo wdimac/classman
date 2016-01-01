@@ -1,10 +1,6 @@
 /**
  * Copyright (C) 2016 AppDynamics
  */
-window.__APP__ = {
-
-};
-
 // Login Panel component
 window.__APP__.LoginPanel = React.createClass({
 	getInitialState() {
@@ -35,6 +31,7 @@ window.__APP__.LoginPanel = React.createClass({
 						<div className='form-group'>
 							<input id='username' ref='username' 
 								className='form-control'
+								autocapitalize='none'
 								placeholder='Username' type='text'/>
 						</div>
 						<div className='form-group'>
