@@ -18,10 +18,10 @@ var EipLookup = React.createClass({
   },
   searchEips() {
     // redo search if we have switched regions
-    if (this.refs.region.value !== this.state.currentModalRegion) {
+    if (this.refs.region.getValue() !== this.state.currentModalRegion) {
       this.setState({searchState:"searching"});
       $.ajax({
-        url: "/api/admin/aws/" + this.refs.region.value + "/eips",
+        url: "/api/admin/aws/" + this.refs.region.getValue() + "/eips",
         headers: {'X-AUTH-TOKEN':Auth.getToken()},
         dataType: 'json',
         cache: false,
@@ -50,7 +50,7 @@ var EipLookup = React.createClass({
       data:JSON.stringify({
         publicIp: eip.publicIp, 
         description: eip.publicIp, 
-        region: this.refs.region.value,
+        region: this.refs.region.getValue(),
         instanceId: eip.instanceId,
         allocationId: eip.allocationId,
         associationId: eip.associationId,
