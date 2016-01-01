@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.amazonaws.services.ec2.model.Address;
+import com.amazonaws.services.ec2.model.DescribeAddressesResult;
 import com.amazonaws.services.ec2.model.DescribeImagesRequest;
 import com.amazonaws.services.ec2.model.DescribeImagesResult;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
@@ -209,6 +211,19 @@ public class AwsAdaptor {
     }
     return instances;
   }
+
+  /**
+   * Get list of EIP addresses for a region
+   *
+   * @param region
+   * @return
+   */
+  public List<Address> getEips(String region) {
+    AmazonEC2Client amazonClient = getClient(Region.valueOf(region));
+    DescribeAddressesResult addrs = amazonClient.describeAddresses();
+    return addrs.getAddresses();
+  }
+
 
   /**
    * Private method to establish a client connection.

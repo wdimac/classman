@@ -1,6 +1,7 @@
 var Images = window.__APP__.Images;
 var Instances = window.__APP__.Instances;
 var SecurityGroupPanel = window.__APP__.SecurityGroupPanel;
+var EipPanel = window.__APP__.EipPanel;
 
 var MenuItem = React.createClass({
   render() {
@@ -58,7 +59,7 @@ window.__APP__.Admin = React.createClass({
         break;
 
       default:
-        panel = (<div> TBD </div>);
+        panel = (<EipPanel awsConfig={this.state.awsConfig} />);
 		}
 		return (
 			<div className="card">

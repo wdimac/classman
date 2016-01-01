@@ -66,7 +66,7 @@ public class SimpleDao<M> {
 
   public M delete(String id, Class<M> clazz) {
     EntityManager entityManager = entityManagerProvider.get();
-    M item = entityManager.find(clazz, id);
+    M item = entityManager.find(clazz, Long.valueOf(id));
     entityManager.remove(item);
     return item;
   }
