@@ -8,6 +8,8 @@ import com.amazonaws.services.ec2.model.DescribeImagesRequest;
 import com.amazonaws.services.ec2.model.DescribeImagesResult;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
+import com.amazonaws.services.ec2.model.DescribeSecurityGroupsRequest;
+import com.amazonaws.services.ec2.model.DescribeSecurityGroupsResult;
 import com.amazonaws.services.ec2.model.Filter;
 import com.amazonaws.services.ec2.model.Image;
 import com.amazonaws.services.ec2.model.Instance;
@@ -15,6 +17,7 @@ import com.amazonaws.services.ec2.model.InstanceStateChange;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.RunInstancesRequest;
 import com.amazonaws.services.ec2.model.RunInstancesResult;
+import com.amazonaws.services.ec2.model.SecurityGroup;
 import com.amazonaws.services.ec2.model.StartInstancesRequest;
 import com.amazonaws.services.ec2.model.StartInstancesResult;
 import com.amazonaws.services.ec2.model.StopInstancesRequest;
@@ -71,6 +74,32 @@ public class AwsAdaptor {
   }
 
   private static final String DEFAULT_SECURITY_GROUP = "EDU_HTTP-RDP";
+
+  /**
+   * Lookup all security groups for the region.
+   *
+   * @param region
+   * @return
+   */
+  public List<SecurityGroup> getSecurityGroups(Region region) {
+    AmazonEC2Client amazonClient = getClient(region);
+    DescribeSecurityGroupsResult groups = amazonClient.describeSecurityGroups();
+    return groups.getSecurityGroups();
+  }
+
+  /**
+   * Return all items listed
+   * AmazonEC2Client amazonClient = getClient(region);
+   * @param ids
+   * @return
+   */
+  public List<SecurityGroup> getSecurityGroups(String[] ids, String region) {
+    AmazonEC2Client amazonClient = getClient(Region.valueOf(region));
+    DescribeSecurityGroupsResult result = amazonClient
+        .describeSecurityGroups(
+            new DescribeSecurityGroupsRequest().withGroupIds(ids));
+    return result.getSecurityGroups();
+  }
 
   /**
    * Finds all private Images available.
@@ -203,4 +232,5 @@ public class AwsAdaptor {
     amazonEC2Client.setEndpoint(region.getEndpoint());
     return amazonEC2Client;
   }
+
 }

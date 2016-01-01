@@ -1,5 +1,6 @@
 var Images = window.__APP__.Images;
 var Instances = window.__APP__.Instances;
+var SecurityGroupPanel = window.__APP__.SecurityGroupPanel;
 
 var MenuItem = React.createClass({
   render() {
@@ -9,7 +10,8 @@ var MenuItem = React.createClass({
     return(
       <a href="javacript:void(0);" className={cname}
                 onClick={this.props.click}>
-              {this.props.title}
+              <i className={"fa fa-" + this.props.icon}> </i>
+              <span className="hidden-xs-down"> {this.props.title}</span>
             </a>
     ); 
   }
@@ -51,6 +53,12 @@ window.__APP__.Admin = React.createClass({
       case 'instances':
         panel = (<Instances awsConfig={this.state.awsConfig} />);
         break;
+      case 'groups':
+        panel = (<SecurityGroupPanel awsConfig={this.state.awsConfig} />);
+        break;
+
+      default:
+        panel = (<div> TBD </div>);
 		}
 		return (
 			<div className="card">
@@ -59,13 +67,20 @@ window.__APP__.Admin = React.createClass({
 					<span className='nav navbar-nav'>
             <MenuItem isActive={this.state.active === 'instances'}
               click={this.changePanel.bind(this, 'instances')}
+              icon='desktop'
               title="All Instances" />
             <MenuItem isActive={this.state.active === 'images'}
               click={this.changePanel.bind(this, 'images')}
+              icon='image'
               title="All Images" />
             <MenuItem isActive={this.state.active === 'eips'}
               click={this.changePanel.bind(this, 'eips')}
+              icon='map-marker'
               title="EIPs" />
+            <MenuItem isActive={this.state.active === 'groups'}
+              click={this.changePanel.bind(this, 'groups')}
+              icon='key'
+              title="Sec. Groups" />
 					</span>
 				</div>
 				<div className="card-body p-a-1">
