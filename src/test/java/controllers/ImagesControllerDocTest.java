@@ -103,15 +103,9 @@ public class ImagesControllerDocTest extends AuthenticatedDocTesterBase{
 
     say("Removing an image in the appilcation is a DELETE request to " + IMAGES_URL + "/<image_id>");
 
-    Images image = new Images();
-    image.setId("TEST_ID");
-    image.setRegion("REGION");
-    image.setDescription("DESCRIPTION");
     Response response = sayAndMakeRequest(
       Request.DELETE()
         .url(testServerUrl().path(IMAGES_URL + "/ID-1"))
-        .contentTypeApplicationJson()
-        .payload(image)
         .addHeader("X-AUTH-TOKEN", auth.auth_token)
       );
 

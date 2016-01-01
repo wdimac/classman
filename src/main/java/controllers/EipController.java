@@ -64,7 +64,7 @@ public class EipController {
   @DELETE
   @Transactional
   public Result deleteEip(@PathParam("id") String id) {
-    models.Eip Eip = eipDao.delete(id, models.Eip.class);
+    models.Eip Eip = eipDao.delete(Long.valueOf(id), models.Eip.class);
 
     return Results.json().render(Eip);
   }
