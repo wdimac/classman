@@ -135,7 +135,22 @@ var EipAssign = React.createClass({
     this.refs.modal.open();
   },
   assignEip() {
-    this.props.updateParent();
+    var url= "/api/admin/eips/" + this.props.eip.id + "?instanceId=" + this.refs.instance.getValue();
+    $.ajax({
+      url: url,
+      headers: {
+        'X-AUTH-TOKEN':Auth.getToken()
+      },
+      type: "PUT",
+      dataType: 'json',
+      cache: false,
+      success: function(data) {
+        this.props.updateParent();
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(this.props.url, status, err.toString());
+      }.bind(this)
+    });
   },
   loadDataFromServer() {
     $.ajax({
@@ -166,7 +181,7 @@ var EipAssign = React.createClass({
        <BootstrapModal
         ref="modal"
         onCancel={this.close}
-        onConfrim={this.assignEip}
+        onConfirm={this.assignEip}
         confirm="Assign"
         title="Lookup Elastic IPs">
         <div className="m-b-1">
@@ -189,6 +204,7 @@ window.__APP__.EipPanel = React.createClass({
     this.loadDataFromServer();
   },
   loadDataFromServer() {
+    console.debug('loading');
     $.ajax({
       url: "/api/admin/eips",
       headers: {

@@ -12,13 +12,16 @@ import com.google.inject.persist.Transactional;
 
 import dao.SimpleDao;
 import filters.TokenFilter;
+import models.Eip;
 import ninja.FilterWith;
 import ninja.Result;
 import ninja.Results;
 import ninja.jaxy.DELETE;
 import ninja.jaxy.GET;
 import ninja.jaxy.POST;
+import ninja.jaxy.PUT;
 import ninja.jaxy.Path;
+import ninja.params.Param;
 import ninja.params.PathParam;
 
 @Path("/api/admin")
@@ -66,6 +69,24 @@ public class EipController {
     return Results.json().render(Eip);
   }
 
+  /**
+   * Update Elastic ip information.
+   *
+   * @param elasticIp
+   * @return
+   */
+  @Path("/eips/{id}")
+  @PUT
+  @Transactional
+  public Result updateEip(@PathParam("id") String id, @Param("instanceId") String instanceId) {
+    System.out.println(instanceId);
+    Eip eip = eipDao.find(id, Eip.class);
+    eip.setInstanceId(instanceId);
+
+    eipDao.persist(eip);
+
+    return Results.json().render(eip);
+  }
 
   /*
    * AWS calls
