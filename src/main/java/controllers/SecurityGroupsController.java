@@ -11,7 +11,7 @@ import com.appdynamics.aws.AwsAdaptor.Region;
 import com.google.inject.Inject;
 import com.google.inject.persist.Transactional;
 
-import dao.SecurityGroupDao;
+import dao.SimpleDao;
 import filters.TokenFilter;
 import ninja.FilterWith;
 import ninja.Result;
@@ -27,7 +27,7 @@ import ninja.params.PathParam;
 @Singleton
 public class SecurityGroupsController {
   @Inject
-  SecurityGroupDao securityGroupDao;
+  SimpleDao<models.SecurityGroup> securityGroupDao;
   @Inject
   AwsAdaptor aws;
 
@@ -39,7 +39,7 @@ public class SecurityGroupsController {
   @GET
   @Transactional
   public Result getSecurityGroups() {
-    return Results.json().render(securityGroupDao.getAllGroups());
+    return Results.json().render(securityGroupDao.getAll(models.SecurityGroup.class));
   }
 
   /**
@@ -62,7 +62,7 @@ public class SecurityGroupsController {
   @DELETE
   @Transactional
   public Result deletesecurityGroup(@PathParam("id") String id) {
-    models.SecurityGroup securityGroup = securityGroupDao.delete(id);
+    models.SecurityGroup securityGroup = securityGroupDao.delete(id, models.SecurityGroup.class);
 
     return Results.json().render(securityGroup);
   }

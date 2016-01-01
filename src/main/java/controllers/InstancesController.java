@@ -10,7 +10,7 @@ import com.appdynamics.aws.AwsAdaptor.Region;
 import com.google.inject.Inject;
 import com.google.inject.persist.Transactional;
 
-import dao.InstanceDao;
+import dao.SimpleDao;
 import filters.TokenFilter;
 import models.Instance;
 import ninja.FilterWith;
@@ -28,7 +28,7 @@ public class InstancesController {
   public enum Actions{START, STOP, TERMINATE};
 
   @Inject
-  InstanceDao instanceDao;
+  SimpleDao<Instance> instanceDao;
   @Inject
   AwsAdaptor aws;
 
@@ -40,7 +40,7 @@ public class InstancesController {
   @GET
   @Transactional
   public Result getInstances() {
-    return Results.json().render(instanceDao.getAllInstances());
+    return Results.json().render(instanceDao.getAll(Instance.class));
   }
 
   /**
@@ -69,7 +69,7 @@ public class InstancesController {
   @Transactional
   public Result controlInstance(@PathParam("id") String id, @PathParam("action") String actionType) {
     Actions action = Actions.valueOf(actionType.toUpperCase());
-    Instance instance = instanceDao.find(id);
+    Instance instance = instanceDao.find(id, Instance.class);
     Region region = Region.valueOf(instance.getRegion());
     String[] idList = {id};
     List<String> result=null;

@@ -11,6 +11,7 @@ import java.util.List;
 import com.amazonaws.services.ec2.model.Image;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.InstanceType;
+import com.amazonaws.services.ec2.model.RunInstancesRequest;
 import com.appdynamics.aws.AwsAdaptor.Region;
 
 /**
@@ -33,7 +34,7 @@ public class AwsAdaptorTester {
     String imageId = System.console().readLine();
 
     List<Instance> instances = adaptor.runInstances(testRegion,
-        adaptor.getRunRequest()
+        new RunInstancesRequest()
           .withImageId(imageId)
           .withInstanceType(InstanceType.M3Xlarge)
           .withMaxCount(1)

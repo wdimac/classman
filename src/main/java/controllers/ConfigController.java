@@ -6,8 +6,11 @@ import javax.inject.Singleton;
 
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.appdynamics.aws.AwsAdaptor;
+import com.google.inject.Inject;
 
+import dao.SimpleDao;
 import filters.TokenFilter;
+import models.SecurityGroup;
 import ninja.FilterWith;
 import ninja.Result;
 import ninja.Results;
@@ -17,7 +20,8 @@ import ninja.jaxy.Path;
 @FilterWith(TokenFilter.class)
 @Singleton
 public class ConfigController {
-
+  @Inject
+  SimpleDao<SecurityGroup> groupDao;
 
   @Path("/config")
   public Result getConfig() {
@@ -25,6 +29,7 @@ public class ConfigController {
 
     config.put("regions", AwsAdaptor.Region.getNameList());
     config.put("instanceTypes", InstanceType.values());
+    config.put("securityGroups", groupDao.getAll(SecurityGroup.class));
     return Results.json().render(config);
   }
 }

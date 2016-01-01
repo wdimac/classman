@@ -12,11 +12,11 @@ import com.amazonaws.services.ec2.model.InstanceType;
 import com.amazonaws.services.ec2.model.RunInstancesRequest;
 import com.appdynamics.aws.AwsAdaptor;
 import com.appdynamics.aws.AwsAdaptor.Region;
+import com.appdynamics.aws.QuickList;
 import com.google.inject.Inject;
 import com.google.inject.persist.Transactional;
 
-import dao.ImagesDao;
-import dao.InstanceDao;
+import dao.SimpleDao;
 import filters.TokenFilter;
 import models.Images;
 import ninja.FilterWith;
@@ -33,27 +33,24 @@ import ninja.params.PathParam;
 @Singleton
 public class ImagesController {
   @Inject
-  ImagesDao imagesDao;
+  SimpleDao<Images> imagesDao;
   @Inject
-  InstanceDao instanceDao;
+  SimpleDao<models.Instance> instanceDao;
   @Inject
   AwsAdaptor aws;
 
   public static class RunConfiguration {
     String type;
-    public String getType() {
-      return type;
-    }
-    public void setType(String type) {
-      this.type = type;
-    }
-    public Integer getCount() {
-      return count;
-    }
-    public void setCount(Integer count) {
-      this.count = count;
-    }
     Integer count;
+    String group;
+    public String getType() { return type; }
+    public void setType(String type) { this.type = type; }
+
+    public Integer getCount() { return count; }
+    public void setCount(Integer count) { this.count = count; }
+
+    public String getGroup() { return group; }
+    public void setGroup(String group) { this.group = group; }
   }
 
   /**
@@ -64,7 +61,7 @@ public class ImagesController {
   @GET
   @Transactional
   public Result getImages() {
-    return Results.json().render(imagesDao.getAllImages());
+    return Results.json().render(imagesDao.getAll(Images.class));
   }
 
   /**
@@ -87,7 +84,7 @@ public class ImagesController {
   @DELETE
   @Transactional
   public Result deleteImage(@PathParam("id") String id) {
-    Images image = imagesDao.delete(id);
+    Images image = imagesDao.delete(id, Images.class);
 
     return Results.json().render(image);
   }
@@ -103,12 +100,13 @@ public class ImagesController {
   @POST
   @Transactional
   public Result runImage(@PathParam("id") String id, RunConfiguration runConfig) {
-    Images image = imagesDao.find(id);
-    RunInstancesRequest request = aws.getRunRequest();
+    Images image = imagesDao.find(id, Images.class);
+    RunInstancesRequest request = new RunInstancesRequest();
     request.setImageId(image.getId());
     request.setInstanceType(InstanceType.valueOf(runConfig.type));
     request.setMaxCount(runConfig.count);
     request.setMinCount(runConfig.count);
+    request.setSecurityGroupIds(new QuickList<String>(runConfig.getGroup()));
     List<Instance> response = aws.runInstances(Region.valueOf(image.getRegion()), request);
 
     List<models.Instance> result = new ArrayList<>();

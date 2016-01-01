@@ -130,7 +130,6 @@ public class ImagesControllerDocTest extends AuthenticatedDocTesterBase{
     in.setInstanceId("i-test");
     mock.add(in);
     when(aws.runInstances(any(Region.class), any(RunInstancesRequest.class))).thenReturn(mock);
-    when(aws.getRunRequest()).thenReturn(new RunInstancesRequest());
 
     sayNextSection("Running instances of an image.");
 

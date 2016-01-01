@@ -132,17 +132,6 @@ public class AwsAdaptor {
   }
 
   /**
-   * Provide a request object with the security group already set.
-   *
-   * @return
-   */
-  public RunInstancesRequest getRunRequest() {
-    return new RunInstancesRequest()
-        .withSecurityGroups(DEFAULT_SECURITY_GROUP);
-
-  }
-
-  /**
    * Attempt to start the instances.
    *
    * @param region
