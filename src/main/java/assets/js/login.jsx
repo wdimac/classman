@@ -31,7 +31,7 @@ window.__APP__.LoginPanel = React.createClass({
 						<div className='form-group'>
 							<input id='username' ref='username' 
 								className='form-control'
-								autocapitalize='none'
+								autoCapitalize='none'
 								placeholder='Username' type='text'/>
 						</div>
 						<div className='form-group'>
