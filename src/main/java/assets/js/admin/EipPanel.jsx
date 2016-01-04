@@ -11,6 +11,7 @@ var EipLookup = React.createClass({
     }
   },
   open() {
+    this.setState({regionEips:[]});
     this.refs.modal.open();
   },
   close() {
@@ -26,7 +27,6 @@ var EipLookup = React.createClass({
         dataType: 'json',
         cache: false,
         success: function(data) {
-          console.debug(data);
           this.setState({
             regionEips: data, 
             searchState:"waiting"
@@ -42,9 +42,7 @@ var EipLookup = React.createClass({
     $.ajax({
       url: "/api/admin/eips",
       type: "POST",
-      headers: {
-        'X-AUTH-TOKEN':Auth.getToken()
-       },
+      headers: {'X-AUTH-TOKEN':Auth.getToken()},
       contentType: 'application/json',
       dataType: 'json',
       data:JSON.stringify({
@@ -108,7 +106,7 @@ var EipLookup = React.createClass({
         onCancel={this.close}
         title="Lookup Elastic IPs">
         <div className="m-b-1">
-          <Select ref="region" options={regionOptions} /> &emsp;
+          <Select ref="region" options={regionOptions} />
           <button className="btn btn-sm btn-primary" onClick={this.searchEips}>
             Search
           </button>
@@ -155,17 +153,13 @@ var EipAssign = React.createClass({
   loadDataFromServer() {
     $.ajax({
       url: "/api/admin/instances",
-      headers: {
-        'X-AUTH-TOKEN':Auth.getToken()
-       },
+      headers: {'X-AUTH-TOKEN':Auth.getToken()},
       dataType: 'json',
       cache: false,
       success: function(data) {
-        console.debug(this.props);
         var niceData = data.filter(function(instance){
           return !instance.terminated && (instance.region === this.props.eip.region);
         }.bind(this));
-        console.debug(niceData);
         this.setState({instances: niceData});
       }.bind(this),
       error: function(xhr, status, err) {
@@ -193,29 +187,77 @@ var EipAssign = React.createClass({
   }
 });
 
+var EipAllocate = React.createClass({
+  close() {
+    this.refs.modal.close();
+  },
+  open() {
+    this.refs.modal.open();
+  },
+  allocateEip() {
+    var url= "/api/admin/aws/" + this.refs.region.getValue() + "/eips" 
+               + (this.refs.vpc.checked ? "?vpc=true":"");
+    $.ajax({
+      url: url,
+      headers: { 'X-AUTH-TOKEN':Auth.getToken() },
+      type: "POST",
+      dataType: 'json',
+      cache: false,
+      success: function(data) {
+        this.props.updateParent();
+        this.refs.modal.close();
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(this.props.url, status, err.toString());
+      }.bind(this)
+    });
+  },
+  render() {
+    var regionOptions = this.props.awsConfig.regions ?
+      this.props.awsConfig.regions.map(function(region) {
+        return {value:region[0], name:region[1]};
+      }):[];
+    return (
+      <BootstrapModal
+        ref="modal"
+        onCancel={this.close}
+        onConfirm={this.allocateEip}
+        confirm="Create Eip"
+        title="Create Elastic IP">
+        <div className="m-b-1">
+          <Select ref="region" options={regionOptions} />
+          <strong>VPC</strong> <input type="checkbox" ref="vpc" />
+        </div>
+        
+      </BootstrapModal>
+    );
+  }
+}); //EipAllocate
+
 window.__APP__.EipPanel = React.createClass({
   getInitialState() {
     return {
       data:[],
-      eipToAssign:null
+      eipToAssign:null,
+      isSearching: false,
+      deleting:null
     }
   },
   componentDidMount() {
     this.loadDataFromServer();
   },
   loadDataFromServer() {
-    console.debug('loading');
+    this.setState({isSearching: true});
     $.ajax({
       url: "/api/admin/eips",
-      headers: {
-        'X-AUTH-TOKEN':Auth.getToken()
-       },
+      headers: {'X-AUTH-TOKEN':Auth.getToken()},
       dataType: 'json',
       cache: false,
       success: function(data) {
-        this.setState({data: data});
+        this.setState({data: data, isSearching:false});
       }.bind(this),
       error: function(xhr, status, err) {
+        this.setState({isSearching:false})
         console.error(this.props.url, status, err.toString());
       }.bind(this)
     });
@@ -229,12 +271,38 @@ window.__APP__.EipPanel = React.createClass({
     });
     this.refs.assign.open();
   },
+  allocateEip() {
+    this.refs.alloc.open();
+  },
+  del(item) {
+    if (!this.state.deleting) {
+      this.setState({deleting:item});
+      $.ajax({
+        url: "/api/admin/eips/" + item.id,
+        headers: { 'X-AUTH-TOKEN':Auth.getToken() },
+        type: "DELETE",
+        dataType: 'json',
+        cache: false,
+        success: function(data) {
+          this.setState({deleting:null});
+          this.loadDataFromServer();
+        }.bind(this),
+        error: function(xhr, status, err) {
+          this.setState({deleting:null});
+          console.error(this.props.url, status, err.toString());
+        }.bind(this)
+      });
+    }
+  },
   //Callback for Accordian
   formatEipRow(item) {
+    var delThis = this.state.deleting && (item.id == this.state.deleting.id);
     return(
       <div key={item.id} className="truncate">
         <i className="fa fa-link btn btn-sm btn-success m-r-1"
           onClick={this.assign.bind(this, item)}></i>
+        <i className={"fa btn btn-sm btn-danger m-r-1 " + (delThis ? "fa-hourglass-half" : "fa-times")}
+          onClick={this.del.bind(this, item)}></i>
         <strong>{item.publicIp}: </strong> {item.instanceId ? item.instanceId : "not assigned"}
       </div>
     )
@@ -244,27 +312,37 @@ window.__APP__.EipPanel = React.createClass({
     return(
       <div>
         <div className="m-b-1">
+          <button className="btn btn-sm btn-success m-r-1" onClick={this.allocateEip}>
+            Allocate Elastic IP
+          </button>
           <button className="btn btn-sm btn-primary" onClick={this.openLookup}>
-            Lookup Elastic IPs
+            Search for Elastic IPs
           </button>
         </div>
-        {this.state.data.length == 0 ?
-          <i className="fa fa-spinner fa-spin fa-2x"></i>
+        {this.state.isSearching ?
+          <div>
+            <i className="fa fa-spinner fa-spin fa-2x"></i> retrieving data...
+          </div>
           :
           <div className="row">
             <div className="m-l-1">
-            <Accordian id="region_list" 
-              formatItemRow={this.formatEipRow}
-              map={sorted} />
+
+              <Accordian id="region_list" 
+                formatItemRow={this.formatEipRow}
+                map={sorted} />
             </div>
           </div>
         }
+
         <EipLookup ref="lookup" 
           existing={this.state.data}
           awsConfig={this.props.awsConfig}
           updateParent={this.loadDataFromServer} />
         <EipAssign ref="assign"
           eip={this.state.eipToAssign}
+          awsConfig={this.props.awsConfig}
+          updateParent={this.loadDataFromServer} />
+        <EipAllocate ref="alloc"
           awsConfig={this.props.awsConfig}
           updateParent={this.loadDataFromServer} />
       </div>

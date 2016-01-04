@@ -5,6 +5,9 @@ import java.util.List;
 
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.Address;
+import com.amazonaws.services.ec2.model.AllocateAddressRequest;
+import com.amazonaws.services.ec2.model.AllocateAddressResult;
+import com.amazonaws.services.ec2.model.DescribeAddressesRequest;
 import com.amazonaws.services.ec2.model.DescribeAddressesResult;
 import com.amazonaws.services.ec2.model.DescribeImagesRequest;
 import com.amazonaws.services.ec2.model.DescribeImagesResult;
@@ -12,10 +15,12 @@ import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.DescribeSecurityGroupsRequest;
 import com.amazonaws.services.ec2.model.DescribeSecurityGroupsResult;
+import com.amazonaws.services.ec2.model.DomainType;
 import com.amazonaws.services.ec2.model.Filter;
 import com.amazonaws.services.ec2.model.Image;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.InstanceStateChange;
+import com.amazonaws.services.ec2.model.ReleaseAddressRequest;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.RunInstancesRequest;
 import com.amazonaws.services.ec2.model.RunInstancesResult;
@@ -224,6 +229,53 @@ public class AwsAdaptor {
     return addrs.getAddresses();
   }
 
+  /**
+   * Request details for specific addresses.
+   *
+   * @param region
+   * @param publicIps
+   * @return
+   */
+  public List<Address> getEips(String region, List<String> publicIps) {
+    AmazonEC2Client amazonClient = getClient(Region.valueOf(region));
+    DescribeAddressesResult addrs = amazonClient.describeAddresses(
+        new DescribeAddressesRequest()
+        .withPublicIps(publicIps));
+    return addrs.getAddresses();
+  }
+
+  /**
+   * Request allocation of new Eip.
+   *
+   * @param region
+   * @param is_vpc
+   * @return
+   */
+  public String requestEip(String region, boolean is_vpc) {
+    AmazonEC2Client amazonClient = getClient(Region.valueOf(region));
+    AllocateAddressResult result = amazonClient.allocateAddress(
+        new AllocateAddressRequest()
+        .withDomain(is_vpc ? DomainType.Vpc: DomainType.Standard));
+    return result.getPublicIp();
+  }
+
+  /**
+   * Release allocated Eip.
+   *
+   * @param region
+   * @param allocId
+   * @param publicIp
+   */
+  public void releaseEips(String region, String allocId, String publicIp) {
+    AmazonEC2Client amazonClient = getClient(Region.valueOf(region));
+    ReleaseAddressRequest request = new ReleaseAddressRequest();
+    if (allocId != null) {
+      request.withAllocationId(allocId);
+    } else {
+      request.withPublicIp(publicIp);
+    }
+    amazonClient.releaseAddress(request);
+  }
 
   /**
    * Private method to establish a client connection.

@@ -18,7 +18,7 @@ window.__APP__.Accordian = React.createClass({
 								</a>
 							</h6>
 						</div>
-				    <div id={panelName} className="panel-collapse collapse m-b-1" 
+				    <div id={panelName} className="panel-collapse m-b-1" 
 				    		role="tabpanel" aria-labelledby={section}>
 							{itemRows}
 						</div>

@@ -5,7 +5,9 @@
  */
 package controllers;
 
-import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -97,12 +99,13 @@ public class EipControllerDocTest extends AuthenticatedDocTesterBase{
     sayNextSection("Removing a EIP reference from the application.");
 
     say("Removing an EIP in the appilcation is a DELETE request to " + EIP_URL + "/<eip_id>");
+    say("This releases the EIP in AWS also.");
 
-      Response response = sayAndMakeRequest(
-      Request.DELETE()
-        .url(testServerUrl().path(EIP_URL + "/1"))
-        .addHeader("X-AUTH-TOKEN", auth.auth_token)
-      );
+    Response response = sayAndMakeRequest(
+    Request.DELETE()
+      .url(testServerUrl().path(EIP_URL + "/1"))
+      .addHeader("X-AUTH-TOKEN", auth.auth_token)
+    );
 
     Eip resultEip = response.payloadAs(Eip.class);
 
@@ -134,6 +137,33 @@ public class EipControllerDocTest extends AuthenticatedDocTesterBase{
 
     sayAndAssertThat("All available Eip are returned.",
         EipResp.size(), CoreMatchers.is(1));
+
+  }
+
+  @Test
+  public void allocateAwsEip() {
+    ArrayList<com.amazonaws.services.ec2.model.Address> eip
+        = getEipList();
+    String ip = eip.get(0).getPublicIp();
+    when(aws.requestEip(anyString(), anyBoolean())).thenReturn(ip);
+    when(aws.getEips(anyString(), any(List.class))).thenReturn(eip);
+
+    sayNextSection("Allocate a new AWS Eip in a region.");
+
+    say("Allocating a new AWS Eip in a region is a POST request to " + AWS_EIP_URL);
+
+    say("Pass the paramater 'vpc' to allocate an EIP for usage in vpc");
+
+    Response response = sayAndMakeRequest(
+      Request.POST()
+        .url(testServerUrl().path(AWS_EIP_URL.replaceAll("\\[region\\]", Region.AP_SOUTHEAST_2.toString())))
+        .addHeader("X-AUTH-TOKEN", auth.auth_token)
+      );
+
+    Eip EipResp = response.payloadAs(Eip.class);
+
+    sayAndAssertThat("All available Eip are returned.",
+        EipResp.getPublicIp(), CoreMatchers.is(ip));
 
   }
 

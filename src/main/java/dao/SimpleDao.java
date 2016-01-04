@@ -1,5 +1,6 @@
 package dao;
 
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
 
@@ -7,6 +8,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Root;
 import javax.persistence.metamodel.EntityType;
@@ -86,5 +88,42 @@ public class SimpleDao<M> {
     TypedQuery<M> query = entityManager.createQuery(cq);
     M item = query.getSingleResult();
     return item;
+  }
+
+  public M findBy(M item){
+    EntityManager entityManager = entityManagerProvider.get();
+    Class<M> clazz = (Class<M>)item.getClass();
+    CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+    CriteriaQuery<M> cq = cb.createQuery(clazz);
+    Root<M> root = cq.from(clazz);
+    cq.select(root);
+
+    Metamodel m = entityManager.getMetamodel();
+    Expression<Boolean> e = null;
+    for (Method meth:item.getClass().getMethods()){
+      if (meth.getName().startsWith("get")) {
+        String attrName = meth.getName();
+        attrName = attrName.substring(0, 4).substring(3).toLowerCase() + attrName.substring(4);
+
+        Object value;
+        try {
+          value = meth.invoke(item);
+          if (value != null) {
+
+            if (e == null) {
+              e = cb.equal(root.get(attrName), value);
+            } else {
+              e = cb.and(cb.equal(root.get(attrName), value), e);
+            }
+          }
+        } catch (Exception ex) {
+          ex.printStackTrace();
+        }
+      }
+    }
+    cq.where(e);
+    TypedQuery<M> query = entityManager.createQuery(cq);
+    M result = query.getSingleResult();
+    return result;
   }
 }

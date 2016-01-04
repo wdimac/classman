@@ -7,6 +7,7 @@ import javax.inject.Singleton;
 
 import com.amazonaws.services.ec2.model.Address;
 import com.appdynamics.aws.AwsAdaptor;
+import com.appdynamics.aws.QuickList;
 import com.google.inject.Inject;
 import com.google.inject.persist.Transactional;
 
@@ -64,9 +65,14 @@ public class EipController {
   @DELETE
   @Transactional
   public Result deleteEip(@PathParam("id") String id) {
-    models.Eip Eip = eipDao.delete(Long.valueOf(id), models.Eip.class);
-
-    return Results.json().render(Eip);
+    models.Eip eip = eipDao.delete(Long.valueOf(id), models.Eip.class);
+    System.out.println("deleted:" + eip.getAllocationId());
+    try {
+      aws.releaseEips(eip.getRegion(), eip.getAllocationId(), eip.getPublicIp());
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return Results.json().render(eip);
   }
 
   /**
@@ -101,6 +107,32 @@ public class EipController {
     List<Address> Eips = aws.getEips(region);
 
     return Results.json().render(Eips);
+  }
+
+  @Path("/aws/{region}/eips")
+  @POST
+  @Transactional
+  public Result allocateAwsEip(@PathParam("region") String region, @Param("vpc") String vpc) {
+    if (region == null) {
+      return Results.json().render(Collections.EMPTY_LIST);
+    }
+    String publicIp = aws.requestEip(region, vpc != null);
+    Address address = aws.getEips(region, new QuickList<String>(publicIp)).get(0);
+
+    Eip eip = new Eip();
+    eip.setAllocationId(address.getAllocationId());
+    eip.setAssociationId(address.getAssociationId());
+    eip.setDomain(address.getDomain());;
+    eip.setInstanceId(address.getInstanceId());
+    eip.setNetworkInterfaceId(address.getNetworkInterfaceId());
+    eip.setNetworkInterfaceOwnerId(address.getNetworkInterfaceOwnerId());
+    eip.setPrivateIpAddress(address.getPrivateIpAddress());
+    eip.setPublicIp(address.getPublicIp());
+    eip.setRegion(region);
+
+    eipDao.persist(eip);
+
+    return Results.json().render(eip);
   }
 
 }
