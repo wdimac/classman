@@ -30,6 +30,9 @@ window.__APP__.FooterBar = React.createClass({
 				<small>
 					Copyright &copy; 2016 AppDynamics, Inc.
 				</small>
+				<small className="pull-right">
+					 Version: {VERSION}
+				</small>
 			</div>
 		);
 	}
