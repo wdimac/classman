@@ -122,7 +122,8 @@ var EipLookup = React.createClass({
 var EipAssign = React.createClass({
   getInitialState() {
     return {
-      instances: []
+      instances: [],
+      message: ""
     }
   },
   close() {
@@ -133,6 +134,7 @@ var EipAssign = React.createClass({
     this.refs.modal.open();
   },
   assignEip() {
+    this.setState({message:"Attempting assignment."});
     var url= "/api/admin/eips/" + this.props.eip.id + "?instanceId=" + this.refs.instance.getValue();
     $.ajax({
       url: url,
@@ -143,9 +145,11 @@ var EipAssign = React.createClass({
       dataType: 'json',
       cache: false,
       success: function(data) {
+        this.setState({message:"Success."})
         this.props.updateParent();
       }.bind(this),
       error: function(xhr, status, err) {
+        this.setState({message:"Unable to assign. (Is instance running?)"})
         console.error(this.props.url, status, err.toString());
       }.bind(this)
     });
@@ -179,7 +183,7 @@ var EipAssign = React.createClass({
         onCancel={this.close}
         onConfirm={this.assignEip}
         confirm="Assign"
-        title="Lookup Elastic IPs">
+        title="Assign Elastic IP to instance">
         <div className="m-b-1">
           Assign To: <Select ref="instance" options={instanceOptions} />
         </div>

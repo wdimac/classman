@@ -7,6 +7,8 @@ import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.Address;
 import com.amazonaws.services.ec2.model.AllocateAddressRequest;
 import com.amazonaws.services.ec2.model.AllocateAddressResult;
+import com.amazonaws.services.ec2.model.AssociateAddressRequest;
+import com.amazonaws.services.ec2.model.AssociateAddressResult;
 import com.amazonaws.services.ec2.model.DescribeAddressesRequest;
 import com.amazonaws.services.ec2.model.DescribeAddressesResult;
 import com.amazonaws.services.ec2.model.DescribeImagesRequest;
@@ -244,6 +246,25 @@ public class AwsAdaptor {
     return addrs.getAddresses();
   }
 
+  /**
+   * Get association ID.
+   *
+   * @param region
+   * @param allocId
+   * @param publicIp
+   * @return
+   */
+  public String associateEip(String region, String allocId, String publicIp, String instanceId) {
+    AmazonEC2Client amazonClient = getClient(Region.valueOf(region));
+    AssociateAddressRequest request = new AssociateAddressRequest().withInstanceId(instanceId);
+    if (allocId != null) {
+      request.withAllocationId(allocId);
+    } else {
+      request.withPublicIp(publicIp);
+    }
+    AssociateAddressResult result = amazonClient.associateAddress(request);
+    return result.getAssociationId();
+  }
   /**
    * Request allocation of new Eip.
    *
