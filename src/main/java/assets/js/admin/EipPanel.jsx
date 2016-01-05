@@ -183,6 +183,7 @@ var EipAssign = React.createClass({
         onCancel={this.close}
         onConfirm={this.assignEip}
         confirm="Assign"
+        message={this.state.message}
         title="Assign Elastic IP to instance">
         <div className="m-b-1">
           Assign To: <Select ref="instance" options={instanceOptions} />

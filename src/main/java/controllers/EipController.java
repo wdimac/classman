@@ -88,13 +88,17 @@ public class EipController {
     System.out.println(instanceId);
     Eip eip = eipDao.find(id, Eip.class);
     eip.setInstanceId(instanceId);
-    String assocId = aws.associateEip(
-        eip.getRegion(),
-        eip.getAllocationId(),
-        eip.getPublicIp(),
-        instanceId);
-    eip.setAssociationId(assocId);
-
+    if (instanceId != null && instanceId.length()>0) {
+      String assocId = aws.associateEip(
+          eip.getRegion(),
+          eip.getAllocationId(),
+          eip.getPublicIp(),
+          instanceId);
+      eip.setAssociationId(assocId);
+    } else {
+      aws.disassociateEip(eip.getRegion(), eip.getPublicIp());
+      eip.setAssociationId(null);
+    }
     eipDao.persist(eip);
 
     return Results.json().render(eip);

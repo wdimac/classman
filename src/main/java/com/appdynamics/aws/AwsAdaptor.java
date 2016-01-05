@@ -17,6 +17,7 @@ import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.DescribeSecurityGroupsRequest;
 import com.amazonaws.services.ec2.model.DescribeSecurityGroupsResult;
+import com.amazonaws.services.ec2.model.DisassociateAddressRequest;
 import com.amazonaws.services.ec2.model.DomainType;
 import com.amazonaws.services.ec2.model.Filter;
 import com.amazonaws.services.ec2.model.Image;
@@ -264,6 +265,13 @@ public class AwsAdaptor {
     }
     AssociateAddressResult result = amazonClient.associateAddress(request);
     return result.getAssociationId();
+  }
+
+  public void disassociateEip(String region, String publicIp) {
+    AmazonEC2Client amazonClient = getClient(Region.valueOf(region));
+    amazonClient.disassociateAddress(
+        new DisassociateAddressRequest()
+        .withPublicIp(publicIp));
   }
   /**
    * Request allocation of new Eip.
