@@ -47,7 +47,7 @@ window.__APP__.Launcher = React.createClass({
       return {name:type, value:type};
     });
     
-    var securityOptions = this.props.awsConfig.securityGroups.filter(function(group){
+    var securityOptions = this.props.groups.filter(function(group){
       return this.props.target.region === group.region;
     }.bind(this)).map(function(group){
       return {name: group.name, value: group.id};

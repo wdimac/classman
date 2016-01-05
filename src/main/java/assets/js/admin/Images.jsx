@@ -193,7 +193,8 @@ window.__APP__.Images = React.createClass({
 		return {
 			data:[],
 			detailItem:null,
-			launchItem:{}
+			launchItem:{},
+      groups:[]
 		}
 	},
   loadDataFromServer() {
@@ -206,6 +207,18 @@ window.__APP__.Images = React.createClass({
       cache: false,
       success: function(data) {
       	this.setState({data: data});
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(this.props.url, status, err.toString());
+      }.bind(this)
+    });
+    $.ajax({
+      url: "/api/admin/security_groups",
+      headers: {'X-AUTH-TOKEN':Auth.getToken()},
+      dataType: 'json',
+      cache: false,
+      success: function(data) {
+        this.setState({groups: data});
       }.bind(this),
       error: function(xhr, status, err) {
         console.error(this.props.url, status, err.toString());
@@ -273,7 +286,6 @@ window.__APP__.Images = React.createClass({
 			(<ImageDetail image={this.state.detailItem} handleDelete={this.deleteDetailItem}/>)
 			:
 			(<div>Select an Item at left to view details</div>);
-		
 		return(
 			<div>
 				<div className="m-b-1">
@@ -301,6 +313,7 @@ window.__APP__.Images = React.createClass({
       		updateParent={this.loadDataFromServer} />
       	<Launcher ref="launcher" 
 	      	awsConfig={this.props.awsConfig}
+          groups={this.state.groups}
       		target={this.state.launchItem} />
 			</div>
 		);
