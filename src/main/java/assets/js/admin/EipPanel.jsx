@@ -168,9 +168,11 @@ var EipAssign = React.createClass({
     });
   },
   render(){
-    var instanceOptions = this.state.instances.map(function(instance){
+    var instanceOptions = [{name:"Unassign", value:""}].concat(
+      this.state.instances.map(function(instance){
       return {name: instance.id + " : " + instance.description, value: instance.id};
-    });
+    }));
+
     return (
        <BootstrapModal
         ref="modal"
