@@ -14,6 +14,7 @@ import java.util.List;
 import org.doctester.testbrowser.Request;
 import org.doctester.testbrowser.Response;
 import org.hamcrest.CoreMatchers;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,13 +27,15 @@ import com.appdynamics.aws.AwsAdaptor;
 import com.appdynamics.aws.AwsAdaptor.Region;
 import com.google.inject.Inject;
 
+import dao.SimpleDao;
+import models.Eip;
+
 @RunWith(MockitoJUnitRunner.class)
 public class InstancesControllerDocTest extends AuthenticatedDocTesterBase{
 
   private static final String INSTANCES_URL = "/api/admin/instances";
   private static final String AWS_INSTANCES_URL  = "/api/admin/aws/[region]/instances";
 
-  @Inject
   InstancesController controller;
   @Mock
   AwsAdaptor aws;
@@ -192,7 +195,34 @@ public class InstancesControllerDocTest extends AuthenticatedDocTesterBase{
         instancesResp, CoreMatchers.containsString(testId));
 
   }
-private ArrayList<Instance> getInstanceList() {
+
+  @Test
+  public void terminateInstanceWithEip() {
+    String testId = "i-INST2";
+    List<String> instances = new ArrayList<>();
+    instances.add(testId);
+    when(aws.terminateInstances(any(Region.class), any(String[].class))).thenReturn(instances);
+
+    Response response = makeRequest(
+      Request.POST()
+        .url(testServerUrl().path(AWS_INSTANCES_URL
+            .replaceAll("\\[region\\]", Region.AP_SOUTHEAST_2.toString())
+            + "/" + testId + "/terminate"))
+        .addHeader("X-AUTH-TOKEN", auth.auth_token)
+      );
+
+    String instancesResp = response.payloadAsString();
+
+    Assert.assertTrue(testId + " not found in response: " + instancesResp,
+        instancesResp.contains(testId));
+
+    SimpleDao<Eip> eipDao = getInjector().getInstance(SimpleDao.class);
+
+    List<Eip> eips = eipDao.getAll(Eip.class);
+    Assert.assertNull(eips.get(0).getInstanceId());
+  }
+
+  private ArrayList<Instance> getInstanceList() {
     Instance testInstance = new Instance()
         .withInstanceId("ami-xxxxxx")
         .withState(new InstanceState().withName("stopped"));

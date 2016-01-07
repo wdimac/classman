@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import javax.persistence.EntityManager;
 
+import models.Eip;
 import models.Images;
 import models.Instance;
 
@@ -26,6 +27,12 @@ public class InstanceData implements Fixture {
     em.detach(instance);
     instance.setId("i-INST2");
     em.persist(instance);
+
+    Eip eip = new Eip();
+    eip.setPublicIp("127.0.0.1");
+    eip.setInstanceId("i-INST2");
+    em.persist(eip);
+
   }
 
 }

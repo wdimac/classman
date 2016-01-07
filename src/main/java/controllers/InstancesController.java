@@ -12,6 +12,7 @@ import com.google.inject.persist.Transactional;
 
 import dao.SimpleDao;
 import filters.TokenFilter;
+import models.Eip;
 import models.Instance;
 import ninja.FilterWith;
 import ninja.Result;
@@ -29,6 +30,8 @@ public class InstancesController {
 
   @Inject
   SimpleDao<Instance> instanceDao;
+  @Inject
+  SimpleDao<Eip> eipDao;
   @Inject
   AwsAdaptor aws;
 
@@ -83,6 +86,14 @@ public class InstancesController {
     case TERMINATE:
       result = aws.terminateInstances(region, idList);
       instance.setTerminated(true);
+      Eip qEip = new Eip();
+      qEip.setInstanceId(id);
+      Eip eip = eipDao.findBy(qEip);
+      if (eip != null) {
+        aws.disassociateEip(eip.getRegion(), eip.getPublicIp());
+        eip.setInstanceId(null);
+        eipDao.persist(eip);
+      }
       instanceDao.persist(instance);
       break;
 
