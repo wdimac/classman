@@ -64,10 +64,17 @@ public class SimpleDao<M> {
       EntityManager entityManager = entityManagerProvider.get();
 
       entityManager.persist(item);
+      entityManager.flush();
     } catch (Exception e) {
       e.printStackTrace();
       throw e;
     }
+  }
+
+  public void update(M item) {
+    EntityManager entityManager = entityManagerProvider.get();
+    item = entityManager.merge(item);
+    entityManager.persist(item);
   }
 
   public M delete(Object id, Class<M> clazz) {

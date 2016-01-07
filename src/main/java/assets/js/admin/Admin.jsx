@@ -57,15 +57,21 @@ window.__APP__.Admin = React.createClass({
       case 'groups':
         panel = (<SecurityGroupPanel awsConfig={this.state.awsConfig} />);
         break;
-
-      default:
+      case 'eips':
         panel = (<EipPanel awsConfig={this.state.awsConfig} />);
+        break;
+      default:
+        panel = (<div> Under construction </div>)
 		}
 		return (
 			<div className="card">
 				<div className="navbar navbar-light">
 					<span className='navbar-brand'>Manage: </span>
 					<span className='nav navbar-nav'>
+            <MenuItem isActive={this.state.active === 'class_type'}
+              click={this.changePanel.bind(this, 'class_type')}
+              icon='calendar-o'
+              title="Class Types" />
             <MenuItem isActive={this.state.active === 'instances'}
               click={this.changePanel.bind(this, 'instances')}
               icon='desktop'
