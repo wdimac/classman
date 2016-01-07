@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -52,6 +53,9 @@ public class SimpleDao<M> {
 
     TypedQuery<M> query=entityManager.createQuery(cq);
     List<M> items = query.getResultList();
+    for (M item : items) {
+      entityManager.refresh(item);
+    }
     return items;
   }
 
@@ -98,7 +102,6 @@ public class SimpleDao<M> {
     Root<M> root = cq.from(clazz);
     cq.select(root);
 
-    Metamodel m = entityManager.getMetamodel();
     Expression<Boolean> e = null;
     for (Method meth:item.getClass().getMethods()){
       if (meth.getName().startsWith("get")) {
@@ -123,7 +126,12 @@ public class SimpleDao<M> {
     }
     cq.where(e);
     TypedQuery<M> query = entityManager.createQuery(cq);
-    M result = query.getSingleResult();
+    M result = null;
+    try {
+      result = query.getSingleResult();
+    } catch (NoResultException nre) {
+      // Just return null
+    }
     return result;
   }
 }
