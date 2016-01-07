@@ -25,7 +25,6 @@ var SGLookup = React.createClass({
         dataType: 'json',
         cache: false,
         success: function(data) {
-          console.debug(data);
           this.setState({
             regionGroups: data, 
             searchState:"waiting"
@@ -140,7 +139,6 @@ window.__APP__.SecurityGroupPanel = React.createClass({
       dataType: 'json',
       cache: false,
       success: function(data) {
-        console.debug(data);
         this.setState({data: data});
       }.bind(this),
       error: function(xhr, status, err) {

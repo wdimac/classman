@@ -66,7 +66,7 @@ public class EipController {
   @Transactional
   public Result deleteEip(@PathParam("id") String id) {
     models.Eip eip = eipDao.delete(Long.valueOf(id), models.Eip.class);
-    System.out.println("deleted:" + eip.getAllocationId());
+
     try {
       aws.releaseEips(eip.getRegion(), eip.getAllocationId(), eip.getPublicIp());
     } catch (Exception e) {
@@ -85,7 +85,6 @@ public class EipController {
   @PUT
   @Transactional
   public Result updateEip(@PathParam("id") String id, @Param("instanceId") String instanceId) {
-    System.out.println(instanceId);
     Eip eip = eipDao.find(id, Eip.class);
     eip.setInstanceId(instanceId);
     if (instanceId != null && instanceId.length()>0) {

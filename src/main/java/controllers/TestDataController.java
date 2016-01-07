@@ -47,10 +47,8 @@ public class TestDataController {
   public Result get(@PathParam("id") long id) {
     EntityManager entityManager = entityManagerProvider.get();
 
-    System.out.println(">>>Retrieving:" + id);
     TypedQuery<Test> q = entityManager.createQuery("SELECT x FROM Test x WHERE x.id= :idparam", Test.class);
     Test test = q.setParameter("idparam", id).getSingleResult();
-    System.out.println("Found:" + test.getId() + " " + test.getTitle());
     return Results.json().render(test);
   }
 

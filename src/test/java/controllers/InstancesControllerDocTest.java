@@ -25,7 +25,6 @@ import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.InstanceState;
 import com.appdynamics.aws.AwsAdaptor;
 import com.appdynamics.aws.AwsAdaptor.Region;
-import com.google.inject.Inject;
 
 import dao.SimpleDao;
 import models.Eip;

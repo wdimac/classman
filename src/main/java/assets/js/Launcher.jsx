@@ -18,7 +18,6 @@ window.__APP__.Launcher = React.createClass({
 	runEm() {
     if (this.state.active) {
       this.setState({active:false, message:null});
-      console.debug( this.refs);
   		var url = '/api/admin/images/' + this.props.target.id + '/run';
   		$.ajax({
         url: url,
@@ -32,7 +31,6 @@ window.__APP__.Launcher = React.createClass({
         },
         cache: false,
         success: function(data) {
-        	console.debug(data);
           this.setState({active:true, message: "Successfully started " + data.length + " instance(s)."});
         }.bind(this),
         error: function(xhr, status, err) {

@@ -64,7 +64,6 @@ var InstanceDetailPanel = React.createClass({
       dataType: 'json',
       cache: false,
       success: function(data) {
-        console.debug(data);
         this.setState({processing: false});
         this.loadDataFromServer();
       }.bind(this),
