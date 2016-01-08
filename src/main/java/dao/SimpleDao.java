@@ -16,6 +16,9 @@ import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.Metamodel;
 import javax.persistence.metamodel.SingularAttribute;
 
+import org.hibernate.Session;
+import org.hibernate.jpa.HibernateEntityManager;
+
 import com.appdynamics.aws.QuickList;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -53,9 +56,6 @@ public class SimpleDao<M> {
 
     TypedQuery<M> query=entityManager.createQuery(cq);
     List<M> items = query.getResultList();
-    for (M item : items) {
-      entityManager.refresh(item);
-    }
     return items;
   }
 
