@@ -10,15 +10,15 @@ public class Images {
   @Id
   String id;
 
+  private String region;
+  private String description;
+
   public String getId() {
     return id;
   }
   public void setId(String id) {
     this.id = id;
   }
-
-  private String region;
-  private String description;
 
   public String getRegion() {
     return region;

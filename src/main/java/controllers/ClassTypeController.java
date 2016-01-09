@@ -35,8 +35,11 @@ public class ClassTypeController {
   @GET
   @Transactional
   public Result getAllTypes() {
+    ctDao.clearSession();
     List<ClassType> types = ctDao.getAll(ClassType.class);
-    return Results.json().render(types);
+
+    Result result = Results.json().render(types);
+    return result;
   }
 
   @Path("/class_types/{id}")
@@ -68,6 +71,7 @@ public class ClassTypeController {
   @DELETE
   @Transactional
   public Result deleteType(@PathParam("id") String id) {
+    System.out.println("In delete****");
     ClassType type = ctDao.delete(Long.valueOf(id), ClassType.class);
     type.setDetails(Collections.EMPTY_LIST);
     return Results.json().render(type);
@@ -90,7 +94,7 @@ public class ClassTypeController {
   @Path("/class_types/{typeId}/details/{id}")
   @PUT
   @Transactional
-  public Result updateDetail(@PathParam("typeId") String typeId,
+  public Result updateDetail(@PathParam("typeId") Long typeId,
       @PathParam("id") String id, ClassTypeDetail detail) {
     ClassType classType = ctDao.find(typeId, ClassType.class);
     detail.setClassType(classType);
@@ -101,9 +105,9 @@ public class ClassTypeController {
   @Path("/class_types/{typeId}/details/{id}")
   @DELETE
   @Transactional
-  public Result deleteDetail(@PathParam("typeId") String typeId,
-      @PathParam("id") String id) {
-    ClassTypeDetail detail = detailDao.delete(Long.valueOf(id), ClassTypeDetail.class);
+  public Result deleteDetail(@PathParam("typeId") Long typeId,
+      @PathParam("id") Long id) {
+    ClassTypeDetail detail = detailDao.delete(id, ClassTypeDetail.class);
     return Results.json().render(detail);
   }
 }

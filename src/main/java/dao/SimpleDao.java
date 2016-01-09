@@ -17,7 +17,6 @@ import javax.persistence.metamodel.Metamodel;
 import javax.persistence.metamodel.SingularAttribute;
 
 import org.hibernate.Session;
-import org.hibernate.jpa.HibernateEntityManager;
 
 import com.appdynamics.aws.QuickList;
 import com.google.inject.Inject;
@@ -84,7 +83,7 @@ public class SimpleDao<M> {
     return item;
   }
 
-  public M find(String id, Class<M> clazz) {
+  public M find(Object id, Class<M> clazz) {
     EntityManager entityManager = entityManagerProvider.get();
 
     CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -97,7 +96,12 @@ public class SimpleDao<M> {
     SingularAttribute<? super M, ?> idAttr = itemType.getSingularAttribute("id");
     cq.where(cb.equal(root.get(idAttr), id));
     TypedQuery<M> query = entityManager.createQuery(cq);
-    M item = query.getSingleResult();
+    M item=null;
+    try {
+      item = query.getSingleResult();
+    } catch (NoResultException e) {
+      //return null
+    }
     return item;
   }
 
@@ -140,5 +144,11 @@ public class SimpleDao<M> {
       // Just return null
     }
     return result;
+  }
+
+  public void clearSession() {
+    EntityManager entityManager = entityManagerProvider.get();
+    Session session = entityManager.unwrap(Session.class);
+    session.clear();
   }
 }

@@ -18,5 +18,5 @@ window.__APP__ = {
     return string
       .replace(/([A-Z])/g, function($1){return ' ' + $1;})
       .replace(/^(.)/, function($1){return $1.toUpperCase();});
-  }
+  },
 }

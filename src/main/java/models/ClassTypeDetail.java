@@ -21,21 +21,19 @@ public class ClassTypeDetail {
 
   private String region;
 
-  @ManyToOne(cascade=CascadeType.REMOVE)
+  @ManyToOne
   @JoinColumn(name="class_type_id", updatable=false)
   @JsonBackReference
   private ClassType classType;
 
-  @ManyToOne(cascade=CascadeType.DETACH)
-  @JoinColumn(name="image_id")
-  private Images image;
+  @Column(name="image_id")
+  private String imageId;
 
   @Column(name="instance_type")
   private String instanceType;
 
-  @ManyToOne(cascade=CascadeType.REMOVE)
-  @JoinColumn(name="security_group_id")
-  private SecurityGroup securityGroup;
+  @Column(name="security_group_id")
+  private String securityGroupId;
 
   public Long getId() {
     return id;
@@ -53,12 +51,12 @@ public class ClassTypeDetail {
     this.region = region;
   }
 
-  public Images getImage() {
-    return image;
+  public String getImageId() {
+    return imageId;
   }
 
-  public void setImage(Images image) {
-    this.image = image;
+  public void setImageId(String imageId) {
+    this.imageId = imageId;
   }
 
   public String getInstanceType() {
@@ -69,12 +67,12 @@ public class ClassTypeDetail {
     this.instanceType = instanceType;
   }
 
-  public SecurityGroup getSecurityGroup() {
-    return securityGroup;
+  public String getSecurityGroupId() {
+    return securityGroupId;
   }
 
-  public void setSecurityGroup(SecurityGroup securityGroup) {
-    this.securityGroup = securityGroup;
+  public void setSecurityGroupId(String securityGroupId) {
+    this.securityGroupId = securityGroupId;
   }
 
   public ClassType getClassType() {

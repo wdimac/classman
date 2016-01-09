@@ -21,7 +21,7 @@ public class ClassType {
 
   private String name;
   private int duration;
-  @OneToMany( cascade=CascadeType.PERSIST, mappedBy="classType")
+  @OneToMany( cascade=CascadeType.REMOVE, mappedBy="classType")
   @JsonManagedReference
   private List<ClassTypeDetail> details;
 

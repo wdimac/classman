@@ -2,6 +2,7 @@ var Images = window.__APP__.Images;
 var Instances = window.__APP__.Instances;
 var SecurityGroupPanel = window.__APP__.SecurityGroupPanel;
 var EipPanel = window.__APP__.EipPanel;
+var ClassTypePanel = window.__APP__.ClassTypePanel;
 
 var MenuItem = React.createClass({
   render() {
@@ -36,7 +37,7 @@ window.__APP__.Admin = React.createClass({
 	getInitialState() {
 		return {
 			awsConfig: {},
-			active: 'instances'
+			active: 'class_type'
 		}
 	},
   componentDidMount() {
@@ -59,6 +60,9 @@ window.__APP__.Admin = React.createClass({
         break;
       case 'eips':
         panel = (<EipPanel awsConfig={this.state.awsConfig} />);
+        break;
+      case 'class_type':
+        panel = (<ClassTypePanel awsConfig={this.state.awsConfig} />);
         break;
       default:
         panel = (<div> Under construction </div>)
