@@ -19,3 +19,14 @@
 .text-black {
   color: black;
 }
+
+.panel-collapse {
+  overflow-y:hidden;
+  max-height:500px;
+  transition: max-height 0.75s ease-in-out;
+}
+
+.panel-collapse.closed {
+  max-height:0px;
+  transition: max-height 0.75s ease-in-out;
+}

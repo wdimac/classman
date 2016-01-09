@@ -71,7 +71,6 @@ public class ClassTypeController {
   @DELETE
   @Transactional
   public Result deleteType(@PathParam("id") String id) {
-    System.out.println("In delete****");
     ClassType type = ctDao.delete(Long.valueOf(id), ClassType.class);
     type.setDetails(Collections.EMPTY_LIST);
     return Results.json().render(type);

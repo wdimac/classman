@@ -42,8 +42,9 @@ window.__APP__.Admin = React.createClass({
 	},
   componentDidMount() {
     this.loadDataFromServer();
-  },	
-  changePanel(panel) {
+  },
+  changePanel(panel, event) {
+    event.preventDefault();
     this.setState({active:panel});
   },
   render() {

@@ -38,7 +38,6 @@ var DetailRow = React.createClass({
       cache: false,
       data: JSON.stringify(detail),
       success: function(data) {
-        console.debug(data);
         this.props.updateParent();
       }.bind(this),
       error: function(xhr, status, err) {
@@ -60,7 +59,6 @@ var DetailRow = React.createClass({
     )
     var imageOptions = deflt;
     var groupOptions = deflt;
-    console.debug("filtering on " + this.props.detail.region);
     if (this.props.detail.region != null) {
       imageOptions= imageOptions.concat(
         this.props.selects.images.filter(function(image){
@@ -77,7 +75,6 @@ var DetailRow = React.createClass({
         })
       );
     }
-    console.debug(imageOptions);
     return (
       <div className="card " style={{minWidth:"250px",padding:"0.5rem"}}>
         <div>
@@ -138,8 +135,6 @@ window.__APP__.ClassTypePanel = React.createClass({
       cache: false,
       async:false,
       success: function(data) {
-        console.debug("FOUND:");
-        console.debug(data);
         this.removeWait("data");
         this.setState({data: data});
       }.bind(this),
@@ -243,7 +238,6 @@ window.__APP__.ClassTypePanel = React.createClass({
       cache: false,
       data: JSON.stringify(type),
       success: function(data) {
-        console.debug(data);
         var update = this.state.data.map(function(type){
           if (type.id === data.id) {
             return data;
