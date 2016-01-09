@@ -2,41 +2,6 @@ var Accordian = window.__APP__.Accordian;
 var Select = window.__APP__.Select;
 
 var DetailRow = React.createClass({
-  getInitialState() {
-    return {
-      dirty:false,
-      region:null
-    }
-  },
-  componentDidMount() {
-    this.setState({region: this.props.detail.region});
-  },
-  componentDidUpdate() {
-    console.debug("Component UPdated");
-  },
-  update(detail) {
-    detail.region = this.refs.region.getValue();
-    detail.instanceType = this.refs.types.getValue();
-    detail.securityGroupId = this.refs.groups.getValue() ? this.refs.groups.getValue():null;
-    detail.imageId = this.refs.images.getValue() ? this.refs.images.getValue():null;
-    $.ajax({
-      url: "/api/admin/class_types/" + detail.classType + "/details/" + detail.id,
-      headers: {'X-AUTH-TOKEN':Auth.getToken()},
-      type: 'PUT',
-      dataType: 'json',
-      contentType: 'application/json',
-      cache: false,
-      data: JSON.stringify(detail),
-      success: function(data) {
-        this.setState({dirty:false});
-        console.debug(data);
-        this.props.updateParent();
-      }.bind(this),
-      error: function(xhr, status, err) {
-        console.error(this.props.url, status, err.toString());
-      }.bind(this)
-    });
-  },
   dropDetail(detail) {
     $.ajax({
       url: "/api/admin/class_types/" + detail.classType + "/details/" + detail.id,
@@ -52,8 +17,34 @@ var DetailRow = React.createClass({
       }.bind(this)
     });
   },
-  markDirty() {
-    this.setState({dirty:true, region:this.refs.region.value});
+  markDirty(type, event) {
+    var detail = this.props.detail;
+    switch (type) {
+      case 'region':
+        detail.region = event.target.value; break;
+      case 'type':
+        detail.instanceType = event.target.value; break;
+      case 'group':
+        detail.securityGroupId = event.target.value; break;
+      case 'image':
+        detail.imageId = event.target.value; break;
+    }
+    $.ajax({
+      url: "/api/admin/class_types/" + detail.classType + "/details/" + detail.id,
+      headers: {'X-AUTH-TOKEN':Auth.getToken()},
+      type: 'PUT',
+      dataType: 'json',
+      contentType: 'application/json',
+      cache: false,
+      data: JSON.stringify(detail),
+      success: function(data) {
+        console.debug(data);
+        this.props.updateParent();
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(this.props.url, status, err.toString());
+      }.bind(this)
+    });
   },
   render() {
     var deflt = [{name:"Select", value:""}];
@@ -69,44 +60,44 @@ var DetailRow = React.createClass({
     )
     var imageOptions = deflt;
     var groupOptions = deflt;
+    console.debug("filtering on " + this.props.detail.region);
     if (this.props.detail.region != null) {
       imageOptions= imageOptions.concat(
         this.props.selects.images.filter(function(image){
-          return image.region = this.state.region;
+          return image.region === this.props.detail.region;
         }.bind(this)).map(function(image) {
           return {name:image.description, value:image.id};
         })
       );
       groupOptions=groupOptions.concat(
         this.props.selects.groups.filter(function(group){
-          return group.region = this.state.region;
+          return group.region === this.props.detail.region;
         }.bind(this)).map(function(group) {
           return {name:group.name, value:group.id};
         })
       );
     }
+    console.debug(imageOptions);
     return (
       <div className="card " style={{minWidth:"250px",padding:"0.5rem"}}>
         <div>
           <Select ref="region" options={regionOptions} myValue={this.props.detail.region}
-            onChange={this.markDirty} />
+            onChange={this.markDirty.bind(this, "region")} />
         </div>
         <div>
           <Select ref="images" options={imageOptions} myValue={this.props.detail.imageId}
-            onChange={this.markDirty} />
+            onChange={this.markDirty.bind(this, "image")} />
         </div>
         <div>
           <Select ref="types" options={typeOptions} myValue={this.props.detail.instanceType}
-            onChange={this.markDirty} />
+            onChange={this.markDirty.bind(this, "type")} />
         </div>
         <div>
           <Select ref="groups" options={groupOptions} myValue={this.props.detail.securityGroupId}
-            onChange={this.markDirty} />
+            onChange={this.markDirty.bind(this, "group")} />
         </div>
         <div>
           <div className="btn-group">
-          <i className={"fa fa-check btn btn-sm btn-success" + (this.state.dirty ? "" : "-outline")}
-            onClick={this.update.bind(this, this.props.detail)}></i>
           <i className="fa fa-times btn btn-sm btn-danger"
               onClick={this.dropDetail.bind(this, this.props.detail)}></i>
           </div>
@@ -283,7 +274,6 @@ window.__APP__.ClassTypePanel = React.createClass({
     });
   },
   formatType(type) {
-    console.debug(this.state.selects);
     return (
       <div className="p-x-1" key={type.id}>
         <div className="row bg-faded p-y-1">
@@ -329,7 +319,6 @@ window.__APP__.ClassTypePanel = React.createClass({
     this.state.data.forEach(function(item){
       sorted[item.name + "__" + item.id + "__"] = [item];
     });
-    console.debug(this.state.waiting);
     return (
       <div>
         <div>

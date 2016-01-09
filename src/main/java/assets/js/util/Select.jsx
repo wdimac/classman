@@ -9,17 +9,17 @@ var Option = React.createClass({
 })
 
 window.__APP__.Select = React.createClass({
-  onChange() {
+  onChange(event) {
     if (this.props.onChange)
-      this.props.onChange();
+      this.props.onChange(event);
   },
   getValue() {
-    return this.state.current;
+    return this.refs.select.value;
   },
   render() {
     return (
       <select ref='select' className="form-control m-b-1"
-        defaultValue={this.props.myValue}
+        value={this.props.myValue}
         style={{height:"2.3rem"}} onChange={this.onChange}>
 
         {this.props.options.map(function(item){
