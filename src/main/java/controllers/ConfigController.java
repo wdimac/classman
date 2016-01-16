@@ -1,6 +1,7 @@
 package controllers;
 
 import java.util.HashMap;
+import java.util.TimeZone;
 
 import javax.inject.Singleton;
 
@@ -29,7 +30,7 @@ public class ConfigController {
 
     config.put("regions", AwsAdaptor.Region.getNameList());
     config.put("instanceTypes", InstanceType.values());
-    config.put("securityGroups", groupDao.getAll(SecurityGroup.class));
+    config.put("timezones", TimeZone.getAvailableIDs());
     return Results.json().render(config);
   }
 }

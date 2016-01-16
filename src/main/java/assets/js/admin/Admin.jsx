@@ -3,6 +3,8 @@ var Instances = window.__APP__.Instances;
 var SecurityGroupPanel = window.__APP__.SecurityGroupPanel;
 var EipPanel = window.__APP__.EipPanel;
 var ClassTypePanel = window.__APP__.ClassTypePanel;
+var ClassesPanel = window.__APP__.ClassesPanel;
+var UserPanel = window.__APP__.UserPanel;
 
 var MenuItem = React.createClass({
   render() {
@@ -37,7 +39,7 @@ window.__APP__.Admin = React.createClass({
 	getInitialState() {
 		return {
 			awsConfig: {},
-			active: 'class_type'
+			active: 'classes'
 		}
 	},
   componentDidMount() {
@@ -65,6 +67,12 @@ window.__APP__.Admin = React.createClass({
       case 'class_type':
         panel = (<ClassTypePanel awsConfig={this.state.awsConfig} />);
         break;
+      case 'classes':
+        panel = (<ClassesPanel awsConfig={this.state.awsConfig} />);
+        break;
+      case 'users':
+        panel = (<UserPanel awsConfig={this.state.awsConfig} />);
+        break;
       default:
         panel = (<div> Under construction </div>)
 		}
@@ -73,6 +81,10 @@ window.__APP__.Admin = React.createClass({
 				<div className="navbar navbar-light">
 					<span className='navbar-brand'>Manage: </span>
 					<span className='nav navbar-nav'>
+            <MenuItem isActive={this.state.active === 'classes'}
+              click={this.changePanel.bind(this, 'classes')}
+              icon='calendar'
+              title="Classes" />
             <MenuItem isActive={this.state.active === 'class_type'}
               click={this.changePanel.bind(this, 'class_type')}
               icon='calendar-o'
@@ -93,6 +105,10 @@ window.__APP__.Admin = React.createClass({
               click={this.changePanel.bind(this, 'groups')}
               icon='key'
               title="Sec. Groups" />
+            <MenuItem isActive={this.state.active === 'users'}
+              click={this.changePanel.bind(this, 'users')}
+              icon='users'
+              title="Users" />
 					</span>
 				</div>
 				<div className="card-body p-a-1">

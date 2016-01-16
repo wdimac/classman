@@ -20,6 +20,7 @@
   color: black;
 }
 
+/* Accordian styles */
 .panel-collapse {
   overflow-y:hidden;
   max-height:500px;
@@ -29,4 +30,19 @@
 .panel-collapse.closed {
   max-height:0px;
   transition: max-height 0.75s ease-in-out;
+}
+
+/* Inliner styles */
+.editable {
+  background-color: #EEE;
+  padding:0.35rem;
+  border: 1px solid #EEE;
+}
+.editable:hover {
+  border-color:#CCC;
+  cursor:pointer;
+}
+
+.editable .placeholder {
+  color:#BBB;
 }

@@ -7,6 +7,8 @@ package controllers;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.TimeZone;
 
 import org.doctester.testbrowser.Request;
 import org.doctester.testbrowser.Response;
@@ -29,13 +31,14 @@ public class ConfigControllerDocTest extends AuthenticatedDocTesterBase{
         .addHeader("X-AUTH-TOKEN", auth.auth_token)
       );
 
-    HashMap<String, ArrayList<Object>> config = response.payloadAs(HashMap.class);
+    HashMap<String, List<Object>> config = response.payloadAs(HashMap.class);
 
     sayAndAssertThat("Config contains 9 Regions.",
-        ((ArrayList<Object>)config.get("regions")).size(), CoreMatchers.is(9));
+        ((List<Object>)config.get("regions")).size(), CoreMatchers.is(9));
     sayAndAssertThat("Config contains 38 Instance Types.",
-        ((ArrayList<Object>)config.get("instanceTypes")).size(), CoreMatchers.is(38));
-
+        ((List<Object>)config.get("instanceTypes")).size(), CoreMatchers.is(38));
+    sayAndAssertThat("Config conatins all Timezone IDs",
+        ((List<Object>)config.get("timezones")).size(), CoreMatchers.is(TimeZone.getAvailableIDs().length));
   }
 
 }

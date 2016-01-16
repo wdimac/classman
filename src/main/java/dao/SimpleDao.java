@@ -1,6 +1,7 @@
 package dao;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -41,17 +42,18 @@ public class SimpleDao<M> {
     Metamodel m = entityManager.getMetamodel();
     EntityType<M> itemType = m.entity(clazz);
     Set<SingularAttribute<M, ?>> attrs = itemType.getDeclaredSingularAttributes();
+    List<Order> oList = new ArrayList<>();
     for (SingularAttribute<M, ?> attr: attrs) {
       if (attr.getName().equals("region")) {
-        regOrder = cb.asc(root.get(attr));
+        oList.add(cb.asc(root.get(attr)));
       }
       if (attr.getName().equals("description")) {
-        descOrder = cb.asc(root.get(attr));
+        oList.add(cb.asc(root.get(attr)));
       }
     }
 
-    if (regOrder != null)
-      cq.orderBy(new QuickList<Order>(regOrder, descOrder));
+    if (oList.size() > 0)
+      cq.orderBy(oList);
 
     TypedQuery<M> query=entityManager.createQuery(cq);
     List<M> items = query.getResultList();

@@ -9,7 +9,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 @Entity
 @Table(name="class_type_detail")
@@ -22,7 +24,7 @@ public class ClassTypeDetail {
 
   @ManyToOne
   @JoinColumn(name="class_type_id", updatable=false)
-  @JsonBackReference
+  @JsonIgnoreProperties({"details"})
   private ClassType classType;
 
   @Column(name="image_id")

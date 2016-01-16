@@ -10,8 +10,6 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
 @Entity
 @Table(name="class_type")
 public class ClassType {
@@ -22,7 +20,6 @@ public class ClassType {
   private String name;
   private int duration;
   @OneToMany( cascade=CascadeType.REMOVE, mappedBy="classType")
-  @JsonManagedReference
   private List<ClassTypeDetail> details;
 
   public String getName() {
