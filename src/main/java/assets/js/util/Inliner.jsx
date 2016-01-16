@@ -25,7 +25,7 @@ window.__APP__.Inliner = React.createClass({
     }
     if (this.state.edit)
       return (
-        <span className={this.props.className}>
+        <div className={this.props.className}>
           <span className="input-group">
             <input ref="myInput" className={clsnm} placeholder={fieldName} 
                 type={this.props.type ? this.props.type : "text"}
@@ -41,16 +41,16 @@ window.__APP__.Inliner = React.createClass({
               </button>
             </span>
           </span>
-        </span>
+        </div>
       )
     else
       return (
-        <span className={"editable " + this.props.className} onClick={this.toggleEdit}>{
+        <div className={"editable " + this.props.className} onClick={this.toggleEdit}>{
           text ? text : 
             <span className="placeholder">
               - {fieldName} -
             </span>
-        }</span>
+        }</div>
       );
   }
 });
@@ -78,7 +78,7 @@ window.__APP__.InlineSelect = React.createClass({
     var fieldName=window.__APP__.decamel(this.props.field);
     if (this.state.edit) {
       return (
-        <span className={this.props.className}>
+        <div className={this.props.className}>
           <span className="input-group">
             <Select ref="myInput" options={this.props.options} 
                 myValue={object ? object.id:null}
@@ -90,7 +90,7 @@ window.__APP__.InlineSelect = React.createClass({
               </button>
             </span>
           </span>
-        </span>
+        </div>
       )
     } else {
       var label = (
@@ -106,9 +106,9 @@ window.__APP__.InlineSelect = React.createClass({
         });
       }
       return (
-        <span className={"editable " + this.props.className} onClick={this.toggleEdit}>
+        <div className={"editable " + this.props.className} onClick={this.toggleEdit}>
           {label}
-        </span>
+        </div>
       );
     }
   }

@@ -18,7 +18,7 @@ window.__APP__.Select = React.createClass({
   },
   render() {
     return (
-      <select ref='select' className="form-control m-b-1"
+      <select ref='select' className="form-control"
         value={this.props.myValue}
         style={{height:"2.3rem"}} onChange={this.onChange}>
 

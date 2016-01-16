@@ -133,33 +133,42 @@ var ClassInfo = React.createClass({
         </div>
         <div id={this.props.panelName} 
             className={"panel-collapse m-b-1 p-x-2" + (this.state.open ? " open":" closed")}>
-          <div className="row">
-            <Inliner object={cl} field="description"
-                className="col-md-6 col-xs-12" handleEdit={this.updateClass} />
-            <div className="col-xs-6" style={{padding:"0.5rem"}}>
+          <div className="row m-t-1">
+            <div className="col-md-6 col-xs-12">
+              <Inliner object={cl} field="description"
+                  className=""
+                  handleEdit={this.updateClass} />
+            </div>
+            <div className="col-xs-6">
               <Inliner object={cl} field="startDate" type="date"
-                  className="m-x-1" handleEdit={this.updateClass} />
+                  className="m-x-1 pull-left" handleEdit={this.updateClass} />
               &nbsp;to&nbsp;
               <Inliner object={cl} field="endDate" type="date"
-                  className="m-x-1" handleEdit={this.updateClass} />
+                  className="m-x-1 pull-left" handleEdit={this.updateClass} />
               <Inliner object={cl} field="startTime" type="time"
-                  className="m-x-1" handleEdit={this.updateClass} />
+                  className="m-x-1 pull-left" handleEdit={this.updateClass} />
               &nbsp;to&nbsp;
               <Inliner object={cl} field="endTime" type="time"
-                  className="m-x-1" handleEdit={this.updateClass} />
+                  className="m-x-1 pull-left" handleEdit={this.updateClass} />
             </div>
          </div>
-          <div className="row">
-            <InlineSelect object={cl} field="instructor" isObject="true"
-                options={this.props.instructors}
-                className="col-md-6 col-xs-12" handleEdit={this.updateClass} />
-            <InlineSelect object={cl} field="timeZone"
-                options={zoneOptions}
-                className="col-md-6 col-xs-12" handleEdit={this.updateClass} />
+          <div className="row m-t-1">
+            <div className="col-md-6 col-xs-12">
+              <InlineSelect object={cl} field="instructor" isObject="true"
+                  options={this.props.instructors}
+                  className="" handleEdit={this.updateClass} />
+            </div>
+            <div className="col-md-6 col-xs-12">
+              <InlineSelect object={cl} field="timeZone"
+                  options={zoneOptions}
+                  className="" handleEdit={this.updateClass} />
+            </div>
           </div>
-          <div className="row">
-            <Inliner object={cl} field="studentCount" type="number"
-                className="col-md-6 col-xs-12" handleEdit={this.updateClass} />
+          <div className="row m-t-1">
+            <div className="col-md-6 col-xs-12">
+              <Inliner object={cl} field="studentCount" type="number"
+                  className="" handleEdit={this.updateClass} />
+            </div>
           </div>
         </div>
       </div>
