@@ -106,7 +106,23 @@ var ClassInfo = React.createClass({
       cache: false,
       data: JSON.stringify(cls),
       success: function(data) {
+        this.props.updateParent(true);
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(xhr, status, err.toString());
+      }.bind(this)
+    });
+  },
+  deleteClass() {
+    $.ajax({
+      url: "/api/admin/classes/" + this.props.info.id,
+      headers: {'X-AUTH-TOKEN':Auth.getToken()},
+      type:"DELETE",
+      dataType: 'json',
+      cache: false,
+      success: function(data) {
         console.debug(data);
+        this.props.updateParent(false);
       }.bind(this),
       error: function(xhr, status, err) {
         console.error(xhr, status, err.toString());
@@ -192,7 +208,13 @@ var ClassInfo = React.createClass({
                 </div>
               </div>
             </div>
-
+          </div>
+          <div className="m-t-1">
+            <button className="btn btn-sm btn-danger"
+                alt="Remove Class"
+                onClick={this.deleteClass}>
+              <i className="fa fa-times"></i>
+            </button>
           </div>
         </div>
       </div>
@@ -213,7 +235,11 @@ window.__APP__.ClassesPanel = React.createClass({
   componentDidMount() {
     this.loadDataFromServer();
   },
-  loadDataFromServer() {
+  loadDataFromServer(redrawOnly) {
+    if (redrawOnly) {
+      this.setState({data: this.state.data});
+      return;
+    }
     this.setState({loading:true});
     $.ajax({
       url: "/api/admin/classes",
@@ -288,6 +314,7 @@ window.__APP__.ClassesPanel = React.createClass({
               console.debug(cl);
               return (
                 <ClassInfo info={cl} key={cl.id} 
+                  updateParent={this.loadDataFromServer}
                   zones={this.props.awsConfig? this.props.awsConfig.timezones : []}
                   instructors={this.state.instructors}/>
               )

@@ -93,7 +93,7 @@ window.__APP__.InlineSelect = React.createClass({
         <div className={this.props.className}>
           <span className="input-group">
             <Select ref="myInput" options={this.props.options} 
-                myValue={object ? object.id:null}
+                myValue={val}
                 onChange={this.doEdit} />
             <span className="input-group-btn">
               <button className="btn btn-secondary text-danger" type="button"
