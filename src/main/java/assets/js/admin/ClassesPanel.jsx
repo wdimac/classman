@@ -17,7 +17,7 @@ var Scheduler = React.createClass({
       classTypeDetail:{id:this.refs.type.getValue()},
       startDate:this.refs.date.value,
       startTime:this.refs.time.value + ":00",
-      studentCount:this.refs.count.value,
+      count:this.refs.count.value,
       timeZone:this.refs.zone.getValue()
     };
     console.debug(classInfo);
@@ -60,7 +60,9 @@ var Scheduler = React.createClass({
         confirm="Schedule"
         message={this.state.message}
         title="Schedule Class">
-        <Select ref="type" options={typeOptions} />
+        <div className="p-b-1">
+          <Select ref="type" options={typeOptions} />
+        </div>
         <div className="row">
           <div className="col-sm-6">
             <input ref="date" className="form-control m-b-1" 
@@ -71,7 +73,9 @@ var Scheduler = React.createClass({
                 type="time" defaultValue="09:00" />
           </div>
         </div>
-        <Select ref="zone" options={zones} />
+        <div className="p-b-1">
+          <Select ref="zone" options={zones} />
+        </div>
         <div className="input-group">
           <span className="input-group-addon"># Instances</span>
           <input ref="count" className="form-control" 
@@ -166,7 +170,7 @@ var ClassInfo = React.createClass({
           </div>
           <div className="row m-t-1">
             <div className="col-md-6 col-xs-12">
-              <Inliner object={cl} field="studentCount" type="number"
+              <Inliner object={cl} field="count" type="number"
                   className="" handleEdit={this.updateClass} />
             </div>
           </div>
@@ -271,6 +275,7 @@ window.__APP__.ClassesPanel = React.createClass({
           </div>
         }
         <Scheduler ref="scheduler" types={this.state.types} 
+            updateParent={this.loadDataFromServer}
             zones={this.props.awsConfig? this.props.awsConfig.timezones : []}/>
       </div>
     );

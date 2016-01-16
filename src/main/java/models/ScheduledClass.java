@@ -12,8 +12,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-
 @Entity
 @Table(name="class")
 public class ScheduledClass {
@@ -32,8 +30,8 @@ public class ScheduledClass {
   @JoinColumn(name="instructor_id")
   private User instructor;
 
-  @Column(name="student_count")
-  private int studentCount;
+  @Column(name="count")
+  private int count;
   @Column(name="start_date")
   private Date startDate;
   @Column(name="end_date")
@@ -101,10 +99,10 @@ public class ScheduledClass {
   public void setTimeZone(String timeZone) {
     this.timeZone = timeZone;
   }
-  public int getStudentCount() {
-    return studentCount;
+  public int getCount() {
+    return count;
   }
-  public void setStudentCount(int studentCount) {
-    this.studentCount = studentCount;
+  public void setCount(int count) {
+    this.count = count;
   }
 }

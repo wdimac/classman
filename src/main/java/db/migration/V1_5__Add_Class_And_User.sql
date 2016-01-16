@@ -31,7 +31,7 @@ create table class (
   descr varchar(256),
   class_type_detail_id MEDIUMINT NOT NULL,
   instructor_id MEDIUMINT,
-  student_count INT,
+  count INT,
   start_date DATE NOT NULL,
   end_date DATE NOT NULL,
   start_time TIME NOT NULL,

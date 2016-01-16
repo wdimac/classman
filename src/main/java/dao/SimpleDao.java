@@ -19,7 +19,6 @@ import javax.persistence.metamodel.SingularAttribute;
 
 import org.hibernate.Session;
 
-import com.appdynamics.aws.QuickList;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -37,8 +36,6 @@ public class SimpleDao<M> {
     Root<M> root = cq.from(clazz);
     cq.select(root);
 
-    Order regOrder = null;
-    Order descOrder = null;
     Metamodel m = entityManager.getMetamodel();
     EntityType<M> itemType = m.entity(clazz);
     Set<SingularAttribute<M, ?>> attrs = itemType.getDeclaredSingularAttributes();

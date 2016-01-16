@@ -13,8 +13,6 @@ import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.google.inject.Inject;
-
 import dao.SimpleDao;
 import models.ClassTypeDetail;
 import models.ScheduledClass;
