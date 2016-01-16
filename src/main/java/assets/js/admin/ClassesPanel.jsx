@@ -2,6 +2,7 @@ var BootstrapModal = window.__APP__.BootstrapModal;
 var Select = window.__APP__.Select;
 var Inliner = window.__APP__.Inliner;
 var InlineSelect = window.__APP__.InlineSelect;
+var DatePicker = window.__APP__.DatePicker;
 
 var Scheduler = React.createClass({
   getInitialState(){
@@ -139,40 +140,59 @@ var ClassInfo = React.createClass({
             className={"panel-collapse m-b-1 p-x-2" + (this.state.open ? " open":" closed")}>
           <div className="row m-t-1">
             <div className="col-md-6 col-xs-12">
-              <Inliner object={cl} field="description"
-                  className=""
-                  handleEdit={this.updateClass} />
+              <div className="row m-t-1">
+                <div className="col-xs-12">
+                  <Inliner object={cl} field="description"
+                      className=""
+                      handleEdit={this.updateClass} />
+                </div>
+              </div>
+              <div className="row m-t-1">
+                <div className="col-xs-12">
+                  <InlineSelect object={cl} field="instructor" isObject="true"
+                      options={this.props.instructors}
+                      className="" handleEdit={this.updateClass} />
+                </div>
+              </div>
+              <div className="row m-t-1">
+                <div className="col-xs-12">
+                  <Inliner object={cl} field="count" type="number"
+                      label="# Instances"
+                      className="" handleEdit={this.updateClass} />
+                </div>
+              </div>
             </div>
-            <div className="col-xs-6">
-              <Inliner object={cl} field="startDate" type="date"
-                  className="m-x-1 pull-left" handleEdit={this.updateClass} />
-              &nbsp;to&nbsp;
-              <Inliner object={cl} field="endDate" type="date"
-                  className="m-x-1 pull-left" handleEdit={this.updateClass} />
-              <Inliner object={cl} field="startTime" type="time"
-                  className="m-x-1 pull-left" handleEdit={this.updateClass} />
-              &nbsp;to&nbsp;
-              <Inliner object={cl} field="endTime" type="time"
-                  className="m-x-1 pull-left" handleEdit={this.updateClass} />
-            </div>
-         </div>
-          <div className="row m-t-1">
+
             <div className="col-md-6 col-xs-12">
-              <InlineSelect object={cl} field="instructor" isObject="true"
-                  options={this.props.instructors}
-                  className="" handleEdit={this.updateClass} />
+              <div className="row m-t-1">
+                <div className="col-xs-6">
+                  <DatePicker object={cl} field="startDate"
+                      className="" handleEdit={this.updateClass} />
+                </div>
+                <div className="col-xs-6">
+                  <DatePicker object={cl} field="endDate"
+                      className="" handleEdit={this.updateClass} />
+                </div>
+              </div>
+              <div className="row m-t-1">
+                <div className="col-xs-6">
+                   <Inliner object={cl} field="startTime" type="time"
+                       className="" handleEdit={this.updateClass} />
+                </div>
+                <div className="col-xs-6">
+                   <Inliner object={cl} field="endTime" type="time"
+                       className="" handleEdit={this.updateClass} />
+                </div>
+              </div>
+              <div className="row m-t-1">
+                <div className="col-xs-12">
+                  <InlineSelect object={cl} field="timeZone"
+                      options={zoneOptions}
+                      className="" handleEdit={this.updateClass} />
+                </div>
+              </div>
             </div>
-            <div className="col-md-6 col-xs-12">
-              <InlineSelect object={cl} field="timeZone"
-                  options={zoneOptions}
-                  className="" handleEdit={this.updateClass} />
-            </div>
-          </div>
-          <div className="row m-t-1">
-            <div className="col-md-6 col-xs-12">
-              <Inliner object={cl} field="count" type="number"
-                  className="" handleEdit={this.updateClass} />
-            </div>
+
           </div>
         </div>
       </div>
@@ -264,14 +284,14 @@ window.__APP__.ClassesPanel = React.createClass({
                 Schedule New
               </button>
             </div>
-              {this.state.data.map(function(cl){
-                console.debug(cl);
-                return (
-                  <ClassInfo info={cl} key={cl.id} 
-                    zones={this.props.awsConfig? this.props.awsConfig.timezones : []}
-                    instructors={this.state.instructors}/>
-                )
-              }.bind(this))}
+            {this.state.data.map(function(cl){
+              console.debug(cl);
+              return (
+                <ClassInfo info={cl} key={cl.id} 
+                  zones={this.props.awsConfig? this.props.awsConfig.timezones : []}
+                  instructors={this.state.instructors}/>
+              )
+            }.bind(this))}
           </div>
         }
         <Scheduler ref="scheduler" types={this.state.types} 
