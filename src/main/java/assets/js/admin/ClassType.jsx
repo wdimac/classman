@@ -29,7 +29,6 @@ var DetailRow = React.createClass({
       case 'image':
         detail.imageId = event.target.value; break;
     }
-    console.debug(typeof detail.classType);
     $.ajax({
       url: "/api/admin/class_types/" + detail.classType.id + "/details/" + detail.id,
       headers: {'X-AUTH-TOKEN':Auth.getToken()},

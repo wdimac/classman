@@ -21,7 +21,6 @@ var Scheduler = React.createClass({
       count:this.refs.count.value,
       timeZone:this.refs.zone.getValue()
     };
-    console.debug(classInfo);
     $.ajax({
       url: "/api/admin/classes",
       headers: {'X-AUTH-TOKEN':Auth.getToken()},
@@ -121,7 +120,6 @@ var ClassInfo = React.createClass({
       dataType: 'json',
       cache: false,
       success: function(data) {
-        console.debug(data);
         this.props.updateParent(false);
       }.bind(this),
       error: function(xhr, status, err) {
@@ -264,7 +262,6 @@ window.__APP__.ClassesPanel = React.createClass({
       dataType: 'json',
       cache: false,
       success: function(data) {
-        console.debug(data);
         this.setState({types: data});
       }.bind(this),
       error: function(xhr, status, err) {
@@ -311,7 +308,6 @@ window.__APP__.ClassesPanel = React.createClass({
               </button>
             </div>
             {this.state.data.map(function(cl){
-              console.debug(cl);
               return (
                 <ClassInfo info={cl} key={cl.id} 
                   updateParent={this.loadDataFromServer}

@@ -76,7 +76,6 @@ window.__APP__.UserPanel = React.createClass({
     });
   },
   render() {
-    console.debug(this.state.data);
     return (
       <div>
         {this.state.loading ?
