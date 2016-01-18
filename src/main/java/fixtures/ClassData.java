@@ -57,6 +57,19 @@ public class ClassData implements Fixture {
     inst.setImage_id(image.getId());
     entityManager.persist(inst);
 
+    clazz = new ScheduledClass();
+    clazz.setDescription("test2");
+    clazz.setClassTypeDetail(detail);
+    cal = new GregorianCalendar();
+    cal.add(Calendar.MONTH, 2);
+    clazz.setStartDate(new Date(cal.getTimeInMillis()));
+    cal.add(Calendar.DAY_OF_MONTH, 2);
+    clazz.setEndDate(new Date(cal.getTimeInMillis()));
+    clazz.setStartTime(Time.valueOf("09:00:00"));
+    clazz.setEndTime(Time.valueOf("16:00:00"));
+    clazz.setTimeZone(TimeZone.getDefault().getID());
+    entityManager.persist(clazz);
+
     results.put("ClassData", "Inserted default records");
   }
 

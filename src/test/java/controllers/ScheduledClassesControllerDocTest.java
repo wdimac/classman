@@ -35,6 +35,7 @@ public class ScheduledClassesControllerDocTest extends AuthenticatedDocTesterBas
   static String CLASS_URL = "/api/admin/classes";
 
   SimpleDao<ClassTypeDetail> ctdDao;
+  SimpleDao<Instance> iDao;
   ScheduledClassesController controller;
 
   @Mock
@@ -47,6 +48,7 @@ public class ScheduledClassesControllerDocTest extends AuthenticatedDocTesterBas
     super.init();
 
     ctdDao = getInjector().getInstance(SimpleDao.class);
+    iDao = getInjector().getInstance(SimpleDao.class);
     controller = getInjector().getInstance(ScheduledClassesController.class);
     controller.aws = aws;
   }
@@ -66,7 +68,7 @@ public class ScheduledClassesControllerDocTest extends AuthenticatedDocTesterBas
     List<ScheduledClass> types = response.payloadAs(List.class);
 
     sayAndAssertThat("All available Types are returned.",
-        types.size(), CoreMatchers.is(1));
+        types.size(), CoreMatchers.is(2));
   }
 
   @Test
@@ -148,6 +150,10 @@ public class ScheduledClassesControllerDocTest extends AuthenticatedDocTesterBas
 
   @Test
   public void deleteType() {
+    Instance inst = iDao.getAll(Instance.class).get(0);
+    inst.setTerminated(true);
+    iDao.update(inst);
+
     sayNextSection("Delete Scheduled Class.");
 
     say("Deleting a Scheduled Class is a DELETE request to " + CLASS_URL + "/[id]");
@@ -155,14 +161,14 @@ public class ScheduledClassesControllerDocTest extends AuthenticatedDocTesterBas
 
     Response response = sayAndMakeRequest(
       Request.DELETE()
-        .url(testServerUrl().path(CLASS_URL + "/1"))
+        .url(testServerUrl().path(CLASS_URL + "/2"))
         .addHeader("X-AUTH-TOKEN", auth.auth_token)
       );
 
     ScheduledClass rClazz = response.payloadAs(ScheduledClass.class);
 
     sayAndAssertThat("Scheduled Class deleted returned.",
-        rClazz.getId(), CoreMatchers.is(1L));
+        rClazz.getId(), CoreMatchers.is(2L));
   }
 
   @Test
