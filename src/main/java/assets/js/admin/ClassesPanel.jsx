@@ -207,6 +207,12 @@ var ClassInfo = React.createClass({
     var zoneOptions = this.props.zones ? this.props.zones.map(function(zone){
       return {name:zone, value:zone};
     }):[];
+    this.props.clazz.instances.sort(function(ia, ib) {
+      if (ia.terminated !== ib.terminated) {
+        return ia.terminated ? 1 : -1;
+      }
+      return (ia.id > ib.id) ? 1 : -1;
+    })
     return (
       <div> 
         <div onClick={this.toggleOpen}>
