@@ -102,7 +102,13 @@ public class ScheduledClassesController {
   @DELETE
   @Transactional
   public Result deleteClass(@PathParam("id") Long id) {
-    ScheduledClass sched = scDao.delete(Long.valueOf(id), ScheduledClass.class);
+    ScheduledClass sched = scDao.find(id, ScheduledClass.class);
+    for (models.Instance instance : sched.getInstances()) {
+      if (!instance.isTerminated()) {
+        return Results.badRequest().json();
+      }
+    }
+    scDao.delete(Long.valueOf(id), ScheduledClass.class);
     return Results.json().render(sched);
   }
 

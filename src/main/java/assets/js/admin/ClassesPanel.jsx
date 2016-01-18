@@ -114,6 +114,14 @@ var ClassInfo = React.createClass({
     });
   },
   deleteClass() {
+    var delOK = true;
+    this.props.clazz.instances.forEach(function(inst){
+      if (!inst.terminated) delOK= false;
+    })
+    if (!delOK) {
+      alert("Cannot delete a class with active instances.");
+      return;
+    }
     $.ajax({
       url: "/api/admin/classes/" + this.props.clazz.id,
       headers: {'X-AUTH-TOKEN':Auth.getToken()},
