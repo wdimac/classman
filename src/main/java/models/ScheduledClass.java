@@ -2,7 +2,9 @@ package models;
 
 import java.sql.Date;
 import java.sql.Time;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -10,6 +12,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
@@ -29,6 +32,9 @@ public class ScheduledClass {
   @ManyToOne
   @JoinColumn(name="instructor_id")
   private User instructor;
+
+  @OneToMany(cascade=CascadeType.REMOVE, mappedBy="scheduledClass")
+  private List<Instance> instances;
 
   @Column(name="count")
   private int count;
@@ -104,5 +110,11 @@ public class ScheduledClass {
   }
   public void setCount(int count) {
     this.count = count;
+  }
+  public List<Instance> getInstances() {
+    return instances;
+  }
+  public void setInstances(List<Instance> instances) {
+    this.instances = instances;
   }
 }

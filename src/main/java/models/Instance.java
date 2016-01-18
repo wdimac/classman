@@ -3,7 +3,11 @@ package models;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name="instances")
@@ -23,6 +27,11 @@ public class Instance {
   private String image_id;
   @Column(name="is_terminated")
   private boolean isTerminated;
+
+  @ManyToOne
+  @JoinColumn(name="class_id", updatable=false)
+  @JsonIgnoreProperties({"instances"})
+  private ScheduledClass scheduledClass;
 
   public String getRegion() {
     return region;
@@ -51,6 +60,12 @@ public class Instance {
   }
   public void setImage_id(String image_id) {
     this.image_id = image_id;
+  }
+  public ScheduledClass getScheduledClass() {
+    return scheduledClass;
+  }
+  public void setScheduledClass(ScheduledClass scheduledClass) {
+    this.scheduledClass = scheduledClass;
   }
 
 }

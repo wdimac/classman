@@ -1,7 +1,11 @@
 package controllers;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
+
 import java.sql.Date;
 import java.sql.Time;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -12,15 +16,29 @@ import org.doctester.testbrowser.Response;
 import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+
+import com.amazonaws.services.ec2.model.InstanceState;
+import com.amazonaws.services.ec2.model.RunInstancesRequest;
+import com.appdynamics.aws.AwsAdaptor;
+import com.appdynamics.aws.AwsAdaptor.Region;
 
 import dao.SimpleDao;
 import models.ClassTypeDetail;
+import models.Instance;
 import models.ScheduledClass;
 
+@RunWith(MockitoJUnitRunner.class)
 public class ScheduledClassesControllerDocTest extends AuthenticatedDocTesterBase {
   static String CLASS_URL = "/api/admin/classes";
 
   SimpleDao<ClassTypeDetail> ctdDao;
+  ScheduledClassesController controller;
+
+  @Mock
+  AwsAdaptor aws;
 
   @Before
   @Override
@@ -29,6 +47,8 @@ public class ScheduledClassesControllerDocTest extends AuthenticatedDocTesterBas
     super.init();
 
     ctdDao = getInjector().getInstance(SimpleDao.class);
+    controller = getInjector().getInstance(ScheduledClassesController.class);
+    controller.aws = aws;
   }
 
   @Test
@@ -143,5 +163,138 @@ public class ScheduledClassesControllerDocTest extends AuthenticatedDocTesterBas
 
     sayAndAssertThat("Scheduled Class deleted returned.",
         rClazz.getId(), CoreMatchers.is(1L));
+  }
+
+  @Test
+  public void runImage() {
+    List<com.amazonaws.services.ec2.model.Instance> mock = new ArrayList<>();
+    com.amazonaws.services.ec2.model.Instance in = new com.amazonaws.services.ec2.model.Instance();
+    in.setImageId("ID-1");
+    in.setInstanceId("i-test");
+    mock.add(in);
+    when(aws.runInstances(any(Region.class), any(RunInstancesRequest.class))).thenReturn(mock);
+
+    sayNextSection("Running class instances.");
+
+    say("Running instances for a class is a POST request to " + CLASS_URL + "/<class_id>/instances");
+
+    say("Pass additional information in request query: <pre>?count=1</pre>. Set count=0 to run configured number of instances.");
+
+    Response response = sayAndMakeRequest(
+      Request.POST()
+        .url(testServerUrl().path(CLASS_URL + "/1/instances?count=1"))
+        .addHeader("X-AUTH-TOKEN", auth.auth_token)
+      );
+
+    List<Instance> result = response.payloadAs(List.class);
+
+    sayAndAssertThat("List of instances is returned.",
+        result.size(), CoreMatchers.is(1));
+  }
+  @Test
+  public void getAwsInfo() {
+    ArrayList<com.amazonaws.services.ec2.model.Instance> instances = getInstanceList();
+    when(aws.getInstances(any(String[].class), any(String.class))).thenReturn(instances);
+    String testId = instances.get(0).getInstanceId();
+
+    sayNextSection("Retrieve AWS information.");
+
+    say("Retrieving AWS information for class instances is a GET request to " + CLASS_URL + "/<class_id>/aws");
+
+    Response response = sayAndMakeRequest(
+      Request.GET()
+        .url(testServerUrl().path(CLASS_URL + "/1/aws"))
+        .addHeader("X-AUTH-TOKEN", auth.auth_token)
+      );
+
+    String instancesResp = response.payloadAsString();
+
+    sayAndAssertThat("Requested instance is returned.",
+        instancesResp, CoreMatchers.containsString(testId));
+
+  }
+
+  @Test
+  public void startInstance() {
+    String testId = "i-INST1";
+    List<String> instances = new ArrayList<>();
+    instances.add(testId);
+    when(aws.startInstances(any(Region.class), any(String[].class))).thenReturn(instances);
+
+    sayNextSection("Start class instances.");
+
+    say("Starting all instances for a class is a POST request to " + CLASS_URL + "/<class_id>/aws/start");
+
+    Response response = sayAndMakeRequest(
+      Request.POST()
+        .url(testServerUrl().path(CLASS_URL + "/1/aws/start"))
+        .addHeader("X-AUTH-TOKEN", auth.auth_token)
+      );
+
+    String instancesResp = response.payloadAsString();
+
+    sayAndAssertThat("Started instance is returned.",
+        instancesResp, CoreMatchers.containsString(testId));
+
+  }
+
+  @Test
+  public void stopInstance() {
+    String testId = "i-INST1";
+    List<String> instances = new ArrayList<>();
+    instances.add(testId);
+    when(aws.stopInstances(any(Region.class), any(String[].class))).thenReturn(instances);
+
+    sayNextSection("Stop all class instances.");
+
+    say("Stopping all instances for a class is a POST request to " + CLASS_URL + "/<class_id>/aws/stop");
+
+    Response response = sayAndMakeRequest(
+      Request.POST()
+        .url(testServerUrl().path(CLASS_URL
+            + "/1/aws/stop"))
+        .addHeader("X-AUTH-TOKEN", auth.auth_token)
+      );
+
+    String instancesResp = response.payloadAsString();
+
+    sayAndAssertThat("Stopped instance ID is returned.",
+        instancesResp, CoreMatchers.containsString(testId));
+
+  }
+
+  @Test
+  public void terminateInstance() {
+    String testId = "i-INST1";
+    List<String> instances = new ArrayList<>();
+    instances.add(testId);
+    when(aws.terminateInstances(any(Region.class), any(String[].class))).thenReturn(instances);
+
+    sayNextSection("Terminate one AWS instance.");
+
+    say("Terminating one AWS instance is a POST request to " + CLASS_URL + "/<instance_id>/terminate");
+
+    Response response = sayAndMakeRequest(
+      Request.POST()
+        .url(testServerUrl().path(CLASS_URL
+            + "/1/aws/terminate"))
+        .addHeader("X-AUTH-TOKEN", auth.auth_token)
+      );
+
+    String instancesResp = response.payloadAsString();
+
+    sayAndAssertThat("Terminated instance ID is returned.",
+        instancesResp, CoreMatchers.containsString(testId));
+
+  }
+
+  private ArrayList<com.amazonaws.services.ec2.model.Instance> getInstanceList() {
+    com.amazonaws.services.ec2.model.Instance testInstance = new com.amazonaws.services.ec2.model.Instance()
+        .withInstanceId("ami-xxxxxx")
+        .withState(new InstanceState().withName("stopped"));
+    ArrayList<com.amazonaws.services.ec2.model.Instance> instances = new ArrayList<>();
+
+    instances.add(testInstance);
+    return instances;
   }
 }

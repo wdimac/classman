@@ -89,7 +89,8 @@ var Scheduler = React.createClass({
 var ClassInfo = React.createClass({
   getInitialState() {
     return {
-      open:false
+      open:false,
+      infos:null
     }
   },
   toggleOpen(){
@@ -105,7 +106,7 @@ var ClassInfo = React.createClass({
       cache: false,
       data: JSON.stringify(cls),
       success: function(data) {
-        this.props.updateParent(true);
+        this.props.updateParent();
       }.bind(this),
       error: function(xhr, status, err) {
         console.error(xhr, status, err.toString());
@@ -114,24 +115,90 @@ var ClassInfo = React.createClass({
   },
   deleteClass() {
     $.ajax({
-      url: "/api/admin/classes/" + this.props.info.id,
+      url: "/api/admin/classes/" + this.props.clazz.id,
       headers: {'X-AUTH-TOKEN':Auth.getToken()},
       type:"DELETE",
       dataType: 'json',
       cache: false,
       success: function(data) {
-        this.props.updateParent(false);
+        this.props.updateParent();
       }.bind(this),
       error: function(xhr, status, err) {
         console.error(xhr, status, err.toString());
       }.bind(this)
     });
   },
+  launch(count) {
+    $.ajax({
+      url: "/api/admin/classes/" + this.props.clazz.id + "/instances?count=" + count,
+      headers: {'X-AUTH-TOKEN':Auth.getToken()},
+      type:"POST",
+      dataType: 'json',
+      cache: false,
+      success: function(data) {
+        if (this.props.clazz.instances) {
+          this.props.clazz.instances.concat(data);
+        } else {
+          this.props.clazz.instances = data;
+        }
+        this.props.updateParent();
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(xhr, status, err.toString());
+      }.bind(this)
+    });
+  },
+  changeAll(state) {
+    $.ajax({
+      url: "/api/admin/classes/" + this.props.clazz.id + "/aws/" + state,
+      headers: {'X-AUTH-TOKEN':Auth.getToken()},
+      type:"POST",
+      dataType: 'json',
+      cache: false,
+      success: function(data) {
+        if (state === "TERMINATE") {
+          this.props.clazz.instances.forEach(function(inst){
+            inst.terminated = true;
+          });
+        }
+        this.getInfo();
+       }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(xhr, status, err.toString());
+      }.bind(this)
+    });
+  },
+  getInfo(){
+    $.ajax({
+      url: "/api/admin/classes/" + this.props.clazz.id + "/aws",
+      headers: {'X-AUTH-TOKEN':Auth.getToken()},
+      type:"GET",
+      dataType: 'json',
+      cache: false,
+      success: function(data) {
+        var infos={};
+        var again = false;
+        data.forEach(function(info){
+          infos[info.instanceId] = info;
+          if (['stopped','running','terminated'].indexOf(info.state.name) <0) {
+            again=true;
+          }
+        });
+        this.setState({infos:infos});
+        if (again) {
+          setTimeout(this.getInfo, 3000);
+        }
+       }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(xhr, status, err.toString());
+      }.bind(this)
+    });
+  },
   render() {
-    var cl = this.props.info;
-    var zoneOptions = this.props.zones.map(function(zone){
+    var cl = this.props.clazz;
+    var zoneOptions = this.props.zones ? this.props.zones.map(function(zone){
       return {name:zone, value:zone};
-    })
+    }):[];
     return (
       <div> 
         <div onClick={this.toggleOpen}>
@@ -207,16 +274,125 @@ var ClassInfo = React.createClass({
               </div>
             </div>
           </div>
-          <div className="m-t-1">
-            <button className="btn btn-sm btn-danger"
-                alt="Remove Class"
+          <div className="m-t-1 text-xs-center clearfix"> {/*Button Panel*/}
+            <button className="btn btn-sm btn-danger pull-right"
+                title="Remove Class"
                 onClick={this.deleteClass}>
               <i className="fa fa-times"></i>
             </button>
+            <div className="btn-group pull-left">
+              <button className="btn btn-sm btn-secondary"
+                  title="Sync Info"
+                  onClick={this.getInfo}>
+                <i className="fa fa-cloud-download"> All</i>
+              </button>
+              <button className="btn btn-sm btn-success-outline"
+                  title="Start All"
+                  onClick={this.changeAll.bind(this, "START")}>
+                <i className="fa fa-power-off"> All</i>
+              </button>
+              <button className="btn btn-sm btn-danger-outline"
+                  title="Stop All"
+                  onClick={this.changeAll.bind(this, "STOP")}>
+                <i className="fa fa-power-off"> All</i>
+              </button>
+              <button className="btn btn-sm btn-warning"
+                  title="Terminate All"
+                  onClick={this.changeAll.bind(this, "TERMINATE")}>
+                <i className="fa fa-trash"> All</i>
+              </button>
+            </div>
+            <div className="btn-group ">
+              <button className="btn btn-sm btn-primary-outline"
+                  title="Launch All"
+                  onClick={this.launch.bind(this, 0)}>
+                <i className="fa fa-rocket"> All</i>
+              </button>
+              <button className="btn btn-sm btn-primary-outline"
+                  title="Launch One Instance"
+                  onClick={this.launch.bind(this, 1)}>
+                <i className="fa fa-rocket"> 1</i>
+              </button>
+            </div>          
+          </div> {/*End button panel*/}
+          <div className="m-t-1">
+            {cl.instances.map(function(inst){
+              return(<InstanceRow key={inst.id} inst={inst} 
+                      updateParent={this.getInfo}
+                      info={this.state.infos ? this.state.infos[inst.id]:null} />)
+            }.bind(this))}
           </div>
         </div>
       </div>
+    );
+  }
+});
 
+var InstanceRow = React.createClass({
+  changeState(action) {
+    if (!action) return;
+
+    var url = "/api/admin/aws/"
+      + this.props.inst.region 
+      + '/instances/' + this.props.inst.id
+      + '/' + action;
+    $.ajax({
+      url: url,
+      headers: { 'X-AUTH-TOKEN':Auth.getToken() },
+      type: 'POST',
+      dataType: 'json',
+      cache: false,
+      success: function(data) {
+        console.debug("action=" + action);
+        if (action === "TERMINATE") this.props.inst.terminated = true;
+        this.props.updateParent();
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(this.props.instance.id, status, err.toString());
+      }.bind(this)
+    });
+  },
+  render() {
+    var icon=" fa-circle-o-notch"
+    var btn=" btn-secondary";
+    var newState=null;
+    if (this.props.info) {
+      console.debug(this.props.info);
+      if (this.props.info.state.name === 'running'){
+        icon="fa-power-off";
+        btn="btn-success";
+        newState="STOP";
+      } else if (this.props.info.state.name === 'stopped') {
+        icon="fa-power-off"
+        btn="btn-danger";
+        newState="START";
+      } else {
+        icon="fa-power-off fa-spin";
+        btn="btn-secondary";
+      }
+    }
+    return (
+      <div className="m-b-1"> 
+      { this.props.inst.terminated ?
+        <div className="btn-group btn-group-sm m-r-1">
+          <button className="btn btn-warning-outline">
+            <i className="fa fa-trash"></i>
+          </button>
+        </div>
+        :
+        <div className="btn-group btn-group-sm m-r-1">
+          <button className={"btn " + btn} 
+            onClick={this.changeState.bind(this, newState)}>
+            <i className={"fa " + icon}></i>
+          </button>
+          <button className="btn btn-warning"
+            onClick={this.changeState.bind(this, 'TERMINATE')}>
+            <i className="fa fa-trash"></i>
+          </button>
+         </div>
+      }
+      {this.props.inst.id} : {this.props.inst.description} 
+      </div>
     );
   }
 });
@@ -233,12 +409,11 @@ window.__APP__.ClassesPanel = React.createClass({
   componentDidMount() {
     this.loadDataFromServer();
   },
-  loadDataFromServer(redrawOnly) {
-    if (redrawOnly) {
-      this.setState({data: this.state.data});
-      return;
+  loadDataFromServer() {
+    if (this.state.data.length === 0) {
+      this.setState({loading:true});
     }
-    this.setState({loading:true});
+    
     $.ajax({
       url: "/api/admin/classes",
       headers: {'X-AUTH-TOKEN':Auth.getToken()},
@@ -309,7 +484,7 @@ window.__APP__.ClassesPanel = React.createClass({
             </div>
             {this.state.data.map(function(cl){
               return (
-                <ClassInfo info={cl} key={cl.id} 
+                <ClassInfo clazz={cl} key={cl.id} 
                   updateParent={this.loadDataFromServer}
                   zones={this.props.awsConfig? this.props.awsConfig.timezones : []}
                   instructors={this.state.instructors}/>

@@ -9,10 +9,13 @@ import java.util.TimeZone;
 
 import javax.persistence.EntityManager;
 
-import com.amazonaws.regions.Regions;
+import com.amazonaws.services.ec2.model.InstanceType;
+import com.appdynamics.aws.AwsAdaptor.Region;
 
 import models.ClassType;
 import models.ClassTypeDetail;
+import models.Images;
+import models.Instance;
 import models.ScheduledClass;
 
 public class ClassData implements Fixture {
@@ -22,9 +25,16 @@ public class ClassData implements Fixture {
     ClassType type = new ClassType();
     entityManager.persist(type);
 
+    Images image = new Images();
+    image.setId("ID-1");
+    image.setRegion(Region.US_EAST_1.name());
+    entityManager.persist(image);
+
     ClassTypeDetail detail = new ClassTypeDetail();
-    detail.setRegion(Regions.US_EAST_1.getName());
+    detail.setRegion(Region.US_EAST_1.name());
     detail.setClassType(type);
+    detail.setInstanceType(InstanceType.M3Xlarge.name());
+    detail.setImageId("ID-1");
     entityManager.persist(detail);
 
     ScheduledClass clazz = new ScheduledClass();
@@ -39,6 +49,13 @@ public class ClassData implements Fixture {
     clazz.setEndTime(Time.valueOf("16:00:00"));
     clazz.setTimeZone(TimeZone.getDefault().getID());
     entityManager.persist(clazz);
+
+    Instance inst = new Instance();
+    inst.setId("i-INST1");
+    inst.setRegion(Region.US_EAST_1.name());
+    inst.setScheduledClass(clazz);
+    inst.setImage_id(image.getId());
+    entityManager.persist(inst);
 
     results.put("ClassData", "Inserted default records");
   }
