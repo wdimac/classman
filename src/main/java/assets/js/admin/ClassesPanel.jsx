@@ -357,7 +357,6 @@ var InstanceRow = React.createClass({
       dataType: 'json',
       cache: false,
       success: function(data) {
-        console.debug("action=" + action);
         if (action === "TERMINATE") this.props.inst.terminated = true;
         this.props.updateParent();
       }.bind(this),
@@ -371,7 +370,6 @@ var InstanceRow = React.createClass({
     var btn=" btn-secondary";
     var newState=null;
     if (this.props.info) {
-      console.debug(this.props.info);
       if (this.props.info.state.name === 'running'){
         icon="fa-power-off";
         btn="btn-success";

@@ -50,7 +50,8 @@ var SGLookup = React.createClass({
         description: group.description, 
         region: this.refs.region.value,
         ownerId: group.ownerId,
-        name: group.groupName
+        name: group.groupName,
+        vpcId: group.vpcId
       }),
       cache: false,
       success: function(data) {
@@ -79,11 +80,16 @@ var SGLookup = React.createClass({
           var boundClick = function(group){
             this.addGroup(group);
           }.bind(this, group);
+          console.debug(group);
           return(
             <div className="truncate" style={{padding:"2px"}} 
                 onClick={boundClick} key={group.id}>
               <i className='fa fa-download btn btn-info btn-sm' /> &emsp;
               {group.groupId}: {group.groupName}
+              {group.vpcId ? 
+                <span> (VPC: {group.vpcId})</span>
+                :""
+              }
             </div>
           );
         }.bind(this));
@@ -154,9 +160,15 @@ window.__APP__.SecurityGroupPanel = React.createClass({
     return(
       <div key={item.id} className="truncate">
         <strong>{item.id}:</strong> 
-        <span className="text-muted"> ({item.ownerId}) </span>
+        <span className="text-muted"> (Owner: {item.ownerId}) </span>
         {item.name} - 
-        {item.description}
+        {item.description} 
+        {item.vpcId ? 
+          <span className="text-info m-l-1">
+            {item.vpcId}
+          </span>
+          :""
+        }
       </div>
     )
   },

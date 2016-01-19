@@ -153,6 +153,7 @@ public class EipControllerDocTest extends AuthenticatedDocTesterBase{
     say("Allocating a new AWS Eip in a region is a POST request to " + AWS_EIP_URL);
 
     say("Pass the paramater 'vpc' to allocate an EIP for usage in vpc");
+    say("Pass the paramater 'user_id' to allocate an EIP for usage in vpc");
 
     Response response = sayAndMakeRequest(
       Request.POST()

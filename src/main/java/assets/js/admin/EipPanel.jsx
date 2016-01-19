@@ -194,7 +194,7 @@ var EipAssign = React.createClass({
   }
 });
 
-var EipAllocate = React.createClass({
+window.__APP__.EipAllocate = React.createClass({
   close() {
     this.refs.modal.close();
   },
@@ -202,8 +202,12 @@ var EipAllocate = React.createClass({
     this.refs.modal.open();
   },
   allocateEip() {
-    var url= "/api/admin/aws/" + this.refs.region.getValue() + "/eips" 
-               + (this.refs.vpc.checked ? "?vpc=true":"");
+    var params = [];
+    if (this.refs.vpc.checked) params.push("vpc=true");
+    if (this.props.user) params.push("user_id=" + this.props.user.id);
+    var url= "/api/admin/aws/" + this.refs.region.getValue() + "/eips";
+    if (params.length > 0)
+      url = url + "?" + params.join('&');
     $.ajax({
       url: url,
       headers: { 'X-AUTH-TOKEN':Auth.getToken() },
@@ -211,7 +215,7 @@ var EipAllocate = React.createClass({
       dataType: 'json',
       cache: false,
       success: function(data) {
-        this.props.updateParent();
+        this.props.updateParent(data);
         this.refs.modal.close();
       }.bind(this),
       error: function(xhr, status, err) {
@@ -240,6 +244,7 @@ var EipAllocate = React.createClass({
     );
   }
 }); //EipAllocate
+var EipAllocate = window.__APP__.EipAllocate;
 
 window.__APP__.EipPanel = React.createClass({
   getInitialState() {
@@ -310,7 +315,17 @@ window.__APP__.EipPanel = React.createClass({
           onClick={this.assign.bind(this, item)}></i>
         <i className={"fa btn btn-sm btn-danger m-r-1 " + (delThis ? "fa-hourglass-half" : "fa-times")}
           onClick={this.del.bind(this, item)}></i>
-        <strong>{item.publicIp}: </strong> {item.instanceId ? item.instanceId : "not assigned"}
+        <strong>{item.publicIp}: </strong> 
+        {item.instanceId ? item.instanceId : "not assigned"}
+        {item.poolUser ? 
+          <span className="m-l-1">
+            Pool: {item.poolUser.firstName} {item.poolUser.lastname}
+          </span>
+          :
+          <span className="m-l-1">
+            Temporary allocation
+          </span>
+        }
       </div>
     )
   },

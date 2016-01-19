@@ -1,11 +1,16 @@
 package models;
 
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name="user")
@@ -19,6 +24,10 @@ public class User {
   @Column(name="last_name")
   private String lastName;
   private String email;
+
+  @OneToMany(mappedBy="poolUser")
+  @JsonIgnoreProperties({"poolUser"})
+  private List<Eip> eips;
 
   public Long getId() {
     return id;
@@ -43,5 +52,11 @@ public class User {
   }
   public void setEmail(String email) {
     this.email = email;
+  }
+  public List<Eip> getEips() {
+    return eips;
+  }
+  public void setEips(List<Eip> eips) {
+    this.eips = eips;
   }
 }

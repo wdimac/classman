@@ -15,6 +15,8 @@ public class SecurityGroup {
   private String ownerId;
   private String name;
   private String description;
+  @Column(name="vpc_id")
+  private String vpcId;
 
   public String getId() {
     return id;
@@ -45,5 +47,11 @@ public class SecurityGroup {
   }
   public void setDescription(String description) {
     this.description = description;
+  }
+  public String getVpcId() {
+    return vpcId;
+  }
+  public void setVpcId(String vpcId) {
+    this.vpcId = vpcId;
   }
 }

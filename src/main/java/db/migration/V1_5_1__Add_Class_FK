@@ -1,3 +1,0 @@
-alter table instances add column class_id varchar(40);
-alter table instances add index(class_id);
-alter table instances add constraint 'FK_INSTANCE_CLASS' foreign key (class_id) references class(id);

@@ -14,6 +14,7 @@ import com.google.inject.persist.Transactional;
 import dao.SimpleDao;
 import filters.TokenFilter;
 import models.Eip;
+import models.User;
 import ninja.FilterWith;
 import ninja.Result;
 import ninja.Results;
@@ -121,7 +122,10 @@ public class EipController {
   @Path("/aws/{region}/eips")
   @POST
   @Transactional
-  public Result allocateAwsEip(@PathParam("region") String region, @Param("vpc") String vpc) {
+  public Result allocateAwsEip(
+      @PathParam("region") String region,
+      @Param("vpc") String vpc,
+      @Param("user_id") Long userId) {
     if (region == null) {
       return Results.json().render(Collections.EMPTY_LIST);
     }
@@ -138,6 +142,11 @@ public class EipController {
     eip.setPrivateIpAddress(address.getPrivateIpAddress());
     eip.setPublicIp(address.getPublicIp());
     eip.setRegion(region);
+    if (userId != null) {
+      User user= new User();
+      user.setId(userId);
+      eip.setPoolUser(user);
+    }
 
     eipDao.persist(eip);
 

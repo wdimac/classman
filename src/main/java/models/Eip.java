@@ -5,7 +5,11 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name="eip")
@@ -31,6 +35,11 @@ public class Eip {
   private String networkInterfaceOwnerId;
   @Column(name="private_ip_address")
   private String privateIpAddress;
+
+  @ManyToOne
+  @JoinColumn(name="pool_user_id", updatable=false)
+  @JsonIgnoreProperties({"eips"})
+  private User poolUser;
 
   public Long getId() {
     return id;
@@ -97,6 +106,12 @@ public class Eip {
   }
   public void setDescription(String description) {
     this.description = description;
+  }
+  public User getPoolUser() {
+    return poolUser;
+  }
+  public void setPoolUser(User poolUser) {
+    this.poolUser = poolUser;
   }
 
 }
