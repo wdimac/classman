@@ -3,6 +3,7 @@ var Select = window.__APP__.Select;
 var Inliner = window.__APP__.Inliner;
 var InlineSelect = window.__APP__.InlineSelect;
 var DatePicker = window.__APP__.DatePicker;
+var PropsSpewer = window.__APP__.PropsSpewer;
 
 var Scheduler = React.createClass({
   getInitialState(){
@@ -343,6 +344,14 @@ var ClassInfo = React.createClass({
 });
 
 var InstanceRow = React.createClass({
+  getInitialState(){
+    return {
+      showInfo:false
+    }
+  },
+  toggleInfo() {
+    this.setState({showInfo: !this.state.showInfo});
+  },
   changeState(action) {
     if (!action) return;
 
@@ -401,9 +410,43 @@ var InstanceRow = React.createClass({
             onClick={this.changeState.bind(this, 'TERMINATE')}>
             <i className="fa fa-trash"></i>
           </button>
+          { this.props.info ?
+            <button className="btn btn-info"
+              onClick={this.toggleInfo}>
+              <i className="fa fa-info-circle"></i>
+            </button>
+            :
+            <button className="btn btn-secondary"
+              onClick={this.toggleInfo}>
+              <i className="fa fa-info fa-fw"></i>
+            </button>
+          }
          </div>
       }
       {this.props.inst.id} : {this.props.inst.description} 
+      {this.state.showInfo?
+        <InfoCard info={this.props.info} close={this.toggleInfo}/>
+        : ""
+      }
+      </div>
+    );
+  }
+});
+
+var InfoCard  = React.createClass({
+  render() {
+    return (
+      <div className="card" 
+          style={{position:"fixed", top:"100px", left:"100px",
+                  bottom:"100px", overflowY:"hidden", zIndex:"99"}}>
+        <div className="card-header card-info">
+          <i className="btn btn-info fa fa-times pull-right"
+              onClick={this.props.close}></i>
+          Instance: {this.props.info.instanceId}
+        </div>
+        <div className="card-block m-y-1 p-t-0" style={{maxHeight:"90%", overflowY:"scroll"}}>
+          <PropsSpewer item={this.props.info} omit={["instanceId"]}/>
+        </div>
       </div>
     );
   }
