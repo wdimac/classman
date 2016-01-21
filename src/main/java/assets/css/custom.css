@@ -22,7 +22,7 @@
 
 /* Accordian styles */
 .panel-collapse {
-  overflow-y:hidden;
+  overflow-y:scroll;
   max-height:500px;
   transition: max-height 0.75s ease-in-out;
 }

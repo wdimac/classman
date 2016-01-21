@@ -9,6 +9,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.amazonaws.services.ec2.model.Address;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
@@ -112,6 +113,16 @@ public class Eip {
   }
   public void setPoolUser(User poolUser) {
     this.poolUser = poolUser;
+  }
+  public void loadFromAddress(Address address) {
+    this.setAllocationId(address.getAllocationId());
+    this.setAssociationId(address.getAssociationId());
+    this.setDomain(address.getDomain());;
+    this.setInstanceId(address.getInstanceId());
+    this.setNetworkInterfaceId(address.getNetworkInterfaceId());
+    this.setNetworkInterfaceOwnerId(address.getNetworkInterfaceOwnerId());
+    this.setPrivateIpAddress(address.getPrivateIpAddress());
+    this.setPublicIp(address.getPublicIp());
   }
 
 }

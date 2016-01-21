@@ -86,14 +86,6 @@ public class InstancesController {
     case TERMINATE:
       result = aws.terminateInstances(region, idList);
       instance.setTerminated(true);
-      Eip qEip = new Eip();
-      qEip.setInstanceId(id);
-      Eip eip = eipDao.findBy(qEip);
-      if (eip != null) {
-        aws.disassociateEip(eip.getRegion(), eip.getPublicIp());
-        eip.setInstanceId(null);
-        eipDao.persist(eip);
-      }
       instanceDao.persist(instance);
       break;
 

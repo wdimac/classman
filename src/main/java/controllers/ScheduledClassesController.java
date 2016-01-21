@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.inject.Singleton;
 
+import com.amazonaws.services.ec2.model.Address;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.amazonaws.services.ec2.model.RunInstancesRequest;
@@ -22,6 +23,7 @@ import filters.TokenFilter;
 import models.ClassTypeDetail;
 import models.Eip;
 import models.ScheduledClass;
+import models.SecurityGroup;
 import ninja.FilterWith;
 import ninja.Result;
 import ninja.Results;
@@ -48,6 +50,8 @@ public class ScheduledClassesController {
   SimpleDao<models.Instance> instanceDao;
   @Inject
   SimpleDao<Eip> eipDao;
+  @Inject
+  SimpleDao<SecurityGroup> groupDao;
 
   @Inject
   AwsAdaptor aws;
@@ -125,6 +129,9 @@ public class ScheduledClassesController {
     }
     ScheduledClass clazz = scDao.find(id, ScheduledClass.class);
     if (count == 0) count = clazz.getCount();
+
+    List<Eip> usable = getUsableEips(clazz, count);
+
     RunInstancesRequest request = new RunInstancesRequest();
     request.setImageId(clazz.getClassTypeDetail().getImageId());
     request.setInstanceType(InstanceType.valueOf(clazz.getClassTypeDetail().getInstanceType()));
@@ -144,7 +151,51 @@ public class ScheduledClassesController {
       instanceDao.persist(instance);
       result.add(instance);
     }
+
+
+    int idx = 0;
+    for (models.Instance inst: result) {
+      Eip eip = usable.get(idx);
+      eip.setInstanceId(inst.getId());
+      eipDao.persist(eip);
+      idx++;
+    }
+
+    aws.associateEipWhenReady(usable);
     return Results.json().render(result);
+  }
+
+  /**
+   * Get count eips from the users pool. Eip must be currently unassigned and usable
+   * in the same domain as the security group being used. (i.e. VPC or standard).
+   * If insufficient EIPs are located, allocate new temporary EIPs.
+   * @param clazz
+   * @param count
+   * @return
+   */
+  private List<Eip> getUsableEips(ScheduledClass clazz, int count) {
+    SecurityGroup grp = groupDao.find(clazz.getClassTypeDetail().getSecurityGroupId(), SecurityGroup.class);
+    String domain = (grp.getVpcId() != null) ? "vpc" : "standard";
+    List<Eip> usable = new ArrayList<>();
+    for (Eip eip: clazz.getInstructor().getEips()) {
+      if ((eip.getInstanceId() == null || eip.getInstanceId().length() == 0) && domain.equals(eip.getDomain())) {
+        usable.add(eip);
+      }
+    }
+
+    while (usable.size() < count) {
+      String region = clazz.getClassTypeDetail().getRegion();
+      String publicIp = aws.requestEip(region, "vpc".equals(domain));
+      Address address = aws.getEips(region, new QuickList<>(publicIp)).get(0);
+      Eip eip = new Eip();
+      eip.loadFromAddress(address);
+      eip.setRegion(region);
+      // Leave user blank because it is not a pool item.
+      eipDao.persist(eip);
+
+      usable.add(eip);
+    }
+    return usable;
   }
 
   /**
@@ -155,7 +206,7 @@ public class ScheduledClassesController {
   @Path("/classes/{id}/aws/{action}")
   @POST
   @Transactional
-  public Result controlInstance(@PathParam("id") String id, @PathParam("action") String actionType) {
+  public Result controlInstances(@PathParam("id") String id, @PathParam("action") String actionType) {
     Actions action = Actions.valueOf(actionType.toUpperCase());
     scDao.clearSession();
     ScheduledClass cls = scDao.find(id, ScheduledClass.class);
@@ -184,14 +235,6 @@ public class ScheduledClassesController {
       for (models.Instance instance: cls.getInstances()) {
         if (result.contains(instance.getId())) {
           instance.setTerminated(true);
-          Eip qEip = new Eip();
-          qEip.setInstanceId(id);
-          Eip eip = eipDao.findBy(qEip);
-          if (eip != null) {
-            aws.disassociateEip(eip.getRegion(), eip.getPublicIp());
-            eip.setInstanceId(null);
-            eipDao.persist(eip);
-          }
           instanceDao.persist(instance);
         }
       }

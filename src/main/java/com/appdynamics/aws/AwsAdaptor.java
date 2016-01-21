@@ -1,8 +1,14 @@
 package com.appdynamics.aws;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.amazonaws.handlers.AsyncHandler;
+import com.amazonaws.services.ec2.AmazonEC2AsyncClient;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.Address;
 import com.amazonaws.services.ec2.model.AllocateAddressRequest;
@@ -34,7 +40,11 @@ import com.amazonaws.services.ec2.model.StopInstancesRequest;
 import com.amazonaws.services.ec2.model.StopInstancesResult;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.amazonaws.services.ec2.model.TerminateInstancesResult;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import dao.SimpleDao;
+import models.Eip;
 
 @Singleton
 public class AwsAdaptor {
@@ -83,7 +93,8 @@ public class AwsAdaptor {
     }
   }
 
-  private static final String DEFAULT_SECURITY_GROUP = "EDU_HTTP-RDP";
+  @Inject
+  private SimpleDao<Eip> eipDao;
 
   /**
    * Lookup all security groups for the region.
@@ -165,6 +176,18 @@ public class AwsAdaptor {
     for (InstanceStateChange change: list) {
       result.add(change.getInstanceId());
     }
+    List<Eip> eips = new ArrayList<>();
+    for (String instanceId : ids) {
+      Eip target = new Eip();
+      target.setInstanceId(instanceId);
+      target = eipDao.findBy(target);
+      if (target != null && "standard".equals(target.getDomain())) {
+        eips.add(target);
+      }
+    }
+    if (eips.size() > 0)
+      this.associateEipWhenReady(eips);
+
     return result;
   }
 
@@ -192,8 +215,25 @@ public class AwsAdaptor {
     List<String> result = new ArrayList<>();
     for (InstanceStateChange change: list) {
       result.add(change.getInstanceId());
+      cleanUpEips(change.getInstanceId());
     }
     return result;
+  }
+
+  public void cleanUpEips(String instanceId) {
+    Eip qEip = new Eip();
+    qEip.setInstanceId(instanceId);
+    Eip eip = eipDao.findBy(qEip);
+    if (eip != null) {
+      this.disassociateEip(eip.getRegion(), eip.getPublicIp());
+      if (eip.getPoolUser() == null) {
+        this.releaseEips(eip.getRegion(), eip.getAllocationId(), eip.getPublicIp());
+        eipDao.delete(eip.getId(), Eip.class);
+      } else {
+        eip.setInstanceId(null);
+        eipDao.persist(eip);
+      }
+    }
   }
 
   public List<Instance> getInstances(Region valueOf) {
@@ -267,6 +307,30 @@ public class AwsAdaptor {
     return result.getAssociationId();
   }
 
+  /**
+   * Get association ID.
+   *
+   * @param region
+   * @param allocId
+   * @param publicIp
+   * @return
+   */
+  public void associateEipWhenReady(List<Eip> eips) {
+    if (eips.isEmpty()) return;
+
+    AmazonEC2AsyncClient amazonClient = getAsyncClient(Region.valueOf(eips.get(0).getRegion()));
+    AsyncHandler<DescribeInstancesRequest, DescribeInstancesResult> asyncHandler = new InstanceStartWaitHandler(eips, this);
+    List<String> instanceIds = new ArrayList<>();
+    for (Eip eip: eips) {
+      if (eip.getInstanceId() != null)
+        instanceIds.add(eip.getInstanceId());
+    }
+    DescribeInstancesRequest describeInstancesRequest =
+        new DescribeInstancesRequest()
+        .withInstanceIds(instanceIds);
+    amazonClient.describeInstancesAsync(describeInstancesRequest, asyncHandler);
+  }
+
   public void disassociateEip(String region, String publicIp) {
     AmazonEC2Client amazonClient = getClient(Region.valueOf(region));
     amazonClient.disassociateAddress(
@@ -312,10 +376,72 @@ public class AwsAdaptor {
    * @param region
    * @return
    */
-  private AmazonEC2Client getClient(Region region) {
+   AmazonEC2Client getClient(Region region) {
     AmazonEC2Client amazonEC2Client = new AmazonEC2Client();
     amazonEC2Client.setEndpoint(region.getEndpoint());
     return amazonEC2Client;
   }
 
+  /**
+   * Private method to establish a client connection.
+   *
+   * @param region
+   * @return
+   */
+   static AmazonEC2AsyncClient getAsyncClient(Region region) {
+    AmazonEC2AsyncClient amazonEC2Client = new AmazonEC2AsyncClient();
+    amazonEC2Client.setEndpoint(region.getEndpoint());
+    return amazonEC2Client;
+  }
+
+  public static class InstanceStartWaitHandler implements AsyncHandler<DescribeInstancesRequest, DescribeInstancesResult> {
+    static final Logger log = LoggerFactory.getLogger(InstanceStartWaitHandler.class);
+    private List<Eip> eips;
+    private AwsAdaptor aws;
+
+    public InstanceStartWaitHandler(List<Eip> eips, AwsAdaptor aws) {
+      this.eips = eips;
+      this.aws  = aws;
+    }
+
+    @Override
+    public void onError(Exception ex) {
+      log.error("Exception checking instance state.", ex);
+    }
+
+    @Override
+    public void onSuccess(DescribeInstancesRequest request, DescribeInstancesResult result) {
+      for (Reservation res: result.getReservations()) {
+        for (Instance inst :res.getInstances()) {
+          if (inst.getState().getName().equals("running")) {
+            for (Eip eip: eips) {
+              if (eip.getInstanceId().equals(inst.getInstanceId())) {
+                log.debug("Associating: " + eip.getPublicIp() + " to instance " + inst.getInstanceId());
+                aws.associateEip(eip.getRegion(),
+                                 eip.getAllocationId(),
+                                 eip.getPublicIp(),
+                                 eip.getInstanceId());
+                eips.remove(eip);
+                request.getInstanceIds().remove(eip.getInstanceId());
+              }
+            }
+          } else if (!inst.getState().getName().equals("pending")) {
+            log.error(MessageFormat.format("Instance not starting, abandoning wait: Instance: %s State: %s",
+                inst.getInstanceId(), inst.getState().getName()));
+            for (Eip eip: eips) {
+              if (eip.getInstanceId().equals(inst.getInstanceId())) {
+                eips.remove(eip);
+                request.getInstanceIds().remove(eip.getInstanceId());
+              }
+            }
+          }
+        }
+      }
+
+      if (!eips.isEmpty()) {
+        AmazonEC2AsyncClient amazonClient = getAsyncClient(Region.valueOf(eips.get(0).getRegion()));
+        amazonClient.describeInstancesAsync(request, this);
+      }
+    }
+  }
 }

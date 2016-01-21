@@ -133,14 +133,7 @@ public class EipController {
     Address address = aws.getEips(region, new QuickList<String>(publicIp)).get(0);
 
     Eip eip = new Eip();
-    eip.setAllocationId(address.getAllocationId());
-    eip.setAssociationId(address.getAssociationId());
-    eip.setDomain(address.getDomain());;
-    eip.setInstanceId(address.getInstanceId());
-    eip.setNetworkInterfaceId(address.getNetworkInterfaceId());
-    eip.setNetworkInterfaceOwnerId(address.getNetworkInterfaceOwnerId());
-    eip.setPrivateIpAddress(address.getPrivateIpAddress());
-    eip.setPublicIp(address.getPublicIp());
+    eip.loadFromAddress(address);
     eip.setRegion(region);
     if (userId != null) {
       User user= new User();

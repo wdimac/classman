@@ -60,7 +60,6 @@ var UserRow = React.createClass({
     this.forceUpdate();
   },
   render() {
-    console.debug(this.props.user.eips.length);
     return (
       <div className="row p-x-1 m-b-1">
         <div className="col-md-3 col-xs-12">
@@ -83,6 +82,8 @@ var UserRow = React.createClass({
             <div className="card" 
               style={{position:"absolute", top:"-1rem",right:"100%",width:"200%",zIndex:"99"}}>
               <div className="card-header card-info">
+                <i className="fa btn btn-sm btn-info m-r-1 fa-times pull-right"
+                      onClick={this.toggleInfo}></i>
                 <i className="fa btn btn-sm btn-secondary m-r-1 fa-plus"
                       onClick={this.openAllocate}></i>
                 EIP Pool

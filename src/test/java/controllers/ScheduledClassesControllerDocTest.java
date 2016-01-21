@@ -1,6 +1,6 @@
 package controllers;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.when;
 
 import java.sql.Date;
@@ -20,6 +20,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.amazonaws.services.ec2.model.Address;
 import com.amazonaws.services.ec2.model.InstanceState;
 import com.amazonaws.services.ec2.model.RunInstancesRequest;
 import com.appdynamics.aws.AwsAdaptor;
@@ -179,6 +180,12 @@ public class ScheduledClassesControllerDocTest extends AuthenticatedDocTesterBas
     in.setInstanceId("i-test");
     mock.add(in);
     when(aws.runInstances(any(Region.class), any(RunInstancesRequest.class))).thenReturn(mock);
+
+    List<Address> addresses = new ArrayList<>();
+    Address addr = new Address();
+    addr.setPublicIp("127.0.0.1");
+    addresses.add(addr);
+    when(aws.getEips(anyString(), any(List.class))).thenReturn(addresses );
 
     sayNextSection("Running class instances.");
 

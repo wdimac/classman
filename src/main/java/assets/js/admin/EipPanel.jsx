@@ -319,7 +319,7 @@ window.__APP__.EipPanel = React.createClass({
         {item.instanceId ? item.instanceId : "not assigned"}
         {item.poolUser ? 
           <span className="m-l-1">
-            Pool: {item.poolUser.firstName} {item.poolUser.lastname}
+            Pool: {item.poolUser.firstName} {item.poolUser.lastName}
           </span>
           :
           <span className="m-l-1">

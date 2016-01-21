@@ -17,6 +17,8 @@ import models.ClassTypeDetail;
 import models.Images;
 import models.Instance;
 import models.ScheduledClass;
+import models.SecurityGroup;
+import models.User;
 
 public class ClassData implements Fixture {
 
@@ -30,12 +32,24 @@ public class ClassData implements Fixture {
     image.setRegion(Region.US_EAST_1.name());
     entityManager.persist(image);
 
+    SecurityGroup group = new SecurityGroup();
+    group.setId("sg-1");
+    group.setOwnerId("xxx");
+    group.setRegion(Region.US_EAST_1.name());
+    entityManager.persist(group);
+
     ClassTypeDetail detail = new ClassTypeDetail();
     detail.setRegion(Region.US_EAST_1.name());
     detail.setClassType(type);
     detail.setInstanceType(InstanceType.M3Xlarge.name());
     detail.setImageId("ID-1");
+    detail.setSecurityGroupId("sg-1");
     entityManager.persist(detail);
+
+    User instructor = new User();
+    instructor.setFirstName("test");
+    instructor.setLastName("Last");
+    entityManager.persist(instructor);
 
     ScheduledClass clazz = new ScheduledClass();
     clazz.setDescription("test");
@@ -48,6 +62,7 @@ public class ClassData implements Fixture {
     clazz.setStartTime(Time.valueOf("09:00:00"));
     clazz.setEndTime(Time.valueOf("16:00:00"));
     clazz.setTimeZone(TimeZone.getDefault().getID());
+    clazz.setInstructor(instructor);
     entityManager.persist(clazz);
 
     Instance inst = new Instance();

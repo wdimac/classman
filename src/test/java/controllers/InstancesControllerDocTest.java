@@ -6,6 +6,7 @@
 package controllers;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -19,7 +20,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.InstanceState;
@@ -198,9 +202,17 @@ public class InstancesControllerDocTest extends AuthenticatedDocTesterBase{
   @Test
   public void terminateInstanceWithEip() {
     String testId = "i-INST2";
-    List<String> instances = new ArrayList<>();
+    final List<String> instances = new ArrayList<>();
     instances.add(testId);
-    when(aws.terminateInstances(any(Region.class), any(String[].class))).thenReturn(instances);
+    final AwsAdaptor spy = Mockito.spy(getInjector().getInstance(AwsAdaptor.class));
+    Mockito.doNothing().when(spy).disassociateEip(anyString(),anyString());
+    when(aws.terminateInstances(any(Region.class), any(String[].class))).thenAnswer(new Answer<List<String>>() {
+      @Override
+      public List<String> answer(InvocationOnMock invocation) throws Throwable {
+        spy.cleanUpEips(instances.get(0));
+        return instances;
+      }
+    });
 
     Response response = makeRequest(
       Request.POST()
@@ -219,7 +231,7 @@ public class InstancesControllerDocTest extends AuthenticatedDocTesterBase{
 
     List<Eip> eips = eipDao.getAll(Eip.class);
     Assert.assertNull(eips.get(0).getInstanceId());
-  }
+}
 
   private ArrayList<Instance> getInstanceList() {
     Instance testInstance = new Instance()

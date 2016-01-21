@@ -7,6 +7,7 @@ import javax.persistence.EntityManager;
 import models.Eip;
 import models.Images;
 import models.Instance;
+import models.User;
 
 public class InstanceData implements Fixture {
 
@@ -28,9 +29,15 @@ public class InstanceData implements Fixture {
     instance.setId("i-INST2");
     em.persist(instance);
 
+    User poolUser = new User();
+    poolUser.setFirstName("test");
+    poolUser.setLastName("test");
+    em.persist(poolUser);
+
     Eip eip = new Eip();
     eip.setPublicIp("127.0.0.1");
     eip.setInstanceId("i-INST2");
+    eip.setPoolUser(poolUser);
     em.persist(eip);
 
   }
