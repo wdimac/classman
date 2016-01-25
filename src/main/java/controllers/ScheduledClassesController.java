@@ -128,6 +128,11 @@ public class ScheduledClassesController {
       return Results.badRequest().json();
     }
     ScheduledClass clazz = scDao.find(id, ScheduledClass.class);
+    List<models.Instance> result = startClassInstances(count, clazz);
+    return Results.json().render(result);
+  }
+
+  public List<models.Instance> startClassInstances(Integer count, ScheduledClass clazz) {
     if (count == 0) count = clazz.getCount();
 
     List<Eip> usable = getUsableEips(clazz, count);
@@ -162,7 +167,7 @@ public class ScheduledClassesController {
     }
 
     aws.associateEipWhenReady(usable);
-    return Results.json().render(result);
+    return result;
   }
 
   /**

@@ -9,14 +9,13 @@ package conf;
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
 
+import scheduled.ClassManager;
+
 @Singleton
 public class Module extends AbstractModule {
-    
 
-    protected void configure() {
-        
-        // bind your injections here!
-        
-    }
+  protected void configure() {
+    bind(ClassManager.class);
+  }
 
 }

@@ -337,6 +337,7 @@ public class AwsAdaptor {
         new DisassociateAddressRequest()
         .withPublicIp(publicIp));
   }
+
   /**
    * Request allocation of new Eip.
    *
