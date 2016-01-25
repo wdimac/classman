@@ -42,7 +42,7 @@ public class ClassManager {
   @Inject
   ScheduledClassesController scController;
 
-  @Schedule(delay=PERIOD, timeUnit=TimeUnit.SECONDS)
+  @Schedule(delay=PERIOD, timeUnit=TimeUnit.MINUTES)
   public void controlInstances() {
     List<ScheduledClass> clazzes = classDao.getAll(ScheduledClass.class);
     for (ScheduledClass clazz: clazzes) {
