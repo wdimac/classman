@@ -203,6 +203,38 @@ var ClassInfo = React.createClass({
       }.bind(this)
     });
   },
+  genPdf() {
+    var doc = new jsPDF("landscape", "pt", "letter");
+    console.debug(this.props.clazz);
+    doc.setFontSize(24);
+    var title = this.props.clazz.classTypeDetail.classType.name
+                + " " + this.props.clazz.startDate;
+    doc.text(36, 60, title);
+    doc.setFontSize(10);
+    doc.rect(30, 80, 726, this.props.clazz.instances.length * 24);
+    doc.lines([[0, this.props.clazz.instances.length * 24]], 300, 80);
+    this.props.clazz.instances.forEach(function(inst, idx) {
+      var rowPos = 96 + idx * 24;
+      doc.text(36, rowPos, inst.description + " (" + inst.id + ")");
+
+      if (inst.terminated) {
+        doc.text(306, rowPos, "Terminated");
+      } else {
+        if (!this.state.infos) {
+          doc.text(306, rowPos, "Live data not loaded. Sync with server");
+        } else {
+          var dns = this.state.infos[inst.id].publicDnsName;
+          if (dns)
+            doc.text(306, rowPos, dns);
+          else
+            doc.text(306, rowPos, "System not running.");
+        }
+      }
+
+      doc.lines([[726,0]], 30, rowPos + 8)
+    }, this);
+    doc.save(title + '.pdf');
+  },
   render() {
     var cl = this.props.clazz;
     var zoneOptions = this.props.zones ? this.props.zones.map(function(zone){
@@ -289,18 +321,27 @@ var ClassInfo = React.createClass({
               </div>
             </div>
           </div>
-          <div className="m-t-1 text-xs-center clearfix"> {/*Button Panel*/}
+          <div className="m-t-1 clearfix"> {/*Button Panel*/}
             <button className="btn btn-sm btn-danger pull-right"
                 title="Remove Class"
                 onClick={this.deleteClass}>
               <i className="fa fa-times"></i>
             </button>
-            <div className="btn-group pull-left">
+
+            <div className="btn-group m-r-1">
               <button className="btn btn-sm btn-secondary"
                   title="Sync Info"
                   onClick={this.getInfo}>
                 <i className="fa fa-cloud-download"> All</i>
               </button>
+              <button className="btn btn-sm btn-info pull-left"
+                  title="Download PDF"
+                  onClick={this.genPdf}>
+                <i className="fa fa-file"> PDf</i>
+              </button>
+            </div>
+
+            <div className="btn-group m-r-1">
               <button className="btn btn-sm btn-success-outline"
                   title="Start All"
                   onClick={this.changeAll.bind(this, "START")}>
@@ -317,6 +358,7 @@ var ClassInfo = React.createClass({
                 <i className="fa fa-trash"> All</i>
               </button>
             </div>
+
             <div className="btn-group ">
               <button className="btn btn-sm btn-primary-outline"
                   title="Launch All"
@@ -328,7 +370,8 @@ var ClassInfo = React.createClass({
                   onClick={this.launch.bind(this, 1)}>
                 <i className="fa fa-rocket"> 1</i>
               </button>
-            </div>          
+            </div>
+                   
           </div> {/*End button panel*/}
           <div className="m-t-1">
             {cl.instances.map(function(inst){

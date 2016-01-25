@@ -244,6 +244,11 @@
       <version>5.8.29-1</version>
     </dependency>
     <dependency>
+      <groupId>org.webjars.bower</groupId>
+      <artifactId>jspdf</artifactId>
+      <version>1.1.135</version>
+    </dependency>
+    <dependency>
       <groupId>mysql</groupId>
       <artifactId>mysql-connector-java</artifactId>
       <version>5.1.38</version>
