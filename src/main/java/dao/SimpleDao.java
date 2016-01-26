@@ -117,6 +117,8 @@ public class SimpleDao<M> {
       if (meth.getName().startsWith("get")) {
         String attrName = meth.getName();
         attrName = attrName.substring(0, 4).substring(3).toLowerCase() + attrName.substring(4);
+        if ("class".equals(attrName))
+          continue;
 
         Object value;
         try {

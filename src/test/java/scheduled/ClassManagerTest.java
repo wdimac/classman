@@ -11,6 +11,9 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import com.appdynamics.aws.AwsAdaptor;
 import com.appdynamics.aws.AwsAdaptor.Region;
+import com.google.inject.Provider;
 import com.appdynamics.aws.QuickList;
 
 import controllers.ScheduledClassesController;
@@ -42,6 +46,12 @@ public class ClassManagerTest {
   SimpleDao<ScheduledClass> cDao;
   @Mock
   SimpleDao<Instance> iDao;
+  @Mock
+  Provider<EntityManager> entityManagerProvider;
+  @Mock
+  EntityManager em;
+  @Mock
+  EntityTransaction trans;
 
   @Before
   public void init() {
@@ -50,6 +60,9 @@ public class ClassManagerTest {
     cm.classDao = cDao;
     cm.instDao = iDao;
     cm.scController = cont;
+    cm.entityManagerProvider = entityManagerProvider;
+    when(entityManagerProvider.get()).thenReturn(em);
+    when(em.getTransaction()).thenReturn(trans);
   }
 
   @Test

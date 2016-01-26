@@ -12,12 +12,16 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.appdynamics.aws.AwsAdaptor;
 import com.appdynamics.aws.AwsAdaptor.Region;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.persist.Transactional;
 
@@ -41,9 +45,12 @@ public class ClassManager {
   AwsAdaptor aws;
   @Inject
   ScheduledClassesController scController;
+  @Inject
+  Provider<EntityManager> entityManagerProvider;
 
-  @Schedule(delay=PERIOD, timeUnit=TimeUnit.MINUTES)
+  @Schedule(delay=PERIOD, initialDelay=2, timeUnit=TimeUnit.MINUTES)
   public void controlInstances() {
+    classDao.clearSession();
     List<ScheduledClass> clazzes = classDao.getAll(ScheduledClass.class);
     for (ScheduledClass clazz: clazzes) {
       log.info("Class:" + clazz.getId());
@@ -80,29 +87,42 @@ public class ClassManager {
     }
   }
 
-  @Transactional
   private void checkLifeCycle(ScheduledClass clazz, Calendar now, Calendar startTime, Calendar endTime) {
-    if (needToStart(now, startTime)) {
-      List<Instance> ins;
-      if (clazz.getInstances().isEmpty()) {
-        ins = scController.startClassInstances(0, clazz);
-        log.info("Created: " + ins.size() + " instances.");
-      } else {
+    EntityManager em = entityManagerProvider.get();
+    EntityTransaction trans = em.getTransaction();
+    trans.begin();
+    try {
+      if (needToStart(now, startTime)) {
+        List<Instance> ins;
+        if (clazz.getInstances().isEmpty()) {
+          ins = scController.startClassInstances(0, clazz);
+          log.info("Created: " + ins.size() + " instances.");
+        } else {
+          List<String> ids = new ArrayList<>();
+          for (Instance in : clazz.getInstances()) {
+            ids.add(in.getId());
+          }
+          List<String> iIds = aws.startInstances(Region.valueOf(clazz.getClassTypeDetail().getRegion()),
+              ids.toArray(new String[ids.size()]));
+          log.info(iIds.size() + " instances started");
+        }
+      } else if (needToEnd(now, endTime)) {
         List<String> ids = new ArrayList<>();
-        for (Instance in: clazz.getInstances()) {
+        for (Instance in : clazz.getInstances()) {
           ids.add(in.getId());
         }
-        List<String> iIds = aws.startInstances(Region.valueOf(clazz.getClassTypeDetail().getRegion()), ids.toArray(new String[ids.size()]));
-        log.info(iIds.size() + " instances started");
+        List<String> iIds = aws.stopInstances(Region.valueOf(clazz.getClassTypeDetail().getRegion()),
+            ids.toArray(new String[ids.size()]));
+        log.info(iIds.size() + " instances stopped");
       }
-    } else if (needToEnd(now, endTime)) {
-      List<String> ids = new ArrayList<>();
-      for (Instance in: clazz.getInstances()) {
-        ids.add(in.getId());
+    } finally {
+      if (trans.getRollbackOnly()) {
+        trans.rollback();
+      } else {
+        trans.commit();
       }
-      List<String> iIds = aws.stopInstances(Region.valueOf(clazz.getClassTypeDetail().getRegion()), ids.toArray(new String[ids.size()]));
-      log.info(iIds.size() + " instances stopped");
     }
+
   }
 
   private boolean needToEnd(Calendar now, Calendar endTime) {
@@ -119,16 +139,26 @@ public class ClassManager {
 
   @Transactional
   private void checkAllTerminated(ScheduledClass clazz) {
-    for (Instance inst: clazz.getInstances()) {
-      List<String> ids = new ArrayList<>();
-      if (!inst.isTerminated()) {
-        ids.add(inst.getId());
-        inst.setTerminated(true);
-        instDao.update(inst);
+    EntityManager em = entityManagerProvider.get();
+    EntityTransaction trans = em.getTransaction();
+    trans.begin();
+    try {
+      for (Instance inst : clazz.getInstances()) {
+        List<String> ids = new ArrayList<>();
+        if (!inst.isTerminated()) {
+          ids.add(inst.getId());
+          inst.setTerminated(true);
+          instDao.update(inst);
+        }
+        if (!ids.isEmpty())
+          aws.terminateInstances(Region.valueOf(inst.getRegion()), ids.toArray(new String[ids.size()]));
       }
-      if (!ids.isEmpty())
-        aws.terminateInstances(Region.valueOf(inst.getRegion()),
-          ids.toArray(new String[ids.size()]));
+    } finally {
+      if (trans.getRollbackOnly()) {
+        trans.rollback();
+      } else {
+        trans.commit();
+      }
     }
   }
 }
