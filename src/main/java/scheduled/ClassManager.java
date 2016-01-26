@@ -108,7 +108,6 @@ public class ClassManager {
   private boolean needToEnd(Calendar now, Calendar endTime) {
     int diff = now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE)
       - (endTime.get(Calendar.HOUR_OF_DAY) * 60 + endTime.get(Calendar.MINUTE));
-    log.info("end diff:" + diff);
     return (diff >= 0 && diff < 60);
   }
 

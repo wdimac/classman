@@ -209,7 +209,6 @@ var ClassInfo = React.createClass({
   },
   genPdf() {
     var doc = new jsPDF("landscape", "pt", "letter");
-    console.debug(this.props.clazz);
     doc.setFontSize(24);
     var title = this.props.clazz.classTypeDetail.classType.name
                 + " " + this.props.clazz.startDate;

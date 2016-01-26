@@ -80,7 +80,6 @@ var SGLookup = React.createClass({
           var boundClick = function(group){
             this.addGroup(group);
           }.bind(this, group);
-          console.debug(group);
           return(
             <div className="truncate" style={{padding:"2px"}} 
                 onClick={boundClick} key={group.id}>
