@@ -98,6 +98,10 @@ var ClassInfo = React.createClass({
     this.setState({open:!this.state.open});
   },
   updateClass(cls){
+    if (cls.startTime.length <=5)
+      cls.startTime += ":00";
+    if (cls.endTime.length <=5)
+      cls.endTime += ":00";
     $.ajax({
       url: "/api/admin/classes/" + cls.id,
       headers: {'X-AUTH-TOKEN':Auth.getToken()},
@@ -371,7 +375,7 @@ var ClassInfo = React.createClass({
                 <i className="fa fa-rocket"> 1</i>
               </button>
             </div>
-                   
+
           </div> {/*End button panel*/}
           <div className="m-t-1">
             {cl.instances.map(function(inst){
