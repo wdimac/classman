@@ -510,11 +510,7 @@ window.__APP__.ClassesPanel = React.createClass({
   componentDidMount() {
     this.loadDataFromServer();
   },
-  loadDataFromServer() {
-    if (this.state.data.length === 0) {
-      this.setState({loading:true});
-    }
-    
+  loadClasses() {
     $.ajax({
       url: "/api/admin/classes",
       headers: {'X-AUTH-TOKEN':Auth.getToken()},
@@ -531,6 +527,13 @@ window.__APP__.ClassesPanel = React.createClass({
         console.error(xhr, status, err.toString());
       }.bind(this)
     });
+  },
+  loadDataFromServer() {
+    if (this.state.data.length === 0) {
+      this.setState({loading:true});
+    }
+    
+    this.loadClasses();
     // Load available types for scheduler
     $.ajax({
       url: "/api/admin/class_types",
@@ -586,7 +589,7 @@ window.__APP__.ClassesPanel = React.createClass({
             {this.state.data.map(function(cl){
               return (
                 <ClassInfo clazz={cl} key={cl.id} 
-                  updateParent={this.loadDataFromServer}
+                  updateParent={this.loadClasses}
                   zones={this.props.awsConfig? this.props.awsConfig.timezones : []}
                   instructors={this.state.instructors}/>
               )

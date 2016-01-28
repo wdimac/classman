@@ -140,7 +140,7 @@ window.__APP__.DatePicker = React.createClass({
         this.doEdit,
         {
           dateFormat:'yy-mm-dd',
-          minDate:1,
+          minDate:0,
           showButtonPanel:true
         }
       );

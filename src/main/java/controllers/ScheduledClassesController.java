@@ -97,6 +97,7 @@ public class ScheduledClassesController {
   @PUT
   @Transactional
   public Result updateClass(@PathParam("id") String id, ScheduledClass clazz) {
+    scDao.clearSession();
     clazz.setId(Long.valueOf(id));
     scDao.update(clazz);
     return Results.json().render(clazz);

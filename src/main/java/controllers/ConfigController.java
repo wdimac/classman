@@ -1,5 +1,6 @@
 package controllers;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.TimeZone;
 
@@ -30,7 +31,9 @@ public class ConfigController {
 
     config.put("regions", AwsAdaptor.Region.getNameList());
     config.put("instanceTypes", InstanceType.values());
-    config.put("timezones", TimeZone.getAvailableIDs());
+    String[] zones = TimeZone.getAvailableIDs();
+    Arrays.sort(zones);
+    config.put("timezones", zones);
     return Results.json().render(config);
   }
 }
