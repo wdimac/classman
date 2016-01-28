@@ -2,6 +2,8 @@ package fixtures;
 
 import java.sql.Date;
 import java.sql.Time;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -21,6 +23,7 @@ import models.SecurityGroup;
 import models.User;
 
 public class ClassData implements Fixture {
+  private static DateFormat formatter= new SimpleDateFormat("yyyy-MM-dd");
 
   @Override
   public void run(EntityManager entityManager, HashMap<String, String> results) {
@@ -56,9 +59,9 @@ public class ClassData implements Fixture {
     clazz.setClassTypeDetail(detail);
     Calendar cal = new GregorianCalendar();
     cal.add(Calendar.MONTH, 1);
-    clazz.setStartDate(new Date(cal.getTimeInMillis()));
+    clazz.setStartDate(formatter.format(new Date(cal.getTimeInMillis())));
     cal.add(Calendar.DAY_OF_MONTH, 2);
-    clazz.setEndDate(new Date(cal.getTimeInMillis()));
+    clazz.setEndDate(formatter.format(new Date(cal.getTimeInMillis())));
     clazz.setStartTime(Time.valueOf("09:00:00"));
     clazz.setEndTime(Time.valueOf("16:00:00"));
     clazz.setTimeZone(TimeZone.getDefault().getID());
@@ -77,9 +80,9 @@ public class ClassData implements Fixture {
     clazz.setClassTypeDetail(detail);
     cal = new GregorianCalendar();
     cal.add(Calendar.MONTH, 2);
-    clazz.setStartDate(new Date(cal.getTimeInMillis()));
+    clazz.setStartDate(formatter.format(new Date(cal.getTimeInMillis())));
     cal.add(Calendar.DAY_OF_MONTH, 2);
-    clazz.setEndDate(new Date(cal.getTimeInMillis()));
+    clazz.setEndDate(formatter.format(new Date(cal.getTimeInMillis())));
     clazz.setStartTime(Time.valueOf("09:00:00"));
     clazz.setEndTime(Time.valueOf("16:00:00"));
     clazz.setTimeZone(TimeZone.getDefault().getID());

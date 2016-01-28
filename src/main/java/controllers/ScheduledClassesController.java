@@ -2,6 +2,8 @@ package controllers;
 
 import java.sql.Date;
 import java.sql.Time;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,6 +43,7 @@ import ninja.params.PathParam;
 public class ScheduledClassesController {
   private static final int DAYS = 1000 * 60 *60 * 24;
   private static final long HOURS8 = 1000 * 60 *60 * 8;
+  private static DateFormat formatter= new SimpleDateFormat("yyyy-MM-dd");
 
   @Inject
   SimpleDao<ScheduledClass> scDao;
@@ -82,9 +85,10 @@ public class ScheduledClassesController {
     System.out.println(clazz.getClassTypeDetail().getId());
     ClassTypeDetail detail = ctdDao.find(clazz.getClassTypeDetail().getId(), ClassTypeDetail.class);
     if (clazz.getEndDate() == null) {
-      clazz.setEndDate(new Date(
-          clazz.getStartDate().getTime() +
-          (detail.getClassType().getDuration() - 1) * DAYS));
+      Date sDate = Date.valueOf(clazz.getStartDate());
+      clazz.setEndDate(formatter.format(new Date(
+          sDate.getTime() +
+          (detail.getClassType().getDuration() - 1) * DAYS)));
     }
     if (clazz.getEndTime() == null) {
       clazz.setEndTime(new Time(clazz.getStartTime().getTime() + HOURS8));

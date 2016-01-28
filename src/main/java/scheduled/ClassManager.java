@@ -5,6 +5,7 @@
  */
 package scheduled;
 
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -58,13 +59,13 @@ public class ClassManager {
 
       //start and end times for servers are on hour before/after classes
       Calendar startTime = new GregorianCalendar(TimeZone.getTimeZone(clazz.getTimeZone()));
-      startTime.setTime(clazz.getStartDate());
+      startTime.setTime(Date.valueOf(clazz.getStartDate()));
       startTime.set(Calendar.HOUR_OF_DAY, clazz.getStartTime().getHours());
       startTime.set(Calendar.MINUTE, clazz.getStartTime().getMinutes());
       startTime.add(Calendar.HOUR_OF_DAY, -1);
 
       Calendar endTime = new GregorianCalendar(TimeZone.getTimeZone(clazz.getTimeZone()));
-      endTime.setTime(clazz.getEndDate());
+      endTime.setTime(Date.valueOf(clazz.getEndDate()));
       endTime.set(Calendar.HOUR_OF_DAY, clazz.getEndTime().getHours());
       endTime.set(Calendar.MINUTE, clazz.getEndTime().getMinutes());
       endTime.add(Calendar.HOUR_OF_DAY, +1);

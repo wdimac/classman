@@ -1,6 +1,5 @@
 package models;
 
-import java.sql.Date;
 import java.sql.Time;
 import java.util.List;
 
@@ -38,10 +37,10 @@ public class ScheduledClass {
 
   @Column(name="count")
   private int count;
-  @Column(name="start_date")
-  private Date startDate;
-  @Column(name="end_date")
-  private Date endDate;
+  @Column(name="start_date_str")
+  private String startDate;
+  @Column(name="end_date_str")
+  private String endDate;
 
   @Column(name="start_time")
   private Time startTime;
@@ -75,16 +74,16 @@ public class ScheduledClass {
   public void setInstructor(User instructor) {
     this.instructor = instructor;
   }
-  public Date getStartDate() {
+  public String getStartDate() {
     return startDate;
   }
-  public void setStartDate(Date startDate) {
+  public void setStartDate(String startDate) {
     this.startDate = startDate;
   }
-  public Date getEndDate() {
+  public String getEndDate() {
     return endDate;
   }
-  public void setEndDate(Date endDate) {
+  public void setEndDate(String endDate) {
     this.endDate = endDate;
   }
   public Time getStartTime() {

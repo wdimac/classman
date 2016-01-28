@@ -11,6 +11,15 @@ var Scheduler = React.createClass({
       message:null
     }
   },
+  componentDidMount() {
+    $("#launch_date").datepicker(
+        {
+          dateFormat:'yy-mm-dd',
+          minDate:0,
+          showButtonPanel:true
+        }
+      );
+  },
   close() {
     this.refs.modal.close();
   },
@@ -67,7 +76,7 @@ var Scheduler = React.createClass({
         <div className="row">
           <div className="col-sm-6">
             <input ref="date" className="form-control m-b-1" 
-                type="date" placeholder="Start Date" />
+                id="launch_date" placeholder="Start Date" />
           </div>
           <div className="col-sm-6">
             <input ref="time" className="form-control m-b-1" 

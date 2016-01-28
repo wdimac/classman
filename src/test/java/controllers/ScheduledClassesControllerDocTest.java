@@ -5,6 +5,8 @@ import static org.mockito.Mockito.when;
 
 import java.sql.Date;
 import java.sql.Time;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -34,6 +36,7 @@ import models.ScheduledClass;
 @RunWith(MockitoJUnitRunner.class)
 public class ScheduledClassesControllerDocTest extends AuthenticatedDocTesterBase {
   static String CLASS_URL = "/api/admin/classes";
+  private static DateFormat formatter= new SimpleDateFormat("yyyy-MM-dd");
 
   SimpleDao<ClassTypeDetail> ctdDao;
   SimpleDao<Instance> iDao;
@@ -118,9 +121,9 @@ public class ScheduledClassesControllerDocTest extends AuthenticatedDocTesterBas
     clazz.setClassTypeDetail(ctdDao.getAll(ClassTypeDetail.class).get(0));
     Calendar cal = new GregorianCalendar();
     cal.add(Calendar.MONTH, 1);
-    clazz.setStartDate(new Date(cal.getTimeInMillis()));
+    clazz.setStartDate(formatter.format(new Date(cal.getTimeInMillis())));
     cal.add(Calendar.DAY_OF_MONTH, 2);
-    clazz.setEndDate(new Date(cal.getTimeInMillis()));
+    clazz.setEndDate(formatter.format(new Date(cal.getTimeInMillis())));
     clazz.setStartTime(Time.valueOf("09:00:00"));
     clazz.setEndTime(Time.valueOf("16:00:00"));
     clazz.setTimeZone(TimeZone.getDefault().getID());

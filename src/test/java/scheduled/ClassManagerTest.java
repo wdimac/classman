@@ -6,6 +6,8 @@ import static org.mockito.Mockito.when;
 
 import java.sql.Date;
 import java.sql.Time;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -36,6 +38,7 @@ import models.ScheduledClass;
 @RunWith(MockitoJUnitRunner.class)
 public class ClassManagerTest {
   static final Logger log = LoggerFactory.getLogger(ClassManagerTest.class);
+  private static DateFormat formatter= new SimpleDateFormat("yyyy-MM-dd");
 
   ClassManager cm;
   @Mock
@@ -109,11 +112,11 @@ public class ClassManagerTest {
     ScheduledClass clazz= new ScheduledClass();
     Calendar start = new GregorianCalendar();
     start.add(Calendar.HOUR_OF_DAY, hours);
-    clazz.setStartDate(new Date(start.getTimeInMillis()));
+    clazz.setStartDate(formatter.format(new Date(start.getTimeInMillis())));
     clazz.setStartTime(new Time(start.getTimeInMillis()));
     start.add(Calendar.DATE, 1);
     start.add(Calendar.HOUR_OF_DAY, 8);
-    clazz.setEndDate(new Date(start.getTimeInMillis()));
+    clazz.setEndDate(formatter.format(new Date(start.getTimeInMillis())));
     clazz.setEndTime(new Time(start.getTimeInMillis()));
     clazz.setTimeZone(start.getTimeZone().getID());
     clazz.setId(1L);
