@@ -195,6 +195,11 @@ var EipAssign = React.createClass({
 });
 
 window.__APP__.EipAllocate = React.createClass({
+  getInitialState() {
+    return {
+      message:null
+    }
+  },
   close() {
     this.refs.modal.close();
   },
@@ -202,6 +207,7 @@ window.__APP__.EipAllocate = React.createClass({
     this.refs.modal.open();
   },
   allocateEip() {
+    this.setState({message:null});
     var params = [];
     if (this.refs.vpc.checked) params.push("vpc=true");
     if (this.props.user) params.push("user_id=" + this.props.user.id);
@@ -216,9 +222,11 @@ window.__APP__.EipAllocate = React.createClass({
       cache: false,
       success: function(data) {
         this.props.updateParent(data);
+        this.setState({message:"New EIP: " + data.publicIp})
         this.refs.modal.close();
       }.bind(this),
       error: function(xhr, status, err) {
+        this.setState({message: "Failed to allocate Eip."});
         console.error(this.props.url, status, err.toString());
       }.bind(this)
     });
@@ -234,6 +242,7 @@ window.__APP__.EipAllocate = React.createClass({
         onCancel={this.close}
         onConfirm={this.allocateEip}
         confirm="Create Eip"
+        message={this.state.message}
         title="Create Elastic IP">
         <div className="m-b-1">
           <Select ref="region" options={regionOptions} />
