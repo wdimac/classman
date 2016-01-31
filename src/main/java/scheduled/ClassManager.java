@@ -56,24 +56,35 @@ public class ClassManager {
     for (ScheduledClass clazz: clazzes) {
       log.info("Class:" + clazz.getId());
       Calendar now = new GregorianCalendar();
+      log.info("now:" + now);
 
       //start and end times for servers are on hour before/after classes
       Calendar startTime = new GregorianCalendar(TimeZone.getTimeZone(clazz.getTimeZone()));
-      startTime.setTime(Date.valueOf(clazz.getStartDate()));
-      startTime.set(Calendar.HOUR_OF_DAY, clazz.getStartTime().getHours());
-      startTime.set(Calendar.MINUTE, clazz.getStartTime().getMinutes());
+      Date sDate = Date.valueOf(clazz.getStartDate());
+      log.info("sDate:" + sDate);
+      log.info("sTime" + clazz.getStartTime());
+      startTime.set(sDate.getYear() +1900, sDate.getMonth(), sDate.getDate(),
+                    clazz.getStartTime().getHours(), clazz.getStartTime().getMinutes(), 0);
       startTime.add(Calendar.HOUR_OF_DAY, -1);
 
       Calendar endTime = new GregorianCalendar(TimeZone.getTimeZone(clazz.getTimeZone()));
-      endTime.setTime(Date.valueOf(clazz.getEndDate()));
-      endTime.set(Calendar.HOUR_OF_DAY, clazz.getEndTime().getHours());
-      endTime.set(Calendar.MINUTE, clazz.getEndTime().getMinutes());
+      Date eDate = Date.valueOf(clazz.getEndDate());
+      endTime.set(eDate.getYear() +1900, eDate.getMonth(), eDate.getDate(),
+                    clazz.getEndTime().getHours(), clazz.getEndTime().getMinutes(), 0);
       endTime.add(Calendar.HOUR_OF_DAY, +1);
+
+      Calendar firstEndTime = new GregorianCalendar(TimeZone.getTimeZone(clazz.getTimeZone()));
+      firstEndTime.set(sDate.getYear() +1900, sDate.getMonth(), sDate.getDate(),
+                    clazz.getEndTime().getHours(), clazz.getEndTime().getMinutes(), 0);
+      firstEndTime.add(Calendar.HOUR_OF_DAY, +1);
+
+      log.info("endTime:" + endTime);
       if (now.before(startTime)) {
         log.info("Class pending.");
         continue;
-      } else if (now.after(endTime) || now.equals(endTime)) {
-        if (endTime.getTimeInMillis() - now.getTimeInMillis() < HOUR) {
+      } else if (now.compareTo(endTime) >=0) {
+        log.info("check stop:" + (now.getTimeInMillis() - endTime.getTimeInMillis()));
+        if (now.getTimeInMillis() - endTime.getTimeInMillis() < HOUR) {
           log.info("Class over - terminating instances");
           checkAllTerminated(clazz);
         }
@@ -82,7 +93,10 @@ public class ClassManager {
         Calendar relStart = (Calendar) now.clone();
         relStart.setTime(startTime.getTime());
         Calendar relEnd = (Calendar)now.clone();
-        relEnd.setTime(endTime.getTime());
+        relEnd.setTime(firstEndTime.getTime());
+
+        log.info("startTime:" + startTime);
+        log.info("relStart:" + relStart);
         checkLifeCycle(clazz, now, relStart, relEnd);
       }
     }
@@ -127,15 +141,15 @@ public class ClassManager {
   }
 
   private boolean needToEnd(Calendar now, Calendar endTime) {
-    int diff = now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE)
-      - (endTime.get(Calendar.HOUR_OF_DAY) * 60 + endTime.get(Calendar.MINUTE));
-    return (diff >= 0 && diff < 60);
+    long diff = now.getTimeInMillis() - endTime.getTimeInMillis();
+    diff = diff % (24 * HOUR);
+    return (diff >= 0 && diff < HOUR);
   }
 
   private boolean needToStart(Calendar now, Calendar startTime) {
-    int diff = now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE)
-        - (startTime.get(Calendar.HOUR_OF_DAY) * 60 + startTime.get(Calendar.MINUTE));
-    return (diff >= 0 && diff < 60);
+    long diff = now.getTimeInMillis() - startTime.getTimeInMillis();
+    diff = diff % (24 * HOUR);
+    return (diff >= 0 && diff < HOUR);
   }
 
   @Transactional
