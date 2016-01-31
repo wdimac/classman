@@ -56,13 +56,10 @@ public class ClassManager {
     for (ScheduledClass clazz: clazzes) {
       log.info("Class:" + clazz.getId());
       Calendar now = new GregorianCalendar();
-      log.info("now:" + now);
 
       //start and end times for servers are on hour before/after classes
       Calendar startTime = new GregorianCalendar(TimeZone.getTimeZone(clazz.getTimeZone()));
       Date sDate = Date.valueOf(clazz.getStartDate());
-      log.info("sDate:" + sDate);
-      log.info("sTime" + clazz.getStartTime());
       startTime.set(sDate.getYear() +1900, sDate.getMonth(), sDate.getDate(),
                     clazz.getStartTime().getHours(), clazz.getStartTime().getMinutes(), 0);
       startTime.add(Calendar.HOUR_OF_DAY, -1);
@@ -83,7 +80,6 @@ public class ClassManager {
         log.info("Class pending.");
         continue;
       } else if (now.compareTo(endTime) >=0) {
-        log.info("check stop:" + (now.getTimeInMillis() - endTime.getTimeInMillis()));
         if (now.getTimeInMillis() - endTime.getTimeInMillis() < HOUR) {
           log.info("Class over - terminating instances");
           checkAllTerminated(clazz);
@@ -95,8 +91,6 @@ public class ClassManager {
         Calendar relEnd = (Calendar)now.clone();
         relEnd.setTime(firstEndTime.getTime());
 
-        log.info("startTime:" + startTime);
-        log.info("relStart:" + relStart);
         checkLifeCycle(clazz, now, relStart, relEnd);
       }
     }
