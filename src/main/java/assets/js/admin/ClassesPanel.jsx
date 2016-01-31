@@ -100,7 +100,8 @@ var ClassInfo = React.createClass({
   getInitialState() {
     return {
       open:false,
-      infos:null
+      infos:null,
+      infoLoading:false
     }
   },
   toggleOpen(){
@@ -191,6 +192,7 @@ var ClassInfo = React.createClass({
     });
   },
   getInfo(){
+    this.setState({infoLoading:true});
     $.ajax({
       url: "/api/admin/classes/" + this.props.clazz.id + "/aws",
       headers: {'X-AUTH-TOKEN':Auth.getToken()},
@@ -198,7 +200,7 @@ var ClassInfo = React.createClass({
       dataType: 'json',
       cache: false,
       success: function(data) {
-        var infos={};
+        var infos=this.state.infos;
         var again = false;
         data.forEach(function(info){
           infos[info.instanceId] = info;
@@ -206,12 +208,13 @@ var ClassInfo = React.createClass({
             again=true;
           }
         });
-        this.setState({infos:infos});
+        this.setState({infos:infos, infoLoading:false});
         if (again) {
           setTimeout(this.getInfo, 3000);
         }
        }.bind(this),
       error: function(xhr, status, err) {
+        this.setState({infoLoading:false});
         console.error(xhr, status, err.toString());
       }.bind(this)
     });
@@ -344,7 +347,11 @@ var ClassInfo = React.createClass({
               <button className="btn btn-sm btn-secondary"
                   title="Sync Info"
                   onClick={this.getInfo}>
-                <i className="fa fa-cloud-download"> All</i>
+                {this.state.infoLoading ?
+                  <i className="fa fa-refresh fa-spin"> All</i>
+                  :
+                  <i className="fa fa-cloud-download"> All</i>
+                }
               </button>
               <button className="btn btn-sm btn-info pull-left"
                   title="Download PDF"
