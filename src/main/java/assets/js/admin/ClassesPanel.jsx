@@ -262,7 +262,7 @@ var ClassInfo = React.createClass({
       <div> 
         <div onClick={this.toggleOpen}>
           <span className="text-muted">
-            {DateFormat.format.date(Date.parse(cl.startDate), "yyyy MMM d")}
+            {cl.startDate}
           </span>
           <span className="m-l-1">
             {cl.classTypeDetail.classType.name}:&ensp;
