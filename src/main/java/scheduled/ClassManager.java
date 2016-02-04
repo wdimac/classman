@@ -168,6 +168,7 @@ public class ClassManager {
       } else {
         trans.commit();
       }
+      em.close();
     }
   }
 }
