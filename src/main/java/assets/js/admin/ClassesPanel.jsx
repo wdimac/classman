@@ -100,7 +100,7 @@ var ClassInfo = React.createClass({
   getInitialState() {
     return {
       open:false,
-      infos:null,
+      infos:{},
       infoLoading:false
     }
   },
@@ -348,7 +348,7 @@ var ClassInfo = React.createClass({
                   title="Sync Info"
                   onClick={this.getInfo}>
                 {this.state.infoLoading ?
-                  <i className="fa fa-refresh fa-spin"> All</i>
+                  <span><i className="fa fa-refresh fa-spin"></i> All</span>
                   :
                   <i className="fa fa-cloud-download"> All</i>
                 }
