@@ -51,57 +51,63 @@ public class ClassManager {
 
   @Schedule(delay=PERIOD, initialDelay=2, timeUnit=TimeUnit.MINUTES)
   public void controlInstances() {
-    classDao.clearSession();
-    List<ScheduledClass> clazzes = classDao.getAll(ScheduledClass.class);
-    for (ScheduledClass clazz: clazzes) {
-      log.info("Class:" + clazz.getId());
-      Calendar now = new GregorianCalendar();
-
-      //start and end times for servers are on hour before/after classes
-      Calendar startTime = new GregorianCalendar(TimeZone.getTimeZone(clazz.getTimeZone()));
-      Date sDate = Date.valueOf(clazz.getStartDate());
-      startTime.set(sDate.getYear() +1900, sDate.getMonth(), sDate.getDate(),
-                    clazz.getStartTime().getHours(), clazz.getStartTime().getMinutes(), 0);
-      startTime.add(Calendar.HOUR_OF_DAY, -1);
-
-      Calendar endTime = new GregorianCalendar(TimeZone.getTimeZone(clazz.getTimeZone()));
-      Date eDate = Date.valueOf(clazz.getEndDate());
-      endTime.set(eDate.getYear() +1900, eDate.getMonth(), eDate.getDate(),
-                    clazz.getEndTime().getHours(), clazz.getEndTime().getMinutes(), 0);
-      endTime.add(Calendar.HOUR_OF_DAY, +1);
-
-      Calendar firstEndTime = new GregorianCalendar(TimeZone.getTimeZone(clazz.getTimeZone()));
-      firstEndTime.set(sDate.getYear() +1900, sDate.getMonth(), sDate.getDate(),
-                    clazz.getEndTime().getHours(), clazz.getEndTime().getMinutes(), 0);
-      firstEndTime.add(Calendar.HOUR_OF_DAY, +1);
-
-      log.info("endTime:" + endTime);
-      if (now.before(startTime)) {
-        log.info("Class pending.");
-        continue;
-      } else if (now.compareTo(endTime) >=0) {
-        if (now.getTimeInMillis() - endTime.getTimeInMillis() < HOUR) {
-          log.info("Class over - terminating instances");
-          checkAllTerminated(clazz);
-        }
-      } else {
-        log.info("Checking to see if in start/stop period");
-        Calendar relStart = (Calendar) now.clone();
-        relStart.setTime(startTime.getTime());
-        Calendar relEnd = (Calendar)now.clone();
-        relEnd.setTime(firstEndTime.getTime());
-
-        checkLifeCycle(clazz, now, relStart, relEnd);
-      }
-    }
-    classDao.commitTrans();
-  }
-
-  private void checkLifeCycle(ScheduledClass clazz, Calendar now, Calendar startTime, Calendar endTime) {
     EntityManager em = entityManagerProvider.get();
     EntityTransaction trans = em.getTransaction();
     trans.begin();
     try {
+      classDao.clearSession();
+      List<ScheduledClass> clazzes = classDao.getAll(ScheduledClass.class);
+      for (ScheduledClass clazz: clazzes) {
+        log.info("Class:" + clazz.getId());
+        Calendar now = new GregorianCalendar();
+
+        //start and end times for servers are on hour before/after classes
+        Calendar startTime = new GregorianCalendar(TimeZone.getTimeZone(clazz.getTimeZone()));
+        Date sDate = Date.valueOf(clazz.getStartDate());
+        startTime.set(sDate.getYear() +1900, sDate.getMonth(), sDate.getDate(),
+                      clazz.getStartTime().getHours(), clazz.getStartTime().getMinutes(), 0);
+        startTime.add(Calendar.HOUR_OF_DAY, -1);
+
+        Calendar endTime = new GregorianCalendar(TimeZone.getTimeZone(clazz.getTimeZone()));
+        Date eDate = Date.valueOf(clazz.getEndDate());
+        endTime.set(eDate.getYear() +1900, eDate.getMonth(), eDate.getDate(),
+                      clazz.getEndTime().getHours(), clazz.getEndTime().getMinutes(), 0);
+        endTime.add(Calendar.HOUR_OF_DAY, +1);
+
+        Calendar firstEndTime = new GregorianCalendar(TimeZone.getTimeZone(clazz.getTimeZone()));
+        firstEndTime.set(sDate.getYear() +1900, sDate.getMonth(), sDate.getDate(),
+                      clazz.getEndTime().getHours(), clazz.getEndTime().getMinutes(), 0);
+        firstEndTime.add(Calendar.HOUR_OF_DAY, +1);
+
+        log.info("endTime:" + endTime);
+        if (now.before(startTime)) {
+          log.info("Class pending.");
+          continue;
+        } else if (now.compareTo(endTime) >=0) {
+          if (now.getTimeInMillis() - endTime.getTimeInMillis() < HOUR) {
+            log.info("Class over - terminating instances");
+            checkAllTerminated(clazz);
+          }
+        } else {
+          log.info("Checking to see if in start/stop period");
+          Calendar relStart = (Calendar) now.clone();
+          relStart.setTime(startTime.getTime());
+          Calendar relEnd = (Calendar)now.clone();
+          relEnd.setTime(firstEndTime.getTime());
+
+          checkLifeCycle(clazz, now, relStart, relEnd);
+        }
+      }
+    } finally {
+      if (trans.getRollbackOnly()) {
+        trans.rollback();
+      } else {
+        trans.commit();
+      }
+    }
+  }
+
+  private void checkLifeCycle(ScheduledClass clazz, Calendar now, Calendar startTime, Calendar endTime) {
       if (needToStart(now, startTime)) {
         List<Instance> ins;
         if (clazz.getInstances().isEmpty()) {
@@ -125,14 +131,6 @@ public class ClassManager {
             ids.toArray(new String[ids.size()]));
         log.info(iIds.size() + " instances stopped");
       }
-    } finally {
-      if (trans.getRollbackOnly()) {
-        trans.rollback();
-      } else {
-        trans.commit();
-      }
-    }
-
   }
 
   private boolean needToEnd(Calendar now, Calendar endTime) {
