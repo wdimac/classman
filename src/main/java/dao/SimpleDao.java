@@ -153,8 +153,8 @@ public class SimpleDao<M> {
     session.clear();
   }
 
-  public void closeSession() {
+  public void commitTrans() {
     EntityManager entityManager = entityManagerProvider.get();
-    entityManager.close();
+    entityManager.getTransaction().commit();
   }
 }
