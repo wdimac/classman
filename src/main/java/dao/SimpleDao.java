@@ -155,8 +155,6 @@ public class SimpleDao<M> {
 
   public void closeSession() {
     EntityManager entityManager = entityManagerProvider.get();
-    Session session = entityManager.unwrap(Session.class);
-    if (session.isOpen())
-      session.close();
+    entityManager.close();
   }
 }
