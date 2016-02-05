@@ -94,6 +94,7 @@ public class ClassManager {
         checkLifeCycle(clazz, now, relStart, relEnd);
       }
     }
+    classDao.closeSession();
   }
 
   private void checkLifeCycle(ScheduledClass clazz, Calendar now, Calendar startTime, Calendar endTime) {
