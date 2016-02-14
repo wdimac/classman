@@ -55,7 +55,7 @@
             <property name="hibernate.c3p0.timeout" value="600" />
             <property name="hibernate.c3p0.testConnectionOnCheckout" value="true" />
             <property name="hibernate.c3p0.preferredTestQuery" value="SELECT 1" />
-            <property name="unreturnedConnectionTimeout" value="5000" />
+            <property name="unreturnedConnectionTimeout" value="300000" />
             <property name="debugUnreturnedConnectionStackTraces" value="true" />
         </properties>
     </persistence-unit>

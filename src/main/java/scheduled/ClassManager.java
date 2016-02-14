@@ -53,7 +53,8 @@ public class ClassManager {
   public void controlInstances() {
     EntityManager em = entityManagerProvider.get();
     EntityTransaction trans = em.getTransaction();
-    trans.begin();
+    if (!trans.isActive())
+      trans.begin();
     try {
       classDao.clearSession();
       List<ScheduledClass> clazzes = classDao.getAll(ScheduledClass.class);
@@ -147,10 +148,6 @@ public class ClassManager {
 
   @Transactional
   private void checkAllTerminated(ScheduledClass clazz) {
-    EntityManager em = entityManagerProvider.get();
-    EntityTransaction trans = em.getTransaction();
-    trans.begin();
-    try {
       for (Instance inst : clazz.getInstances()) {
         List<String> ids = new ArrayList<>();
         if (!inst.isTerminated()) {
@@ -161,13 +158,5 @@ public class ClassManager {
         if (!ids.isEmpty())
           aws.terminateInstances(Region.valueOf(inst.getRegion()), ids.toArray(new String[ids.size()]));
       }
-    } finally {
-      if (trans.getRollbackOnly()) {
-        trans.rollback();
-      } else {
-        trans.commit();
-      }
-      em.close();
-    }
   }
 }
