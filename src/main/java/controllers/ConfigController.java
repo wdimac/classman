@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.TimeZone;
 
 import javax.inject.Singleton;
+import javax.transaction.Transactional;
 
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.appdynamics.aws.AwsAdaptor;
@@ -26,6 +27,7 @@ public class ConfigController {
   SimpleDao<SecurityGroup> groupDao;
 
   @Path("/config")
+  @Transactional
   public Result getConfig() {
     HashMap<String, Object> config = new HashMap<>();
 
