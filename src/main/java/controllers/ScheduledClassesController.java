@@ -83,7 +83,6 @@ public class ScheduledClassesController {
   @POST
   @Transactional
   public Result insertClass(ScheduledClass clazz) {
-    System.out.println(clazz.getClassTypeDetail().getId());
     ClassTypeDetail detail = ctdDao.find(clazz.getClassTypeDetail().getId(), ClassTypeDetail.class);
     if (clazz.getEndDate() == null) {
       Date sDate = Date.valueOf(clazz.getStartDate());
