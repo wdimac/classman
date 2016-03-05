@@ -26,6 +26,7 @@ import ninja.jaxy.DELETE;
 import ninja.jaxy.GET;
 import ninja.jaxy.POST;
 import ninja.jaxy.Path;
+import ninja.jpa.UnitOfWork;
 import ninja.params.PathParam;
 
 @Path("/api/admin")
@@ -128,6 +129,7 @@ public class ImagesController {
 
   @Path("/aws/{region}/images/{id}")
   @GET
+  @UnitOfWork
   public Result getAwsImages(@PathParam("region") String region, @PathParam("id") String id) {
     String[] ids = {id};
     List<Image> images = aws.getImages(ids, region);
@@ -137,6 +139,7 @@ public class ImagesController {
 
   @Path("/aws/{region}/images")
   @GET
+  @UnitOfWork
   public Result getAllAwsImages(@PathParam("region") String region) {
     if (region == null) {
       return Results.json().render(Collections.EMPTY_LIST);

@@ -20,6 +20,7 @@ import ninja.jaxy.DELETE;
 import ninja.jaxy.GET;
 import ninja.jaxy.POST;
 import ninja.jaxy.Path;
+import ninja.jpa.UnitOfWork;
 import ninja.params.PathParam;
 
 @Path("/api/admin")
@@ -74,6 +75,7 @@ public class SecurityGroupsController {
 
   @Path("/aws/{region}/security_groups")
   @GET
+  @UnitOfWork
   public Result getAllAwssecurityGroups(@PathParam("region") String region) {
     if (region == null) {
       return Results.json().render(Collections.EMPTY_LIST);
@@ -85,6 +87,7 @@ public class SecurityGroupsController {
 
   @Path("/aws/{region}/security_groups/{id}")
   @GET
+  @UnitOfWork
   public Result getOneAwssecurityGroup(@PathParam("region") String region, @PathParam("id") String id) {
     if (region == null) {
       return Results.json().render(Collections.EMPTY_LIST);

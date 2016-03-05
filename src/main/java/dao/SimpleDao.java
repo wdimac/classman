@@ -2,6 +2,7 @@ package dao;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -156,5 +157,12 @@ public class SimpleDao<M> {
   public void commitTrans() {
     EntityManager entityManager = entityManagerProvider.get();
     entityManager.getTransaction().commit();
+  }
+
+  public void detach(Collection<M> entities) {
+    EntityManager entityManager = entityManagerProvider.get();
+    for (M entity:entities) {
+      entityManager.detach(entity);
+    }
   }
 }

@@ -34,6 +34,7 @@ import ninja.jaxy.GET;
 import ninja.jaxy.POST;
 import ninja.jaxy.PUT;
 import ninja.jaxy.Path;
+import ninja.jpa.UnitOfWork;
 import ninja.params.Param;
 import ninja.params.PathParam;
 
@@ -171,6 +172,7 @@ public class ScheduledClassesController {
       idx++;
     }
 
+    eipDao.detach(usable);
     aws.associateEipWhenReady(usable);
     return result;
   }
@@ -259,6 +261,7 @@ public class ScheduledClassesController {
 
   @Path("/classes/{id}/aws")
   @GET
+  @UnitOfWork
   public Result getAwsInfo(@PathParam("region") String region, @PathParam("id") String id) {
     ScheduledClass cls = scDao.find(id, ScheduledClass.class);
     List<String> idList = new ArrayList<>();

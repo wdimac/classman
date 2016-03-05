@@ -54,6 +54,7 @@ public class ClassManager {
 
   @Schedule(delay=PERIOD, initialDelay=2, timeUnit=TimeUnit.MINUTES)
   public void controlInstances() {
+    log.info("Start work");
     unitOfWork.begin();
     EntityManager em = entityManagerProvider.get();
     EntityTransaction trans = em.getTransaction();
@@ -109,6 +110,7 @@ public class ClassManager {
         trans.commit();
       }
       unitOfWork.end();
+      log.info("work ended.");
     }
   }
 

@@ -23,6 +23,7 @@ import ninja.jaxy.GET;
 import ninja.jaxy.POST;
 import ninja.jaxy.PUT;
 import ninja.jaxy.Path;
+import ninja.jpa.UnitOfWork;
 import ninja.params.Param;
 import ninja.params.PathParam;
 
@@ -110,6 +111,7 @@ public class EipController {
 
   @Path("/aws/{region}/eips")
   @GET
+  @UnitOfWork
   public Result getAllAwsEips(@PathParam("region") String region) {
     if (region == null) {
       return Results.json().render(Collections.EMPTY_LIST);

@@ -20,6 +20,7 @@ import ninja.Results;
 import ninja.jaxy.GET;
 import ninja.jaxy.POST;
 import ninja.jaxy.Path;
+import ninja.jpa.UnitOfWork;
 import ninja.params.PathParam;
 
 @Path("/api/admin")
@@ -103,6 +104,7 @@ public class InstancesController {
 
   @Path("/aws/{region}/instances/{id}")
   @GET
+  @UnitOfWork
   public Result getAwsInstances(@PathParam("region") String region, @PathParam("id") String id) {
     String[] ids = {id};
     List<com.amazonaws.services.ec2.model.Instance> Instances = aws.getInstances(ids, region);
@@ -112,6 +114,7 @@ public class InstancesController {
 
   @Path("/aws/{region}/instances")
   @GET
+  @UnitOfWork
   public Result getAllAwsInstances(@PathParam("region") String region) {
     if (region == null) {
       return Results.json().render(Collections.EMPTY_LIST);
