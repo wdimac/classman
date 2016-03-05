@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import com.appdynamics.aws.AwsAdaptor;
 import com.appdynamics.aws.AwsAdaptor.Region;
 import com.google.inject.Provider;
+import com.google.inject.persist.UnitOfWork;
 import com.appdynamics.aws.QuickList;
 
 import controllers.ScheduledClassesController;
@@ -55,6 +56,8 @@ public class ClassManagerTest {
   EntityManager em;
   @Mock
   EntityTransaction trans;
+  @Mock
+  UnitOfWork unitOfWork;
 
   @Before
   public void init() {
@@ -64,6 +67,7 @@ public class ClassManagerTest {
     cm.instDao = iDao;
     cm.scController = cont;
     cm.entityManagerProvider = entityManagerProvider;
+    cm.unitOfWork = unitOfWork;
     when(entityManagerProvider.get()).thenReturn(em);
     when(em.getTransaction()).thenReturn(trans);
   }
