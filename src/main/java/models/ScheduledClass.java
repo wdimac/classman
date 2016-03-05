@@ -6,6 +6,7 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -32,7 +33,7 @@ public class ScheduledClass {
   @JoinColumn(name="instructor_id")
   private User instructor;
 
-  @OneToMany(cascade=CascadeType.REMOVE, mappedBy="scheduledClass")
+  @OneToMany(cascade=CascadeType.REMOVE, mappedBy="scheduledClass", fetch=FetchType.EAGER)
   private List<Instance> instances;
 
   @Column(name="count")

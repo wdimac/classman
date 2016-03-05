@@ -30,6 +30,7 @@ import controllers.ScheduledClassesController;
 import dao.SimpleDao;
 import models.Instance;
 import models.ScheduledClass;
+import ninja.jpa.UnitOfWork;
 import ninja.scheduler.Schedule;
 
 @Singleton
@@ -48,9 +49,12 @@ public class ClassManager {
   ScheduledClassesController scController;
   @Inject
   Provider<EntityManager> entityManagerProvider;
+  @Inject
+  com.google.inject.persist.UnitOfWork unitOfWork;
 
   @Schedule(delay=PERIOD, initialDelay=2, timeUnit=TimeUnit.MINUTES)
   public void controlInstances() {
+    unitOfWork.begin();
     EntityManager em = entityManagerProvider.get();
     EntityTransaction trans = em.getTransaction();
     if (!trans.isActive())
@@ -80,7 +84,6 @@ public class ClassManager {
                       clazz.getEndTime().getHours(), clazz.getEndTime().getMinutes(), 0);
         firstEndTime.add(Calendar.HOUR_OF_DAY, +1);
 
-        log.info("endTime:" + endTime);
         if (now.before(startTime)) {
           log.info("Class pending.");
           continue;
@@ -105,6 +108,7 @@ public class ClassManager {
       } else {
         trans.commit();
       }
+      unitOfWork.end();
     }
   }
 
@@ -146,7 +150,6 @@ public class ClassManager {
     return (diff >= 0 && diff < HOUR);
   }
 
-  @Transactional
   private void checkAllTerminated(ScheduledClass clazz) {
       for (Instance inst : clazz.getInstances()) {
         List<String> ids = new ArrayList<>();

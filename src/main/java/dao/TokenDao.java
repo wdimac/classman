@@ -10,6 +10,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 import models.Token;
+import ninja.jpa.UnitOfWork;
 
 @Singleton
 public class TokenDao {
@@ -21,6 +22,7 @@ public class TokenDao {
     entityManager.persist(token);
   }
 
+  @UnitOfWork
   public boolean isValidToken(Token token) {
     try {
     EntityManager entityManager = entityManagerProvider.get();
