@@ -29,8 +29,10 @@ var Scheduler = React.createClass({
       startDate:this.refs.date.value,
       startTime:this.refs.time.value + ":00",
       count:this.refs.count.value,
-      timeZone:this.refs.zone.getValue()
+      timeZone:this.refs.zone.getValue(),
+      instructor:{id:this.refs.instructor.getValue()}
     };
+    console.log(classInfo);
     $.ajax({
       url: "/api/admin/classes",
       headers: {'X-AUTH-TOKEN':Auth.getToken()},
@@ -86,10 +88,13 @@ var Scheduler = React.createClass({
         <div className="p-b-1">
           <Select ref="zone" options={zones} />
         </div>
-        <div className="input-group">
+        <div className="input-group p-b-1">
           <span className="input-group-addon"># Instances</span>
           <input ref="count" className="form-control" 
               type="number" defaultValue="6" />
+        </div>
+        <div className="p-b-1">
+          <Select ref="instructor" options={this.props.instructors} />
         </div>
       </BootstrapModal>
     );
@@ -613,6 +618,7 @@ window.__APP__.ClassesPanel = React.createClass({
           </div>
         }
         <Scheduler ref="scheduler" types={this.state.types} 
+            instructors={this.state.instructors}
             updateParent={this.loadDataFromServer}
             zones={this.props.awsConfig? this.props.awsConfig.timezones : []}/>
       </div>
