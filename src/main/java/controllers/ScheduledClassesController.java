@@ -10,6 +10,7 @@ import java.util.List;
 import javax.inject.Singleton;
 
 import com.amazonaws.services.ec2.model.Address;
+import com.amazonaws.services.ec2.model.CreateTagsRequest;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.amazonaws.services.ec2.model.RunInstancesRequest;
@@ -160,9 +161,13 @@ public class ScheduledClassesController {
     request.setMaxCount(count);
     request.setMinCount(count);
     request.setSecurityGroupIds(new QuickList<String>(clazz.getClassTypeDetail().getSecurityGroupId()));
-    List<Instance> response = aws.runInstances(Region.valueOf(clazz.getClassTypeDetail().getRegion().toUpperCase()), request);
+    List<Instance> response = aws.runInstances(
+        Region.valueOf(clazz.getClassTypeDetail().getRegion().toUpperCase()),
+        request,
+        clazz.getClassTypeDetail().getClassType().getName());
 
     List<models.Instance> result = new ArrayList<>();
+
     for (Instance in: response) {
       models.Instance instance = new models.Instance();
       instance.setId(in.getInstanceId());

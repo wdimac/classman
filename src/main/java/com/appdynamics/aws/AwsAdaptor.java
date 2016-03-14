@@ -15,6 +15,7 @@ import com.amazonaws.services.ec2.model.AllocateAddressRequest;
 import com.amazonaws.services.ec2.model.AllocateAddressResult;
 import com.amazonaws.services.ec2.model.AssociateAddressRequest;
 import com.amazonaws.services.ec2.model.AssociateAddressResult;
+import com.amazonaws.services.ec2.model.CreateTagsRequest;
 import com.amazonaws.services.ec2.model.DescribeAddressesRequest;
 import com.amazonaws.services.ec2.model.DescribeAddressesResult;
 import com.amazonaws.services.ec2.model.DescribeImagesRequest;
@@ -38,6 +39,7 @@ import com.amazonaws.services.ec2.model.StartInstancesRequest;
 import com.amazonaws.services.ec2.model.StartInstancesResult;
 import com.amazonaws.services.ec2.model.StopInstancesRequest;
 import com.amazonaws.services.ec2.model.StopInstancesResult;
+import com.amazonaws.services.ec2.model.Tag;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.amazonaws.services.ec2.model.TerminateInstancesResult;
 import com.google.inject.Inject;
@@ -157,12 +159,25 @@ public class AwsAdaptor {
    *
    * @param region
    * @param request
+   * @param name
    * @return
    */
-  public List<Instance> runInstances(Region region, RunInstancesRequest request) {
+  public List<Instance> runInstances(Region region, RunInstancesRequest request, String name) {
     AmazonEC2Client amazonClient = getClient(region);
     RunInstancesResult results = amazonClient.runInstances(request);
-    return results.getReservation().getInstances();
+    List<Instance> instanceList = results.getReservation().getInstances();
+
+
+    Tag tag = new Tag().withKey("Name").withValue(name);
+    List<String> idList = new ArrayList<>();
+    for (Instance inst: instanceList) {
+      idList.add(inst.getInstanceId());
+    }
+    amazonClient.createTags(new CreateTagsRequest()
+        .withResources(idList)
+        .withTags(tag));
+
+    return instanceList;
   }
 
   public List<String> startInstances(Region region, String[] ids){
@@ -177,6 +192,7 @@ public class AwsAdaptor {
       result.add(change.getInstanceId());
     }
     List<Eip> eips = new ArrayList<>();
+
     for (String instanceId : ids) {
       Eip target = new Eip();
       target.setInstanceId(instanceId);

@@ -115,7 +115,7 @@ public class ScheduledClassesControllerDocTest extends AuthenticatedDocTesterBas
     sayAndAssertThat("Class is inserted.",
         rType.getId(), CoreMatchers.notNullValue());
 
-    Mockito.verify(aws).runInstances(any(Region.class), any(RunInstancesRequest.class));
+    Mockito.verify(aws).runInstances(any(Region.class), any(RunInstancesRequest.class), anyString());
   }
 
   private ScheduledClass getClassObject() {
@@ -185,7 +185,7 @@ public class ScheduledClassesControllerDocTest extends AuthenticatedDocTesterBas
     in.setImageId("ID-1");
     in.setInstanceId("i-test");
     mock.add(in);
-    when(aws.runInstances(any(Region.class), any(RunInstancesRequest.class))).thenReturn(mock);
+    when(aws.runInstances(any(Region.class), any(RunInstancesRequest.class), anyString())).thenReturn(mock);
 
     List<Address> addresses = new ArrayList<>();
     Address addr = new Address();

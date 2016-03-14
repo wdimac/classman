@@ -102,13 +102,14 @@ public class ImagesController {
   @Transactional
   public Result runImage(@PathParam("id") String id, RunConfiguration runConfig) {
     Images image = imagesDao.find(id, Images.class);
+    String name = "Instance for " + id;
     RunInstancesRequest request = new RunInstancesRequest();
     request.setImageId(image.getId());
     request.setInstanceType(InstanceType.valueOf(runConfig.type));
     request.setMaxCount(runConfig.count);
     request.setMinCount(runConfig.count);
     request.setSecurityGroupIds(new QuickList<String>(runConfig.getGroup()));
-    List<Instance> response = aws.runInstances(Region.valueOf(image.getRegion()), request);
+    List<Instance> response = aws.runInstances(Region.valueOf(image.getRegion()), request, name);
 
     List<models.Instance> result = new ArrayList<>();
     for (Instance in: response) {
@@ -116,7 +117,7 @@ public class ImagesController {
       instance.setId(in.getInstanceId());
       instance.setImage_id(in.getImageId());
       instance.setRegion(image.getRegion());
-      instance.setDescription("Instance for " + in.getImageId());
+      instance.setDescription(name);
       instanceDao.persist(instance);
       result.add(instance);
     }

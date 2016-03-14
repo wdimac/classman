@@ -5,7 +5,7 @@
  */
 package controllers;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -123,7 +123,7 @@ public class ImagesControllerDocTest extends AuthenticatedDocTesterBase{
     in.setImageId("ID-1");
     in.setInstanceId("i-test");
     mock.add(in);
-    when(aws.runInstances(any(Region.class), any(RunInstancesRequest.class))).thenReturn(mock);
+    when(aws.runInstances(any(Region.class), any(RunInstancesRequest.class), anyString())).thenReturn(mock);
 
     sayNextSection("Running instances of an image.");
 

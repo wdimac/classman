@@ -38,7 +38,8 @@ public class AwsAdaptorTester {
           .withImageId(imageId)
           .withInstanceType(InstanceType.M3Xlarge)
           .withMaxCount(1)
-          .withMinCount(1)
+          .withMinCount(1),
+        "Test instance"
         );
 
     System.out.println("Instance started:");
