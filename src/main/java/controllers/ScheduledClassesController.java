@@ -37,6 +37,8 @@ import ninja.jaxy.Path;
 import ninja.jpa.UnitOfWork;
 import ninja.params.Param;
 import ninja.params.PathParam;
+import ninja.scheduler.Scheduler;
+import scheduled.ClassManager;
 
 @Path("/api/admin")
 @FilterWith(TokenFilter.class)
@@ -44,6 +46,7 @@ import ninja.params.PathParam;
 public class ScheduledClassesController {
   private static final int DAYS = 1000 * 60 *60 * 24;
   private static final long HOURS8 = 1000 * 60 *60 * 8;
+  private static final long MIN_15 = 1000 * 60 * 15;
   private static DateFormat formatter= new SimpleDateFormat("yyyy-MM-dd");
 
   @Inject
@@ -59,6 +62,8 @@ public class ScheduledClassesController {
 
   @Inject
   AwsAdaptor aws;
+  @Inject
+  ClassManager cm;
 
   @Path("/classes")
   @GET
@@ -94,6 +99,13 @@ public class ScheduledClassesController {
       clazz.setEndTime(new Time(clazz.getStartTime().getTime() + HOURS8));
     }
     scDao.persist(clazz);
+    scDao.refresh(clazz); // Load details
+
+    startClassInstances(clazz.getCount(), clazz);
+
+    scDao.refresh(clazz); // Load instance information
+    cm.setShutdown(clazz.getId(), System.currentTimeMillis() + MIN_15);
+
     return Results.json().render(clazz);
   }
 
@@ -188,9 +200,11 @@ public class ScheduledClassesController {
     SecurityGroup grp = groupDao.find(clazz.getClassTypeDetail().getSecurityGroupId(), SecurityGroup.class);
     String domain = (grp.getVpcId() != null) ? "vpc" : "standard";
     List<Eip> usable = new ArrayList<>();
-    for (Eip eip: clazz.getInstructor().getEips()) {
-      if ((eip.getInstanceId() == null || eip.getInstanceId().length() == 0) && domain.equals(eip.getDomain())) {
-        usable.add(eip);
+    if (clazz.getInstructor() != null) {
+      for (Eip eip: clazz.getInstructor().getEips()) {
+        if ((eip.getInstanceId() == null || eip.getInstanceId().length() == 0) && domain.equals(eip.getDomain())) {
+          usable.add(eip);
+        }
       }
     }
 

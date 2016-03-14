@@ -20,6 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.amazonaws.services.ec2.model.Address;
@@ -113,6 +114,8 @@ public class ScheduledClassesControllerDocTest extends AuthenticatedDocTesterBas
 
     sayAndAssertThat("Class is inserted.",
         rType.getId(), CoreMatchers.notNullValue());
+
+    Mockito.verify(aws).runInstances(any(Region.class), any(RunInstancesRequest.class));
   }
 
   private ScheduledClass getClassObject() {

@@ -32,7 +32,6 @@ var Scheduler = React.createClass({
       timeZone:this.refs.zone.getValue(),
       instructor:{id:this.refs.instructor.getValue()}
     };
-    console.log(classInfo);
     $.ajax({
       url: "/api/admin/classes",
       headers: {'X-AUTH-TOKEN':Auth.getToken()},

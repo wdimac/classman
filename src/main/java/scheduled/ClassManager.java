@@ -9,6 +9,7 @@ import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
@@ -21,16 +22,15 @@ import org.slf4j.LoggerFactory;
 
 import com.appdynamics.aws.AwsAdaptor;
 import com.appdynamics.aws.AwsAdaptor.Region;
+import com.appdynamics.aws.QuickList;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.google.inject.persist.Transactional;
 
 import controllers.ScheduledClassesController;
 import dao.SimpleDao;
 import models.Instance;
 import models.ScheduledClass;
-import ninja.jpa.UnitOfWork;
 import ninja.scheduler.Schedule;
 
 @Singleton
@@ -38,6 +38,7 @@ public class ClassManager {
   static final Logger log = LoggerFactory.getLogger(ClassManager.class);
   static final long PERIOD = 15;
   static final long HOUR = 60 * 60 * 1000;
+  static final HashMap<Long, Long> shutdownList = new HashMap<>();
 
   @Inject
   SimpleDao<ScheduledClass> classDao;
@@ -64,6 +65,10 @@ public class ClassManager {
       List<ScheduledClass> clazzes = classDao.getAll(ScheduledClass.class);
       for (ScheduledClass clazz: clazzes) {
         log.info("Class:" + clazz.getId());
+        if (shutMeDown(clazz)) {
+          continue;
+        }
+
         Calendar now = new GregorianCalendar();
 
         //start and end times for servers are on hour before/after classes
@@ -110,6 +115,28 @@ public class ClassManager {
       }
       unitOfWork.end();
     }
+  }
+
+  public void setShutdown(Long id, Long time) {
+    shutdownList.put(id, time);
+  }
+
+  private boolean shutMeDown(ScheduledClass clazz) {
+    if (shutdownList.containsKey(clazz.getId())) {
+      Long current = System.currentTimeMillis();
+      if (current > shutdownList.get(clazz.getId())) {
+        log.info("Stopping instances.");
+        ArrayList<String> ids = new ArrayList<>();
+        for (Instance instance: clazz.getInstances()) {
+          ids.add(instance.getId());
+        }
+        aws.stopInstances(Region.valueOf(clazz.getClassTypeDetail().getRegion()),
+                          ids.toArray(new String[ids.size()]));
+        shutdownList.remove(clazz.getId());
+        return true;
+      }
+    }
+    return false;
   }
 
   private void checkLifeCycle(ScheduledClass clazz, Calendar now, Calendar startTime, Calendar endTime) {
@@ -162,4 +189,5 @@ public class ClassManager {
           aws.terminateInstances(Region.valueOf(inst.getRegion()), ids.toArray(new String[ids.size()]));
       }
   }
+
 }
