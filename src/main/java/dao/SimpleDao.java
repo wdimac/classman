@@ -24,8 +24,6 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
-import models.ScheduledClass;
-
 @Singleton
 public class SimpleDao<M> {
   @Inject
@@ -171,5 +169,10 @@ public class SimpleDao<M> {
   public void refresh(M entity) {
     EntityManager entityManager = entityManagerProvider.get();
     entityManager.refresh(entity);
+  }
+
+  public void beginTransaction() {
+    EntityManager entityManager = entityManagerProvider.get();
+    entityManager.getTransaction().begin();
   }
 }

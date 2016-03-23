@@ -35,7 +35,7 @@ public class DbController {
    */
   @Transactional
   public Result reset(@Param("fixture") String[] fixtures) {
-    String[] tables = {"Token", "Images", "Instance", "SecurityGroup", "Eip", "ClassType"};
+    String[] tables = {"Token", "Images", "Instance", "SecurityGroup", "Eip", "ClassType", "Vpc"};
 
     HashMap<String, String> results = new HashMap<String, String>();
     EntityManager entityManager = entityManagerProvider.get();

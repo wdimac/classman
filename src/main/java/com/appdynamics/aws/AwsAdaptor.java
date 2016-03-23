@@ -24,6 +24,7 @@ import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.DescribeSecurityGroupsRequest;
 import com.amazonaws.services.ec2.model.DescribeSecurityGroupsResult;
+import com.amazonaws.services.ec2.model.DescribeSubnetsResult;
 import com.amazonaws.services.ec2.model.DisassociateAddressRequest;
 import com.amazonaws.services.ec2.model.DomainType;
 import com.amazonaws.services.ec2.model.Filter;
@@ -39,6 +40,7 @@ import com.amazonaws.services.ec2.model.StartInstancesRequest;
 import com.amazonaws.services.ec2.model.StartInstancesResult;
 import com.amazonaws.services.ec2.model.StopInstancesRequest;
 import com.amazonaws.services.ec2.model.StopInstancesResult;
+import com.amazonaws.services.ec2.model.Subnet;
 import com.amazonaws.services.ec2.model.Tag;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.amazonaws.services.ec2.model.TerminateInstancesResult;
@@ -95,8 +97,11 @@ public class AwsAdaptor {
     }
   }
 
+  static final Logger log = LoggerFactory.getLogger(AwsAdaptor.class);
   @Inject
   private SimpleDao<Eip> eipDao;
+  @Inject
+  com.google.inject.persist.UnitOfWork unitOfWork;
 
   /**
    * Lookup all security groups for the region.
@@ -122,6 +127,18 @@ public class AwsAdaptor {
         .describeSecurityGroups(
             new DescribeSecurityGroupsRequest().withGroupIds(ids));
     return result.getSecurityGroups();
+  }
+
+  /**
+   * Return all items listed
+   * AmazonEC2Client amazonClient = getClient(region);
+   * @param ids
+   * @return
+   */
+  public List<Subnet> getAllVpcs(Region region) {
+    AmazonEC2Client amazonClient = getClient(region);
+    DescribeSubnetsResult result = amazonClient.describeSubnets();
+    return result.getSubnets();
   }
 
   /**
@@ -241,7 +258,7 @@ public class AwsAdaptor {
     qEip.setInstanceId(instanceId);
     Eip eip = eipDao.findBy(qEip);
     if (eip != null) {
-      this.disassociateEip(eip.getRegion(), eip.getPublicIp());
+      this.disassociateEip(eip);
       if (eip.getPoolUser() == null) {
         this.releaseEips(eip.getRegion(), eip.getAllocationId(), eip.getPublicIp());
         eipDao.delete(eip.getId(), Eip.class);
@@ -347,11 +364,14 @@ public class AwsAdaptor {
     amazonClient.describeInstancesAsync(describeInstancesRequest, asyncHandler);
   }
 
-  public void disassociateEip(String region, String publicIp) {
-    AmazonEC2Client amazonClient = getClient(Region.valueOf(region));
-    amazonClient.disassociateAddress(
-        new DisassociateAddressRequest()
-        .withPublicIp(publicIp));
+  public void disassociateEip(Eip eip) {
+    AmazonEC2Client amazonClient = getClient(Region.valueOf(eip.getRegion()));
+    DisassociateAddressRequest request = new DisassociateAddressRequest();
+    if (eip.getAllocationId() != null)
+      request.setAssociationId(eip.getAssociationId());
+    else
+      request.setPublicIp(eip.getPublicIp());
+    amazonClient.disassociateAddress(request);
   }
 
   /**
@@ -434,11 +454,13 @@ public class AwsAdaptor {
             for (Eip eip: eips) {
               if (eip.getInstanceId().equals(inst.getInstanceId())) {
                 log.debug("Associating: " + eip.getPublicIp() + " to instance " + inst.getInstanceId());
-                aws.associateEip(eip.getRegion(),
+                String assocId = aws.associateEip(eip.getRegion(),
                                  eip.getAllocationId(),
                                  eip.getPublicIp(),
                                  eip.getInstanceId());
                 eips.remove(eip);
+                eip.setAssociationId(assocId);
+                aws.updateDuringAsync(eip);
                 request.getInstanceIds().remove(eip.getInstanceId());
               }
             }
@@ -459,6 +481,23 @@ public class AwsAdaptor {
         AmazonEC2AsyncClient amazonClient = getAsyncClient(Region.valueOf(eips.get(0).getRegion()));
         amazonClient.describeInstancesAsync(request, this);
       }
+    }
+  }
+
+  /**
+   * Method to update an eip during async handler.
+   *
+   * @param eip
+   */
+  public void updateDuringAsync(Eip eip) {
+    unitOfWork.begin();
+    eipDao.beginTransaction();
+    try {
+      eipDao.update(eip);
+      log.info("Association:" + eip.getAssociationId());
+    } finally {
+      eipDao.commitTrans();
+      unitOfWork.end();
     }
   }
 }

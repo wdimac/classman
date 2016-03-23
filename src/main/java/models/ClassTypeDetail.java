@@ -31,8 +31,12 @@ public class ClassTypeDetail {
   @Column(name="instance_type")
   private String instanceType;
 
-  @Column(name="security_group_id")
-  private String securityGroupId;
+  @ManyToOne
+  @JoinColumn(name="security_group_id")
+  private SecurityGroup securityGroup;
+  @ManyToOne
+  @JoinColumn(name="subnet_id")
+  private Vpc subnet;
 
   public Long getId() {
     return id;
@@ -66,12 +70,12 @@ public class ClassTypeDetail {
     this.instanceType = instanceType;
   }
 
-  public String getSecurityGroupId() {
-    return securityGroupId;
+  public SecurityGroup getSecurityGroup() {
+    return securityGroup;
   }
 
-  public void setSecurityGroupId(String securityGroupId) {
-    this.securityGroupId = securityGroupId;
+  public void setSecurityGroup(SecurityGroup securityGroup) {
+    this.securityGroup = securityGroup;
   }
 
   public ClassType getClassType() {
@@ -80,5 +84,13 @@ public class ClassTypeDetail {
 
   public void setClassType(ClassType classType) {
     this.classType = classType;
+  }
+
+  public Vpc getSubnet() {
+    return subnet;
+  }
+
+  public void setSubnet(Vpc subnet) {
+    this.subnet = subnet;
   }
 }

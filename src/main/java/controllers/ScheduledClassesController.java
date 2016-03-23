@@ -10,7 +10,6 @@ import java.util.List;
 import javax.inject.Singleton;
 
 import com.amazonaws.services.ec2.model.Address;
-import com.amazonaws.services.ec2.model.CreateTagsRequest;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.amazonaws.services.ec2.model.RunInstancesRequest;
@@ -38,7 +37,6 @@ import ninja.jaxy.Path;
 import ninja.jpa.UnitOfWork;
 import ninja.params.Param;
 import ninja.params.PathParam;
-import ninja.scheduler.Scheduler;
 import scheduled.ClassManager;
 
 @Path("/api/admin")
@@ -160,7 +158,10 @@ public class ScheduledClassesController {
     request.setInstanceType(InstanceType.valueOf(clazz.getClassTypeDetail().getInstanceType()));
     request.setMaxCount(count);
     request.setMinCount(count);
-    request.setSecurityGroupIds(new QuickList<String>(clazz.getClassTypeDetail().getSecurityGroupId()));
+    request.setSecurityGroupIds(new QuickList<String>(clazz.getClassTypeDetail().getSecurityGroup().getId()));
+    if (clazz.getClassTypeDetail().getSubnet() != null) {
+      request.setSubnetId(clazz.getClassTypeDetail().getSubnet().getSubnetId());
+    }
     List<Instance> response = aws.runInstances(
         Region.valueOf(clazz.getClassTypeDetail().getRegion().toUpperCase()),
         request,
@@ -202,12 +203,13 @@ public class ScheduledClassesController {
    * @return
    */
   private List<Eip> getUsableEips(ScheduledClass clazz, int count) {
-    SecurityGroup grp = groupDao.find(clazz.getClassTypeDetail().getSecurityGroupId(), SecurityGroup.class);
-    String domain = (grp.getVpcId() != null) ? "vpc" : "standard";
+    String domain = (clazz.getClassTypeDetail().getSubnet() != null) ? "vpc" : "standard";
     List<Eip> usable = new ArrayList<>();
     if (clazz.getInstructor() != null) {
       for (Eip eip: clazz.getInstructor().getEips()) {
-        if ((eip.getInstanceId() == null || eip.getInstanceId().length() == 0) && domain.equals(eip.getDomain())) {
+        if ((eip.getInstanceId() == null || eip.getInstanceId().length() == 0)
+            && eip.getRegion().equals(clazz.getClassTypeDetail().getRegion())
+            && domain.equals(eip.getDomain())) {
           usable.add(eip);
         }
       }

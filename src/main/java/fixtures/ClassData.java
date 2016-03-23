@@ -46,7 +46,7 @@ public class ClassData implements Fixture {
     detail.setClassType(type);
     detail.setInstanceType(InstanceType.M3Xlarge.name());
     detail.setImageId("ID-1");
-    detail.setSecurityGroupId("sg-1");
+    detail.setSecurityGroup(group);
     entityManager.persist(detail);
 
     User instructor = new User();

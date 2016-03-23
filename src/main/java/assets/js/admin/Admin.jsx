@@ -5,6 +5,7 @@ var EipPanel = window.__APP__.EipPanel;
 var ClassTypePanel = window.__APP__.ClassTypePanel;
 var ClassesPanel = window.__APP__.ClassesPanel;
 var UserPanel = window.__APP__.UserPanel;
+var VpcPanel = window.__APP__.VpcPanel;
 
 var MenuItem = React.createClass({
   render() {
@@ -70,6 +71,9 @@ window.__APP__.Admin = React.createClass({
       case 'classes':
         panel = (<ClassesPanel awsConfig={this.state.awsConfig} />);
         break;
+      case 'vpc':
+        panel = (<VpcPanel awsConfig={this.state.awsConfig} />);
+        break;
       case 'users':
         panel = (<UserPanel awsConfig={this.state.awsConfig} />);
         break;
@@ -105,6 +109,10 @@ window.__APP__.Admin = React.createClass({
               click={this.changePanel.bind(this, 'groups')}
               icon='key'
               title="Sec. Groups" />
+            <MenuItem isActive={this.state.active === 'vpc'}
+              click={this.changePanel.bind(this, 'vpc')}
+              icon='sitemap'
+              title="VPC" />
             <MenuItem isActive={this.state.active === 'users'}
               click={this.changePanel.bind(this, 'users')}
               icon='users'

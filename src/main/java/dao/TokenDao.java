@@ -8,7 +8,6 @@ import javax.persistence.TypedQuery;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.inject.persist.Transactional;
 
 import models.Token;
 import ninja.jpa.UnitOfWork;
