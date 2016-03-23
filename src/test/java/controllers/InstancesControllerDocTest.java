@@ -6,7 +6,6 @@
 package controllers;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -205,7 +204,7 @@ public class InstancesControllerDocTest extends AuthenticatedDocTesterBase{
     final List<String> instances = new ArrayList<>();
     instances.add(testId);
     final AwsAdaptor spy = Mockito.spy(getInjector().getInstance(AwsAdaptor.class));
-    Mockito.doNothing().when(spy).disassociateEip(anyString(),anyString());
+    Mockito.doNothing().when(spy).disassociateEip(any(Eip.class));
     when(aws.terminateInstances(any(Region.class), any(String[].class))).thenAnswer(new Answer<List<String>>() {
       @Override
       public List<String> answer(InvocationOnMock invocation) throws Throwable {

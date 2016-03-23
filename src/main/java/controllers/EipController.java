@@ -97,7 +97,7 @@ public class EipController {
           instanceId);
       eip.setAssociationId(assocId);
     } else {
-      aws.disassociateEip(eip.getRegion(), eip.getPublicIp());
+      aws.disassociateEip(eip);
       eip.setAssociationId(null);
     }
     eipDao.persist(eip);
