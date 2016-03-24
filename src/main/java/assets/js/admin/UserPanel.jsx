@@ -95,7 +95,7 @@ var UserRow = React.createClass({
                       <i className="fa btn btn-sm btn-danger m-r-1 fa-times"
                         onClick={this.delEip.bind(this, eip)}></i>
                       <strong>{eip.publicIp}: </strong> 
-                      {eip.region} &emsp;
+                      {eip.region} ({eip.domain})&emsp;
                       {eip.instanceId ? eip.instanceId : "not assigned"}
 
                     </div>

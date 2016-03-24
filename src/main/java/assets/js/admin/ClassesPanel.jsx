@@ -57,7 +57,9 @@ var Scheduler = React.createClass({
     this.props.types.forEach(function(type){
       type.details.forEach(function(detail){
         if (detail.region)
-          typeOptions.push({name:type.name + ": " + detail.region, value:detail.id});
+          typeOptions.push({name:type.name + ": " 
+            + detail.region + " " + (detail.subnet ? "(vpc)":""), 
+            value:detail.id});
       });
     });
     var zones = this.props.zones ? this.props.zones.map(function(zone){
@@ -275,7 +277,7 @@ var ClassInfo = React.createClass({
             {cl.classTypeDetail.classType.name}:&ensp;
           </span>
           <span className="text-muted">
-            {cl.classTypeDetail.region}
+            {cl.classTypeDetail.region} {cl.classTypeDetail.subnet? "(vpc)":""}
           </span>
           {this.state.open ? 
             <i className="fa fa-minus-square-o m-l-1"></i>

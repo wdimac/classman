@@ -325,7 +325,8 @@ window.__APP__.EipPanel = React.createClass({
         <i className={"fa btn btn-sm btn-danger m-r-1 " + (delThis ? "fa-hourglass-half" : "fa-times")}
           onClick={this.del.bind(this, item)}></i>
         <strong>{item.publicIp}: </strong> 
-        {item.instanceId ? item.instanceId : "not assigned"}
+        {item.instanceId ? item.instanceId : "not assigned"} &thinsp;
+        ({item.domain})
         {item.poolUser ? 
           <span className="m-l-1">
             Pool: {item.poolUser.firstName} {item.poolUser.lastName}
