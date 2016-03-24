@@ -232,10 +232,14 @@ var ClassInfo = React.createClass({
                 + " " + this.props.clazz.startDate;
     doc.text(36, 60, title);
     doc.setFontSize(10);
-    doc.rect(30, 80, 726, this.props.clazz.instances.length * 24);
-    doc.lines([[0, this.props.clazz.instances.length * 24]], 300, 80);
+    doc.rect(30, 80, 726, (this.props.clazz.instances.length + 1 ) * 24);
+    doc.lines([[0, (this.props.clazz.instances.length + 1) * 24]], 300, 80);
+    //Headers
+    doc.text(36, 96, "Instance");
+    doc.text(306, 96, "Public IP Address");
+    doc.lines([[726,0]], 30, 104);
     this.props.clazz.instances.forEach(function(inst, idx) {
-      var rowPos = 96 + idx * 24;
+      var rowPos = 120 + idx * 24;
       doc.text(36, rowPos, inst.description + " (" + inst.id + ")");
 
       if (inst.terminated) {
@@ -244,7 +248,7 @@ var ClassInfo = React.createClass({
         if (!this.state.infos) {
           doc.text(306, rowPos, "Live data not loaded. Sync with server");
         } else {
-          var dns = this.state.infos[inst.id].publicDnsName;
+          var dns = this.state.infos[inst.id].publicIpAddress;
           if (dns)
             doc.text(306, rowPos, dns);
           else
