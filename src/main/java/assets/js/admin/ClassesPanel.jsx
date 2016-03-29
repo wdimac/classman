@@ -32,6 +32,7 @@ var Scheduler = React.createClass({
       timeZone:this.refs.zone.getValue(),
       instructor:{id:this.refs.instructor.getValue()}
     };
+    this.setState({message: "Scheduling class"});
     $.ajax({
       url: "/api/admin/classes",
       headers: {'X-AUTH-TOKEN':Auth.getToken()},
@@ -42,6 +43,7 @@ var Scheduler = React.createClass({
       data: JSON.stringify(classInfo),
       success: function(data) {
         this.props.updateParent();
+        this.setState({message: nil});
         this.close();
       }.bind(this),
       error: function(xhr, status, err) {
@@ -49,8 +51,6 @@ var Scheduler = React.createClass({
         console.error(xhr, status, err.toString());
       }.bind(this)
     });
-
-    this.refs.modal.close();
   },
   render() {
     var typeOptions= [];
