@@ -153,6 +153,7 @@ window.__APP__.ClassTypePanel = React.createClass({
   removeWait(item) {
     var idx = this.state.waiting.indexOf(item);
     this.state.waiting.splice(idx, 1);
+    this.setState({waiting:this.state.waiting});
   },
   loadDataFromServer() {
     this.state.waiting.push("data")
