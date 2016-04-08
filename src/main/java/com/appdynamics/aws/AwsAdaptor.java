@@ -2,11 +2,13 @@ package com.appdynamics.aws;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.handlers.AsyncHandler;
 import com.amazonaws.services.ec2.AmazonEC2AsyncClient;
 import com.amazonaws.services.ec2.AmazonEC2Client;
@@ -240,17 +242,28 @@ public class AwsAdaptor {
 
   public List<String> terminateInstances(Region region, String[] ids){
     AmazonEC2Client amazonClient = getClient(region);
-    TerminateInstancesRequest terminateInstancesRequest =
-        new TerminateInstancesRequest()
-            .withInstanceIds(ids);
-    TerminateInstancesResult results = amazonClient.terminateInstances(terminateInstancesRequest );
-    List<InstanceStateChange> list = results.getTerminatingInstances();
-    List<String> result = new ArrayList<>();
-    for (InstanceStateChange change: list) {
-      result.add(change.getInstanceId());
-      cleanUpEips(change.getInstanceId());
+    for(String id: ids) {
+
+      TerminateInstancesRequest terminateInstancesRequest =
+          new TerminateInstancesRequest()
+              .withInstanceIds(new QuickList<String>(id));
+      try {
+        TerminateInstancesResult results = amazonClient.terminateInstances(terminateInstancesRequest );
+      } catch (AmazonServiceException ex) {
+
+        // Check the ErrorCode to see if the instance does not exist.
+        if ("InvalidInstanceID.NotFound".equals(ex.getErrorCode())) {
+          log.info("Instance " + id + " does not exist. Already terminated?");
+        } else {
+          // The exception was thrown for another reason, so re-throw the
+          // exception.
+          throw ex;
+        }
+      }
+      cleanUpEips(id);
     }
-    return result;
+
+    return Arrays.asList(ids);
   }
 
   public void cleanUpEips(String instanceId) {
