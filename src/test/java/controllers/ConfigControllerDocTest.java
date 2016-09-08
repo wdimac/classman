@@ -34,8 +34,8 @@ public class ConfigControllerDocTest extends AuthenticatedDocTesterBase{
 
     sayAndAssertThat("Config contains 9 Regions.",
         ((List<Object>)config.get("regions")).size(), CoreMatchers.is(9));
-    sayAndAssertThat("Config contains 38 Instance Types.",
-        ((List<Object>)config.get("instanceTypes")).size(), CoreMatchers.is(38));
+    sayAndAssertThat("Config contains 59 Instance Types.",
+        ((List<Object>)config.get("instanceTypes")).size(), CoreMatchers.is(59));
     sayAndAssertThat("Config conatins all Timezone IDs",
         ((List<Object>)config.get("timezones")).size(), CoreMatchers.is(TimeZone.getAvailableIDs().length));
   }

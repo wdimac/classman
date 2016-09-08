@@ -256,7 +256,7 @@
     <dependency>
       <groupId>com.amazonaws</groupId>
       <artifactId>aws-java-sdk-ec2</artifactId>
-      <version>1.9.0</version>
+      <version>1.11.32</version>
       <exclusions>
         <exclusion>
           <artifactId>commons-logging</artifactId>
