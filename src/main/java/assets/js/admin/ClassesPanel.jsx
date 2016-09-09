@@ -489,7 +489,7 @@ var InstanceRow = React.createClass({
             </button>
             :
             <button className="btn btn-secondary"
-              onClick={this.toggleInfo}>
+              onClick={this.props.updateParent}>
               <i className="fa fa-info fa-fw"></i>
             </button>
           }
