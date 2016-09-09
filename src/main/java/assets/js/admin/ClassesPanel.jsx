@@ -496,7 +496,7 @@ var InstanceRow = React.createClass({
          </div>
       }
       {this.props.inst.id} : {this.props.inst.description} 
-      {this.state.showInfo?
+      {(this.state.showInfo && this.props.info)?
         <InfoCard info={this.props.info} close={this.toggleInfo}/>
         : ""
       }
