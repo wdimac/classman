@@ -24,8 +24,8 @@ Run the following in mysql to create the user and databases for dev and testing
 create user 'appd'@'localhost' identified by '4v^Xa7P1el';
 create database classman_dev;
 create database classman_test;
-grant all on classman_dev to 'appd'@'localhost';
-grant all on classman_test to 'appd'@'localhost';
+grant all on 'classman_dev'.* to 'appd'@'localhost';
+grant all on 'classman_test'.* to 'appd'@'localhost';
 ```
 Save your aws credentials (create a key in aws) in ~/.aws/credentials
 
