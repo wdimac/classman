@@ -140,8 +140,8 @@ var ClassInfo = React.createClass({
       if (!inst.terminated) delOK= false;
     })
     if (!delOK) {
-      alert("Cannot delete a class with active instances.");
-      return;
+      if (!confirm("This will terminate active instances."))
+          return;
     }
     $.ajax({
       url: "/api/admin/classes/" + this.props.clazz.id,

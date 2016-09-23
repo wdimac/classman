@@ -6,6 +6,7 @@ import java.util.List;
 import javax.inject.Singleton;
 
 import com.amazonaws.services.ec2.model.Address;
+import com.amazonaws.services.ec2.model.AmazonEC2Exception;
 import com.appdynamics.aws.AwsAdaptor;
 import com.appdynamics.aws.QuickList;
 import com.google.inject.Inject;
@@ -35,7 +36,7 @@ public class EipController {
   SimpleDao<models.Eip> eipDao;
   @Inject
   AwsAdaptor aws;
-
+ 
   /**
    * Get list of elastic ips
    * @return
@@ -69,11 +70,7 @@ public class EipController {
   public Result deleteEip(@PathParam("id") String id) {
     models.Eip eip = eipDao.delete(Long.valueOf(id), models.Eip.class);
 
-    try {
-      aws.releaseEips(eip.getRegion(), eip.getAllocationId(), eip.getPublicIp());
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    aws.releaseEips(eip.getRegion(), eip.getAllocationId(), eip.getPublicIp());
     return Results.json().render(eip);
   }
 

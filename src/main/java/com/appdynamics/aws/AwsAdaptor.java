@@ -4,6 +4,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,7 @@ import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.Address;
 import com.amazonaws.services.ec2.model.AllocateAddressRequest;
 import com.amazonaws.services.ec2.model.AllocateAddressResult;
+import com.amazonaws.services.ec2.model.AmazonEC2Exception;
 import com.amazonaws.services.ec2.model.AssociateAddressRequest;
 import com.amazonaws.services.ec2.model.AssociateAddressResult;
 import com.amazonaws.services.ec2.model.CreateTagsRequest;
@@ -248,7 +250,7 @@ public class AwsAdaptor {
           new TerminateInstancesRequest()
               .withInstanceIds(new QuickList<String>(id));
       try {
-        TerminateInstancesResult results = amazonClient.terminateInstances(terminateInstancesRequest );
+        amazonClient.terminateInstances(terminateInstancesRequest );
       } catch (AmazonServiceException ex) {
 
         // Check the ErrorCode to see if the instance does not exist.
@@ -384,7 +386,15 @@ public class AwsAdaptor {
       request.setAssociationId(eip.getAssociationId());
     else
       request.setPublicIp(eip.getPublicIp());
-    amazonClient.disassociateAddress(request);
+    try {
+      amazonClient.disassociateAddress(request);
+    } catch (AmazonEC2Exception ae) {
+      if (ae.getStatusCode() == 400) {
+        log.info("no association, ignoring");
+      } else {
+        log.error("Failed to dissociate EIP", ae);
+      }
+    }
   }
 
   /**
@@ -417,7 +427,15 @@ public class AwsAdaptor {
     } else {
       request.withPublicIp(publicIp);
     }
-    amazonClient.releaseAddress(request);
+    try {
+      amazonClient.releaseAddress(request);
+    } catch (AmazonEC2Exception ae) {
+      if (ae.getStatusCode() == 400) {
+        log.info("EIP " + publicIp + " has already been released.");
+      } else {
+        log.error("Failed to release EIP: " + publicIp + " cause: " + ae.getErrorMessage());
+      }
+    }
   }
 
   /**

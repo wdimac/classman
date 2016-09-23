@@ -123,11 +123,19 @@ public class ScheduledClassesController {
   @Transactional
   public Result deleteClass(@PathParam("id") Long id) {
     ScheduledClass sched = scDao.find(id, ScheduledClass.class);
+    List<models.Instance> instancesToTerminate = new ArrayList<>();
     for (models.Instance instance : sched.getInstances()) {
       if (!instance.isTerminated()) {
-        return Results.badRequest().json();
+        instancesToTerminate.add(instance);
       }
     }
+    
+    if (!instancesToTerminate.isEmpty()) {
+      aws.terminateInstances(
+          Region.valueOf(sched.getClassTypeDetail().getRegion()), 
+          instancesToTerminate.stream().map(i -> i.getId()).toArray(size -> new String[size]));
+    }
+    
     scDao.delete(Long.valueOf(id), ScheduledClass.class);
     return Results.json().render(sched);
   }

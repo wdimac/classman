@@ -54,7 +54,7 @@ public class ClassManager {
 
   @Schedule(delay=PERIOD, initialDelay=2, timeUnit=TimeUnit.MINUTES)
   public void controlInstances() {
-    unitOfWork.begin();
+	unitOfWork.begin();
     EntityManager em = entityManagerProvider.get();
     EntityTransaction trans = em.getTransaction();
     if (!trans.isActive())

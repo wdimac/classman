@@ -1,7 +1,7 @@
 package controllers;
 
 import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.sql.Date;
 import java.sql.Time;
@@ -133,7 +133,7 @@ public class ScheduledClassesControllerDocTest extends AuthenticatedDocTesterBas
     return clazz;
   }
   @Test
-  public void updateType() {
+  public void updateClass() {
     sayNextSection("Update Scheduled Class.");
 
     say("Updating a Scheduled Class is a PUT request to " + CLASS_URL + "/[id]");
@@ -156,7 +156,7 @@ public class ScheduledClassesControllerDocTest extends AuthenticatedDocTesterBas
   }
 
   @Test
-  public void deleteType() {
+  public void deleteClass() {
     Instance inst = iDao.getAll(Instance.class).get(0);
     inst.setTerminated(true);
     iDao.update(inst);
@@ -168,14 +168,15 @@ public class ScheduledClassesControllerDocTest extends AuthenticatedDocTesterBas
 
     Response response = sayAndMakeRequest(
       Request.DELETE()
-        .url(testServerUrl().path(CLASS_URL + "/2"))
+        .url(testServerUrl().path(CLASS_URL + "/1"))
         .addHeader("X-AUTH-TOKEN", auth.auth_token)
       );
 
     ScheduledClass rClazz = response.payloadAs(ScheduledClass.class);
 
     sayAndAssertThat("Scheduled Class deleted returned.",
-        rClazz.getId(), CoreMatchers.is(2L));
+        rClazz.getId(), CoreMatchers.is(1L));
+    verify(aws, times(1)).terminateInstances(any(Region.class), any(String[].class));
   }
 
   @Test

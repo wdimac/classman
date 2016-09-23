@@ -73,6 +73,7 @@ public class ClassData implements Fixture {
     inst.setRegion(Region.US_EAST_1.name());
     inst.setScheduledClass(clazz);
     inst.setImage_id(image.getId());
+    inst.setTerminated(false);
     entityManager.persist(inst);
 
     clazz = new ScheduledClass();
