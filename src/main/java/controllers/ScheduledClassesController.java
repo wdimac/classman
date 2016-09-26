@@ -5,9 +5,14 @@ import java.sql.Time;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Singleton;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.amazonaws.services.ec2.model.Address;
 import com.amazonaws.services.ec2.model.Instance;
@@ -43,6 +48,7 @@ import scheduled.ClassManager;
 @FilterWith(TokenFilter.class)
 @Singleton
 public class ScheduledClassesController {
+  static final Logger log = LoggerFactory.getLogger(ScheduledClassesController.class);
   private static final int DAYS = 1000 * 60 *60 * 24;
   private static final long HOURS8 = 1000 * 60 *60 * 8;
   private static final long MIN_15 = 1000 * 60 * 15;
@@ -289,13 +295,14 @@ public class ScheduledClassesController {
 
   @Path("/classes/{id}/aws")
   @GET
-  @UnitOfWork
+  @Transactional
   public Result getAwsInfo(@PathParam("region") String region, @PathParam("id") String id) {
     ScheduledClass cls = scDao.find(id, ScheduledClass.class);
-    List<String> idList = new ArrayList<>();
+    Map<String, models.Instance> idList = new HashMap<>();
     for (models.Instance inst : cls.getInstances()) {
       if (!inst.isTerminated()) {
-        idList.add(inst.getId());
+        idList.put(inst.getId(), inst);
+        
       }
     }
 
@@ -304,9 +311,17 @@ public class ScheduledClassesController {
     }
 
     List<com.amazonaws.services.ec2.model.Instance> instanceInfos
-      = aws.getInstances(idList.toArray(new String[idList.size()]),
+      = aws.getInstances(idList.keySet().toArray(new String[idList.size()]),
                          cls.getClassTypeDetail().getRegion());
 
+    for (com.amazonaws.services.ec2.model.Instance info: instanceInfos) {
+      if (info.getState().getCode() == 48) {
+        models.Instance inst = idList.get(info.getInstanceId());
+        inst.setTerminated(true);
+        instanceDao.update(inst);
+        log.info("Updated " + inst.getId() + " " + inst.isTerminated());
+      }
+    }
     return Results.json().render(instanceInfos);
   }
 }

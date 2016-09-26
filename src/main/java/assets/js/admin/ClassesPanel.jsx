@@ -459,6 +459,8 @@ var InstanceRow = React.createClass({
         icon="fa-power-off"
         btn="btn-danger";
         newState="START";
+      } else if (this.props.info.state.name === 'terminated') {
+        this.props.inst.terminated = true;
       } else {
         icon="fa-power-off fa-spin";
         btn="btn-secondary";
