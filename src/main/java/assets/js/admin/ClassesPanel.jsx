@@ -43,7 +43,7 @@ var Scheduler = React.createClass({
       data: JSON.stringify(classInfo),
       success: function(data) {
         this.props.updateParent();
-        this.setState({message: nil});
+        this.setState({message: "Class scheduled"});
         this.close();
       }.bind(this),
       error: function(xhr, status, err) {
@@ -141,7 +141,7 @@ var ClassInfo = React.createClass({
     })
     if (!delOK) {
       if (!confirm("This will terminate active instances."))
-          return;
+          sreturn;
     }
     $.ajax({
       url: "/api/admin/classes/" + this.props.clazz.id,
