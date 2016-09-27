@@ -12,7 +12,6 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -25,12 +24,12 @@ import com.appdynamics.aws.AwsAdaptor.Region;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.jensfendler.ninjaquartz.annotations.QuartzSchedule;
 
 import controllers.ScheduledClassesController;
 import dao.SimpleDao;
 import models.Instance;
 import models.ScheduledClass;
-import ninja.scheduler.Schedule;
 
 @Singleton
 public class ClassManager {
@@ -52,7 +51,7 @@ public class ClassManager {
   @Inject
   com.google.inject.persist.UnitOfWork unitOfWork;
 
-  @Schedule(delay=PERIOD, initialDelay=2, timeUnit=TimeUnit.MINUTES)
+  @QuartzSchedule(cronSchedule = "0 0/15 * * * ?")
   public void controlInstances() {
 	unitOfWork.begin();
     EntityManager em = entityManagerProvider.get();
