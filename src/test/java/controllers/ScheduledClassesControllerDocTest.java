@@ -311,7 +311,7 @@ public class ScheduledClassesControllerDocTest extends AuthenticatedDocTesterBas
   private ArrayList<com.amazonaws.services.ec2.model.Instance> getInstanceList() {
     com.amazonaws.services.ec2.model.Instance testInstance = new com.amazonaws.services.ec2.model.Instance()
         .withInstanceId("ami-xxxxxx")
-        .withState(new InstanceState().withName("stopped"));
+        .withState(new InstanceState().withName("stopped").withCode(24));
     ArrayList<com.amazonaws.services.ec2.model.Instance> instances = new ArrayList<>();
 
     instances.add(testInstance);
