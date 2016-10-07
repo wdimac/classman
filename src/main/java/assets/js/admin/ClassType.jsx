@@ -24,8 +24,6 @@ var DetailRow = React.createClass({
         detail.region = event.target.value; break;
       case 'type':
         detail.instanceType = event.target.value; break;
-      case 'group':
-        detail.securityGroup= {id:event.target.value}; break;
       case 'image':
         detail.imageId = event.target.value; break;
       case 'vpc':
@@ -60,7 +58,6 @@ var DetailRow = React.createClass({
       })
     )
     var imageOptions = deflt;
-    var groupOptions = deflt;
     var vpcOptions = [{name:"Default (EC2 classic)", value:""}];
     if (this.props.detail.region != null) {
       imageOptions= imageOptions.concat(
@@ -70,32 +67,13 @@ var DetailRow = React.createClass({
           return {name:image.description, value:image.id};
         })
       );
-      groupOptions=groupOptions.concat(
-        this.props.selects.groups.filter(function(group){
-          return group.region === this.props.detail.region;
-        }.bind(this)).map(function(group) {
-          return {name:group.name, value:group.id};
-        })
-      );
-       vpcOptions=vpcOptions.concat(
+      vpcOptions=vpcOptions.concat(
         this.props.selects.vpc.filter(function(vpc){
           return vpc.region === this.props.detail.region;
         }.bind(this)).map(function(vpc) {
           return {name:vpc.vpcId + " : " + vpc.subnetId, value:vpc.subnetId};
         })
       );
-    }
-    var msg = ""
-    if (this.props.detail.securityGroup) {
-      if (this.props.detail.subnet) {
-        if( this.props.detail.subnet.vpcId !== this.props.detail.securityGroup.vpcId) {
-          msg = "Security group is not valid in selected subnet.";
-        }
-      } else {
-        if (this.props.detail.securityGroup.vpcId) {
-          msg = "Security group requires a subnet for " + this.props.detail.securityGroup.vpcId;
-        }
-      }
     }
     return (
       <div className="card " style={{minWidth:"250px",padding:"0.5rem"}}>
@@ -112,10 +90,6 @@ var DetailRow = React.createClass({
             onChange={this.markDirty.bind(this, "type")} />
         </div>
         <div>
-          <Select ref="groups" options={groupOptions} myValue={this.props.detail.securityGroup? this.props.detail.securityGroup.id:null}
-            onChange={this.markDirty.bind(this, "group")} />
-        </div>
-        <div>
           <Select ref="vpc" options={vpcOptions} myValue={this.props.detail.subnet? this.props.detail.subnet.subnetId:null}
             onChange={this.markDirty.bind(this, "vpc")} />
         </div>
@@ -123,7 +97,6 @@ var DetailRow = React.createClass({
           <div className="btn-group">
           <i className="fa fa-times btn btn-sm btn-danger"
               onClick={this.dropDetail.bind(this, this.props.detail)}></i>
-          <small className="text-danger p-l-1">{msg}</small>
           </div>
         </div>
       </div>
@@ -140,7 +113,6 @@ window.__APP__.ClassTypePanel = React.createClass({
         regions: [],
         types:   [],
         images:  [],
-        groups:  [],
         vpc:     []
       }
     }
@@ -188,22 +160,6 @@ window.__APP__.ClassTypePanel = React.createClass({
       }.bind(this),
       error: function(xhr, status, err) {
         this.removeWait("images");
-        console.error(this.props.url, status, err.toString());
-      }.bind(this)
-    });
-    this.state.waiting.push("groups");
-    $.ajax({
-      url: "/api/admin/security_groups",
-      headers: {'X-AUTH-TOKEN':Auth.getToken()},
-      dataType: 'json',
-      cache: false,
-      timeout: 5000,
-      success: function(data) {
-        this.removeWait("groups");
-        this.state.selects.groups = data;
-      }.bind(this),
-      error: function(xhr, status, err) {
-        this.removeWait("groups");
         console.error(this.props.url, status, err.toString());
       }.bind(this)
     });

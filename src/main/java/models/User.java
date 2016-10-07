@@ -29,6 +29,10 @@ public class User {
   @OneToMany(mappedBy="poolUser", fetch=FetchType.EAGER)
   private List<Eip> eips;
 
+  @OneToMany(mappedBy="instructor", fetch=FetchType.EAGER)
+  @JsonIgnoreProperties({"instructor"})
+  private List<SecurityGroup> securityGroups;
+  
   public Long getId() {
     return id;
   }
@@ -58,5 +62,11 @@ public class User {
   }
   public void setEips(List<Eip> eips) {
     this.eips = eips;
+  }
+  public List<SecurityGroup> getSecurityGroups() {
+    return securityGroups;
+  }
+  public void setSecurityGroups(List<SecurityGroup> securityGroups) {
+    this.securityGroups = securityGroups;
   }
 }

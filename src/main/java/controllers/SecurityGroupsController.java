@@ -19,6 +19,7 @@ import ninja.Results;
 import ninja.jaxy.DELETE;
 import ninja.jaxy.GET;
 import ninja.jaxy.POST;
+import ninja.jaxy.PUT;
 import ninja.jaxy.Path;
 import ninja.jpa.UnitOfWork;
 import ninja.params.PathParam;
@@ -52,9 +53,25 @@ public class SecurityGroupsController {
   @Path("/security_groups")
   @POST
   @Transactional
-  public Result addsecurityGroup(models.SecurityGroup securityGroup) {
+  public Result addSecurityGroup(models.SecurityGroup securityGroup) {
 
     securityGroupDao.persist(securityGroup);
+
+    return Results.json().render(securityGroup);
+  }
+  
+  /**
+   * Update securityGroup information.
+   *
+   * @param securityGroup
+   * @return
+   */
+  @Path("/security_groups/{id}")
+  @PUT
+  @Transactional
+  public Result updateSecurityGroup(models.SecurityGroup securityGroup) {
+
+    securityGroupDao.update(securityGroup);
 
     return Results.json().render(securityGroup);
   }
@@ -62,7 +79,7 @@ public class SecurityGroupsController {
   @Path("/security_groups/{id}")
   @DELETE
   @Transactional
-  public Result deletesecurityGroup(@PathParam("id") String id) {
+  public Result deleteSecurityGroup(@PathParam("id") String id) {
     models.SecurityGroup securityGroup = securityGroupDao.delete(id, models.SecurityGroup.class);
 
     return Results.json().render(securityGroup);

@@ -23,7 +23,7 @@ window.__APP__.Select = React.createClass({
         style={{height:"2.3rem"}} onChange={this.onChange}>
 
         {this.props.options.map(function(item){
-          return ( <Option item={item} key={item.value}/>)
+          return ( <Option item={item} key={item.name}/>)
         }.bind(this))}
 
       </select>

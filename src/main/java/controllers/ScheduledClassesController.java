@@ -103,10 +103,17 @@ public class ScheduledClassesController {
     if (clazz.getEndTime() == null) {
       clazz.setEndTime(new Time(clazz.getStartTime().getTime() + HOURS8));
     }
+    
+    SecurityGroup group = groupDao.find(clazz.getSecurityGroup().getId(), SecurityGroup.class);
+    log.info("GROUP:" + clazz.getSecurityGroup().getId());
     scDao.persist(clazz);
     scDao.refresh(clazz); // Load details
 
-    startClassInstances(clazz.getCount(), clazz);
+    try {
+      startClassInstances(clazz.getCount(), clazz);
+    } catch (Exception e) {
+      log.error("Failed to start class instances", e);
+    }
 
     scDao.refresh(clazz); // Load instance information
     cm.setShutdown(clazz.getId(), System.currentTimeMillis() + MIN_15);
@@ -172,7 +179,7 @@ public class ScheduledClassesController {
     request.setInstanceType(InstanceType.valueOf(clazz.getClassTypeDetail().getInstanceType()));
     request.setMaxCount(count);
     request.setMinCount(count);
-    request.setSecurityGroupIds(new QuickList<String>(clazz.getClassTypeDetail().getSecurityGroup().getId()));
+    request.setSecurityGroupIds(new QuickList<String>(clazz.getSecurityGroup().getId()));
     if (clazz.getClassTypeDetail().getSubnet() != null) {
       request.setSubnetId(clazz.getClassTypeDetail().getSubnet().getSubnetId());
     }

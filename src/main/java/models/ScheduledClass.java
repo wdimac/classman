@@ -51,6 +51,16 @@ public class ScheduledClass {
   @Column(name="time_zone")
   private String timeZone;
 
+  @ManyToOne
+  @JoinColumn(name="security_group_id")
+  private SecurityGroup securityGroup;
+
+  public SecurityGroup getSecurityGroup() {
+    return securityGroup;
+  }
+  public void setSecurityGroup(SecurityGroup securityGroup) {
+    this.securityGroup = securityGroup;
+  }
   public Long getId() {
     return id;
   }

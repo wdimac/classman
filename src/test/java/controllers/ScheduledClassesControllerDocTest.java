@@ -1,7 +1,10 @@
 package controllers;
 
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.sql.Date;
 import java.sql.Time;
@@ -33,6 +36,7 @@ import dao.SimpleDao;
 import models.ClassTypeDetail;
 import models.Instance;
 import models.ScheduledClass;
+import models.SecurityGroup;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ScheduledClassesControllerDocTest extends AuthenticatedDocTesterBase {
@@ -41,6 +45,7 @@ public class ScheduledClassesControllerDocTest extends AuthenticatedDocTesterBas
 
   SimpleDao<ClassTypeDetail> ctdDao;
   SimpleDao<Instance> iDao;
+  SimpleDao<SecurityGroup> gDao;
   ScheduledClassesController controller;
 
   @Mock
@@ -54,6 +59,7 @@ public class ScheduledClassesControllerDocTest extends AuthenticatedDocTesterBas
 
     ctdDao = getInjector().getInstance(SimpleDao.class);
     iDao = getInjector().getInstance(SimpleDao.class);
+    gDao = getInjector().getInstance(SimpleDao.class);
     controller = getInjector().getInstance(ScheduledClassesController.class);
     controller.aws = aws;
   }
@@ -119,6 +125,7 @@ public class ScheduledClassesControllerDocTest extends AuthenticatedDocTesterBas
   }
 
   private ScheduledClass getClassObject() {
+    SecurityGroup group = gDao.find("sg-1", SecurityGroup.class);
     ScheduledClass clazz = new ScheduledClass();
     clazz.setDescription("insert_test");
     clazz.setClassTypeDetail(ctdDao.getAll(ClassTypeDetail.class).get(0));
@@ -130,6 +137,7 @@ public class ScheduledClassesControllerDocTest extends AuthenticatedDocTesterBas
     clazz.setStartTime(Time.valueOf("09:00:00"));
     clazz.setEndTime(Time.valueOf("16:00:00"));
     clazz.setTimeZone(TimeZone.getDefault().getID());
+    clazz.setSecurityGroup(group);
     return clazz;
   }
   @Test

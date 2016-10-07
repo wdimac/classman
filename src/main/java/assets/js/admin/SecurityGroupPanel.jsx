@@ -1,5 +1,6 @@
 var BootstrapModal = window.__APP__.BootstrapModal;
 var Accordian = window.__APP__.Accordian;
+var InlineSelect = window.__APP__.InlineSelect;
 
 var SGLookup = React.createClass({
   getInitialState() {
@@ -129,11 +130,33 @@ var SGLookup = React.createClass({
 window.__APP__.SecurityGroupPanel = React.createClass({
   getInitialState() {
     return {
-      data:[]
+      data:[],
+      instructors:[]
     }
   },
   componentDidMount() {
+    this.loadOther();
     this.loadDataFromServer();
+  },
+  loadOther() {
+    $.ajax({
+      url: "/api/admin/users",
+      headers: {
+        'X-AUTH-TOKEN':Auth.getToken()
+       },
+      dataType: 'json',
+      cache: false,
+      success: function(data) {
+        var options = [{name:"Select", value:""}];
+        options = options.concat(data.map(function(instr){
+          return {name: instr.firstName + " " + instr.lastName, value:instr.id}
+        }));
+        this.setState({instructors: options});
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(this.props.url, status, err.toString());
+      }.bind(this)
+    });  
   },
   loadDataFromServer() {
     $.ajax({
@@ -154,20 +177,43 @@ window.__APP__.SecurityGroupPanel = React.createClass({
   openLookup() {
     this.refs.lookup.open();
   },
+  updateGroup(secGroup) {
+    $.ajax({
+      url: "/api/admin/security_groups/" + secGroup.id,
+      headers: { 'X-AUTH-TOKEN':Auth.getToken() },
+      type: 'PUT',
+      dataType: 'json',
+      contentType: 'application/json',
+      cache: false,
+      data: JSON.stringify(secGroup),
+      success: function(data) {
+        console.log(data)
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(status, err.toString());
+      }.bind(this)
+    });
+  },
   //Callback for Accordian
   formatGroupRow(item) {
     return(
-      <div key={item.id} className="truncate">
-        <strong>{item.id}:</strong> 
-        <span className="text-muted"> (Owner: {item.ownerId}) </span>
-        {item.name} - 
-        {item.description} 
+      <div key={item.id} className="truncate m-b-1">
+        <div className="col-md-6">
+        <strong>{item.id}:&emsp;</strong> 
         {item.vpcId ? 
-          <span className="text-info m-l-1">
-            {item.vpcId}
+          <span className="text-info">
+            {item.vpcId}&ensp;
           </span>
           :""
         }
+        {item.name} - {item.description} 
+        
+        </div>
+        <div className="col-md-6">
+          <InlineSelect object={item} field="instructor" isObject="true"
+            options={this.state.instructors}
+            className="" handleEdit={this.updateGroup} />
+        </div>
       </div>
     )
   },

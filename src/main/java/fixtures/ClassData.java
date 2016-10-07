@@ -35,10 +35,16 @@ public class ClassData implements Fixture {
     image.setRegion(Region.US_EAST_1.name());
     entityManager.persist(image);
 
+    User instructor = new User();
+    instructor.setFirstName("test");
+    instructor.setLastName("Last");
+    entityManager.persist(instructor);
+
     SecurityGroup group = new SecurityGroup();
     group.setId("sg-1");
     group.setOwnerId("xxx");
     group.setRegion(Region.US_EAST_1.name());
+    group.setInstructor(instructor);
     entityManager.persist(group);
 
     ClassTypeDetail detail = new ClassTypeDetail();
@@ -46,13 +52,7 @@ public class ClassData implements Fixture {
     detail.setClassType(type);
     detail.setInstanceType(InstanceType.M3Xlarge.name());
     detail.setImageId("ID-1");
-    detail.setSecurityGroup(group);
     entityManager.persist(detail);
-
-    User instructor = new User();
-    instructor.setFirstName("test");
-    instructor.setLastName("Last");
-    entityManager.persist(instructor);
 
     ScheduledClass clazz = new ScheduledClass();
     clazz.setDescription("test");
@@ -66,6 +66,7 @@ public class ClassData implements Fixture {
     clazz.setEndTime(Time.valueOf("16:00:00"));
     clazz.setTimeZone(TimeZone.getDefault().getID());
     clazz.setInstructor(instructor);
+    clazz.setSecurityGroup(group);
     entityManager.persist(clazz);
 
     Instance inst = new Instance();
@@ -87,6 +88,7 @@ public class ClassData implements Fixture {
     clazz.setStartTime(Time.valueOf("09:00:00"));
     clazz.setEndTime(Time.valueOf("16:00:00"));
     clazz.setTimeZone(TimeZone.getDefault().getID());
+    clazz.setSecurityGroup(group);
     entityManager.persist(clazz);
 
     results.put("ClassData", "Inserted default records");

@@ -3,7 +3,11 @@ package models;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name="security_groups")
@@ -17,7 +21,18 @@ public class SecurityGroup {
   private String description;
   @Column(name="vpc_id")
   private String vpcId;
+  
+  @ManyToOne
+  @JoinColumn(name="user_id")
+  @JsonIgnoreProperties({"securityGroups"})
+  private User instructor;
 
+  public User getInstructor() {
+    return instructor;
+  }
+  public void setInstructor(User instructor) {
+    this.instructor = instructor;
+  }
   public String getId() {
     return id;
   }

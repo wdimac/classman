@@ -32,9 +32,6 @@ public class ClassTypeDetail {
   private String instanceType;
 
   @ManyToOne
-  @JoinColumn(name="security_group_id")
-  private SecurityGroup securityGroup;
-  @ManyToOne
   @JoinColumn(name="subnet_id")
   private Vpc subnet;
 
@@ -68,14 +65,6 @@ public class ClassTypeDetail {
 
   public void setInstanceType(String instanceType) {
     this.instanceType = instanceType;
-  }
-
-  public SecurityGroup getSecurityGroup() {
-    return securityGroup;
-  }
-
-  public void setSecurityGroup(SecurityGroup securityGroup) {
-    this.securityGroup = securityGroup;
   }
 
   public ClassType getClassType() {

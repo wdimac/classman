@@ -8,7 +8,8 @@ var PropsSpewer = window.__APP__.PropsSpewer;
 var Scheduler = React.createClass({
   getInitialState(){
     return {
-      message:null
+      message:null,
+      groupOptions:[{name:'Select an Instructor'}]
     }
   },
   componentDidMount() {
@@ -23,6 +24,19 @@ var Scheduler = React.createClass({
   close() {
     this.refs.modal.close();
   },
+  updateGroups(event) {
+    var options = this.props.groups.createOptions(event.target.value,
+      function(group){
+        var typeId = this.refs.type.getValue();
+        var detail = this.props.details.find(function(detail){
+          return detail.id == typeId;
+        })
+        if (detail.region !== group.region) return false;
+        if (detail.subnet.vpcId != group.vpcId) return false;
+        return true;
+      }.bind(this));
+    this.setState({groupOptions:options});
+  },
   schedule() {
     var classInfo = {
       classTypeDetail:{id:this.refs.type.getValue()},
@@ -30,7 +44,8 @@ var Scheduler = React.createClass({
       startTime:this.refs.time.value + ":00",
       count:this.refs.count.value,
       timeZone:this.refs.zone.getValue(),
-      instructor:{id:this.refs.instructor.getValue()}
+      instructor:{id:this.refs.instructor.getValue()},
+      securityGroup:{id:this.refs.group.getValue()}
     };
     this.setState({message: "Scheduling class"});
     $.ajax({
@@ -54,13 +69,11 @@ var Scheduler = React.createClass({
   },
   render() {
     var typeOptions= [];
-    this.props.types.forEach(function(type){
-      type.details.forEach(function(detail){
-        if (detail.region)
-          typeOptions.push({name:type.name + ": " 
-            + detail.region + " " + (detail.subnet ? "(vpc)":""), 
-            value:detail.id});
-      });
+    this.props.details.forEach(function(detail){
+      if (detail.region)
+        typeOptions.push({name:detail.classType.name + ": " 
+          + detail.region + " " + (detail.subnet ? "(vpc)":""), 
+          value:detail.id});
     });
     var zones = this.props.zones ? this.props.zones.map(function(zone){
       return {name:zone, value:zone}
@@ -95,7 +108,11 @@ var Scheduler = React.createClass({
               type="number" defaultValue="6" />
         </div>
         <div className="p-b-1">
-          <Select ref="instructor" options={this.props.instructors} />
+          <Select ref="instructor" options={this.props.instructors} 
+            onChange={this.updateGroups}/>
+        </div>
+          <div className="p-b-1">
+          <Select ref="group" options={this.state.groupOptions} />
         </div>
       </BootstrapModal>
     );
@@ -265,12 +282,22 @@ var ClassInfo = React.createClass({
     var zoneOptions = this.props.zones ? this.props.zones.map(function(zone){
       return {name:zone, value:zone};
     }):[];
-    this.props.clazz.instances.sort(function(ia, ib) {
+    cl.instances.sort(function(ia, ib) {
       if (ia.terminated !== ib.terminated) {
         return ia.terminated ? 1 : -1;
       }
       return (ia.id > ib.id) ? 1 : -1;
-    })
+    });
+    var groupOptions = 
+      this.props.securityGroups.createOptions?
+      this.props.securityGroups.createOptions(cl.instructor.id,
+        function(group){
+          var detail = cl.classTypeDetail;
+          if (detail.region !== group.region) return false;
+          if (detail.subnet.vpcId != group.vpcId) return false;
+          return true;
+      })
+      :[];
     return (
       <div> 
         <div onClick={this.toggleOpen}>
@@ -308,10 +335,15 @@ var ClassInfo = React.createClass({
                 </div>
               </div>
               <div className="row m-t-1">
-                <div className="col-xs-12">
+                <div className="col-xs-6">
                   <Inliner object={cl} field="count" type="number"
                       label="# Instances"
                       className="" handleEdit={this.updateClass} />
+                </div>
+                <div className="col-xs-6">
+                  <InlineSelect object={cl} field="securityGroup" isObject="true"
+                    options={groupOptions}
+                    className="" handleEdit={this.updateClass} />
                 </div>
               </div>
             </div>
@@ -531,8 +563,9 @@ window.__APP__.ClassesPanel = React.createClass({
     return {
       loading:false,
       data:[],
-      types:[],
-      instructors:[]
+      details:[],
+      instructors:[],
+      securityGroups:{}
     }
   },
   componentDidMount() {
@@ -569,7 +602,10 @@ window.__APP__.ClassesPanel = React.createClass({
       dataType: 'json',
       cache: false,
       success: function(data) {
-        this.setState({types: data});
+        var deets = data.reduce(function(deets, type){
+          return deets.concat(type.details);
+        }, []);
+        this.setState({details: deets});
       }.bind(this),
       error: function(xhr, status, err) {
         console.error(xhr, status, err.toString());
@@ -581,11 +617,28 @@ window.__APP__.ClassesPanel = React.createClass({
       dataType: 'json',
       cache: false,
       success: function(data) {
+        var groupMap={};
         var options = [{name:"Select", value:""}];
         options = options.concat(data.map(function(instr){
-          return {name: instr.firstName + " " + instr.lastName, value:instr.id}
+          groupMap[instr.id] = instr.securityGroups;
+          return {name: instr.firstName + " " + instr.lastName, value:instr.id};
         }));
-        this.setState({instructors: options});
+        groupMap.createOptions = function(instructorId, filterFunc) {
+          var options = this[instructorId];
+          if (!options) {
+            return [{name:'Select an Instructor'}];
+          }
+          // Filter the available groups down to ones appropriate for 
+          // the other settings of the class
+          options = options
+            .filter(filterFunc)
+            .map(function(group){
+              return {name:group.description, value:group.id};
+            });
+          if (options.length <= 0) options = [{name: "No relevant Security Group found"}];
+          return options;
+        };
+        this.setState({instructors: options, securityGroups:groupMap});
       }.bind(this),
       error: function(xhr, status, err) {
         console.error(xhr, status, err.toString());
@@ -619,12 +672,14 @@ window.__APP__.ClassesPanel = React.createClass({
                 <ClassInfo clazz={cl} key={cl.id} 
                   updateParent={this.loadClasses}
                   zones={this.props.awsConfig? this.props.awsConfig.timezones : []}
-                  instructors={this.state.instructors}/>
+                  instructors={this.state.instructors}
+                  securityGroups={this.state.securityGroups}/>
               )
             }.bind(this))}
           </div>
         }
-        <Scheduler ref="scheduler" types={this.state.types} 
+        <Scheduler ref="scheduler" details={this.state.details}
+            groups={this.state.securityGroups}
             instructors={this.state.instructors}
             updateParent={this.loadDataFromServer}
             zones={this.props.awsConfig? this.props.awsConfig.timezones : []}/>
