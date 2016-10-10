@@ -5,6 +5,8 @@ import java.sql.Time;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -309,12 +311,11 @@ public class ScheduledClassesController {
     for (models.Instance inst : cls.getInstances()) {
       if (!inst.isTerminated()) {
         idList.put(inst.getId(), inst);
-        
       }
     }
 
     if (idList.isEmpty()) {
-      return Results.json().render(idList);
+      return Results.json().render(Collections.EMPTY_LIST);
     }
 
     List<com.amazonaws.services.ec2.model.Instance> instanceInfos
