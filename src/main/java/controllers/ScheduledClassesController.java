@@ -319,7 +319,7 @@ public class ScheduledClassesController {
     }
 
     List<com.amazonaws.services.ec2.model.Instance> instanceInfos
-      = aws.getInstances(idList.keySet().toArray(new String[idList.size()]),
+      = aws.getInstances(new ArrayList<String>(idList.keySet()),
                          cls.getClassTypeDetail().getRegion());
 
     for (com.amazonaws.services.ec2.model.Instance info: instanceInfos) {

@@ -4,7 +4,8 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Future;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +35,9 @@ import com.amazonaws.services.ec2.model.DomainType;
 import com.amazonaws.services.ec2.model.Filter;
 import com.amazonaws.services.ec2.model.Image;
 import com.amazonaws.services.ec2.model.Instance;
+import com.amazonaws.services.ec2.model.InstanceState;
 import com.amazonaws.services.ec2.model.InstanceStateChange;
+import com.amazonaws.services.ec2.model.InstanceStateName;
 import com.amazonaws.services.ec2.model.ReleaseAddressRequest;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.RunInstancesRequest;
@@ -47,7 +50,6 @@ import com.amazonaws.services.ec2.model.StopInstancesResult;
 import com.amazonaws.services.ec2.model.Subnet;
 import com.amazonaws.services.ec2.model.Tag;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
-import com.amazonaws.services.ec2.model.TerminateInstancesResult;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -106,6 +108,8 @@ public class AwsAdaptor {
   private SimpleDao<Eip> eipDao;
   @Inject
   com.google.inject.persist.UnitOfWork unitOfWork;
+  private static final Pattern INSTANCE_MISSING_ERROR_REGEX = Pattern.compile(".*The instance ID '(.*)' does not exist.*");
+  private static final InstanceState TERMINATED_STATE = new InstanceState().withCode(48).withName(InstanceStateName.Terminated);
 
   /**
    * Lookup all security groups for the region.
@@ -295,16 +299,41 @@ public class AwsAdaptor {
    * @param ids
    * @return
    */
-  public List<Instance> getInstances(String[] ids, String region) {
+  public List<Instance> getInstances(List<String> ids, String region) {
     AmazonEC2Client amazonClient = getClient(Region.valueOf(region));
-    DescribeInstancesResult result = amazonClient
-        .describeInstances(
-            new DescribeInstancesRequest().withInstanceIds(ids));
+    List<String> badIds = new ArrayList<>();
+    boolean working = true;
+    DescribeInstancesResult result = null;
+    while (working) {
+      try {
+        result = amazonClient
+            .describeInstances(
+                new DescribeInstancesRequest().withInstanceIds(ids));
+        working = false;
+      } catch (AmazonEC2Exception e) {
+        Matcher m = INSTANCE_MISSING_ERROR_REGEX.matcher(e.getMessage());
+        if (m.matches()) {
+          String id = m.group(1);
+          badIds.add(id);
+          ids.remove(id);
+        } else {
+          throw e;
+        }
+      }
+    }
     List<Reservation> reserves = result.getReservations();
     List<Instance> instances = new ArrayList<>();
     for (Reservation res: reserves) {
       instances.addAll(res.getInstances());
     }
+    for (String id: badIds) {
+      Instance terminated = 
+          new Instance()
+          .withInstanceId(id)
+          .withState(TERMINATED_STATE);
+      instances.add(terminated);
+    }
+    
     return instances;
   }
 

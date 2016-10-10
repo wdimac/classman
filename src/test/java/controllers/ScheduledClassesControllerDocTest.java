@@ -222,7 +222,7 @@ public class ScheduledClassesControllerDocTest extends AuthenticatedDocTesterBas
   @Test
   public void getAwsInfo() {
     ArrayList<com.amazonaws.services.ec2.model.Instance> instances = getInstanceList();
-    when(aws.getInstances(any(String[].class), any(String.class))).thenReturn(instances);
+    when(aws.getInstances(any(List.class), any(String.class))).thenReturn(instances);
     String testId = instances.get(0).getInstanceId();
 
     sayNextSection("Retrieve AWS information.");

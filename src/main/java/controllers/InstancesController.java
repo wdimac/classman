@@ -7,6 +7,7 @@ import javax.inject.Singleton;
 
 import com.appdynamics.aws.AwsAdaptor;
 import com.appdynamics.aws.AwsAdaptor.Region;
+import com.appdynamics.aws.QuickList;
 import com.google.inject.Inject;
 import com.google.inject.persist.Transactional;
 
@@ -106,7 +107,7 @@ public class InstancesController {
   @GET
   @UnitOfWork
   public Result getAwsInstances(@PathParam("region") String region, @PathParam("id") String id) {
-    String[] ids = {id};
+    List<String> ids = new QuickList<>(id);
     List<com.amazonaws.services.ec2.model.Instance> Instances = aws.getInstances(ids, region);
 
     return Results.json().render(Instances.get(0));

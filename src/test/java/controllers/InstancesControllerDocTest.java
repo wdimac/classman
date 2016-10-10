@@ -100,7 +100,7 @@ public class InstancesControllerDocTest extends AuthenticatedDocTesterBase{
   @Test
   public void getOneAwsInstance() {
     ArrayList<Instance> instances = getInstanceList();
-    when(aws.getInstances(any(String[].class), any(String.class))).thenReturn(instances);
+    when(aws.getInstances(any(List.class), any(String.class))).thenReturn(instances);
     String testId = instances.get(0).getInstanceId();
 
     sayNextSection("Retrieve one AWS instance.");
