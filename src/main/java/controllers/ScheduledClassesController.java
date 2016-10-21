@@ -233,6 +233,7 @@ public class ScheduledClassesController {
         Eip eip = usable.get(idx);
         eip.setInstance(inst);
         eipDao.persist(eip);
+        instanceDao.refresh(inst);
         idx++;
       }
 

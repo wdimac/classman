@@ -31,6 +31,7 @@ import com.amazonaws.services.ec2.model.InstanceState;
 import com.amazonaws.services.ec2.model.RunInstancesRequest;
 import com.appdynamics.aws.AwsAdaptor;
 import com.appdynamics.aws.AwsAdaptor.Region;
+import com.appdynamics.aws.QuickList;
 
 import dao.SimpleDao;
 import models.ClassTypeDetail;
@@ -288,6 +289,33 @@ public class ScheduledClassesControllerDocTest extends AuthenticatedDocTesterBas
 
     sayAndAssertThat("Stopped instance ID is returned.",
         instancesResp, CoreMatchers.containsString(testId));
+
+  }
+
+  @Test
+  public void controlEips() {
+    String testId = "i-INST1";
+    List<String> instances = new ArrayList<>();
+    instances.add(testId);
+    when(aws.requestEip(anyString(), any(Boolean.class))).thenReturn("0.0.0.0");
+    Address address = new Address();
+    address.setPublicIp("0.0.0.0");
+    when(aws.getEips(anyString(), any(List.class))).thenReturn(new QuickList(address));
+
+    sayNextSection("Start class instances.");
+
+    say("Adding/removing eips for all instances for a class is a POST request to " + CLASS_URL + "/<class_id>/eips");
+
+    Response response = sayAndMakeRequest(
+      Request.POST()
+        .url(testServerUrl().path(CLASS_URL + "/1/eips"))
+        .addHeader("X-AUTH-TOKEN", auth.auth_token)
+      );
+
+    String instancesResp = response.payloadAsString();
+
+    sayAndAssertThat("Started instance is returned.",
+        instancesResp, CoreMatchers.containsString("0.0.0.0"));
 
   }
 
