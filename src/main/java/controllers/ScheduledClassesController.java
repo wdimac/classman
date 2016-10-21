@@ -207,7 +207,7 @@ public class ScheduledClassesController {
     int idx = 0;
     for (models.Instance inst: result) {
       Eip eip = usable.get(idx);
-      eip.setInstanceId(inst.getId());
+      eip.setInstance(inst);
       eipDao.persist(eip);
       idx++;
     }
@@ -217,6 +217,54 @@ public class ScheduledClassesController {
     return result;
   }
 
+  @Path("/classes/{id}/eips")
+  @POST
+  @Transactional
+  public Result handleEips(@PathParam("id") Long id) {
+    ScheduledClass clazz = scDao.find(id, ScheduledClass.class);
+    List<models.Instance> instances = clazz.getInstances();
+    if(instances.size() > 0 && instances.get(0).getEip() != null) { //remove eips
+      dropEips(clazz);
+    } else { //add eips
+      List<Eip> usable = getUsableEips(clazz, instances.size());
+      
+      int idx = 0;
+      for (models.Instance inst: instances) {
+        Eip eip = usable.get(idx);
+        eip.setInstance(inst);
+        eipDao.persist(eip);
+        idx++;
+      }
+
+      eipDao.detach(usable);
+      aws.associateEipWhenReady(usable);
+    }
+    return Results.json().render(instances);
+  }
+
+  /**
+   * Dissociate eips from instances. Release any temporary ones.
+   * 
+   * @param clazz
+   * @param instances
+   */
+  private void dropEips(ScheduledClass clazz) {
+    for(models.Instance instance:clazz.getInstances()) {
+      Eip eip = instance.getEip();
+      if (eip != null) {
+        aws.disassociateEip(instance.getEip());
+        if(eip.getPoolUser() == null) {
+          aws.releaseEips(clazz.getClassTypeDetail().getRegion(),
+            eip.getAllocationId(), eip.getPublicIp());
+          eipDao.delete(eip.getId(), Eip.class);
+        } else {
+          eip.setInstance(null);
+          eipDao.update(eip);
+        }
+      }
+    }
+  }
+  
   /**
    * Get count eips from the users pool. Eip must be currently unassigned and usable
    * in the same domain as the security group being used. (i.e. VPC or standard).
@@ -230,7 +278,7 @@ public class ScheduledClassesController {
     List<Eip> usable = new ArrayList<>();
     if (clazz.getInstructor() != null) {
       for (Eip eip: clazz.getInstructor().getEips()) {
-        if ((eip.getInstanceId() == null || eip.getInstanceId().length() == 0)
+        if ((eip.getInstance() == null)
             && eip.getRegion().equals(clazz.getClassTypeDetail().getRegion())
             && domain.equals(eip.getDomain())) {
           usable.add(eip);

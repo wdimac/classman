@@ -15,6 +15,7 @@ import com.google.inject.persist.Transactional;
 import dao.SimpleDao;
 import filters.TokenFilter;
 import models.Eip;
+import models.Instance;
 import models.User;
 import ninja.FilterWith;
 import ninja.Result;
@@ -85,8 +86,10 @@ public class EipController {
   @Transactional
   public Result updateEip(@PathParam("id") String id, @Param("instanceId") String instanceId) {
     Eip eip = eipDao.find(id, Eip.class);
-    eip.setInstanceId(instanceId);
     if (instanceId != null && instanceId.length()>0) {
+      Instance inst = new Instance();
+      inst.setId(instanceId);
+      eip.setInstance(inst);
       String assocId = aws.associateEip(
           eip.getRegion(),
           eip.getAllocationId(),

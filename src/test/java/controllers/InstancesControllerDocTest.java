@@ -229,7 +229,7 @@ public class InstancesControllerDocTest extends AuthenticatedDocTesterBase{
     SimpleDao<Eip> eipDao = getInjector().getInstance(SimpleDao.class);
 
     List<Eip> eips = eipDao.getAll(Eip.class);
-    Assert.assertNull(eips.get(0).getInstanceId());
+    Assert.assertNull(eips.get(0).getInstance());
 }
 
   private ArrayList<Instance> getInstanceList() {

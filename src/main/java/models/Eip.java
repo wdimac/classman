@@ -7,6 +7,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import com.amazonaws.services.ec2.model.Address;
@@ -21,8 +22,10 @@ public class Eip {
 
   private String region;
   private String description;
-  @Column(name="instance_id")
-  private String instanceId;
+  @OneToOne
+  @JoinColumn(name="instance_id")
+  @JsonIgnoreProperties({"eip"})
+  private Instance instance;
   @Column(name="public_ip")
   private String publicIp;
   @Column(name="allocation_id")
@@ -48,11 +51,11 @@ public class Eip {
   public void setId(Long id) {
     this.id = id;
   }
-  public String getInstanceId() {
-    return instanceId;
+  public Instance getInstance() {
+    return instance;
   }
-  public void setInstanceId(String instanceId) {
-    this.instanceId = instanceId;
+  public void setInstance(Instance instance) {
+    this.instance = instance;
   }
   public String getPublicIp() {
     return publicIp;
@@ -117,8 +120,12 @@ public class Eip {
   public void loadFromAddress(Address address) {
     this.setAllocationId(address.getAllocationId());
     this.setAssociationId(address.getAssociationId());
-    this.setDomain(address.getDomain());;
-    this.setInstanceId(address.getInstanceId());
+    this.setDomain(address.getDomain());
+    if (address.getInstanceId() != null) {
+      Instance inst = new Instance();
+      inst.setId(address.getInstanceId());
+      this.setInstance(inst);
+    }
     this.setNetworkInterfaceId(address.getNetworkInterfaceId());
     this.setNetworkInterfaceOwnerId(address.getNetworkInterfaceOwnerId());
     this.setPrivateIpAddress(address.getPrivateIpAddress());

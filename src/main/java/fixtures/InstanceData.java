@@ -36,7 +36,7 @@ public class InstanceData implements Fixture {
 
     Eip eip = new Eip();
     eip.setPublicIp("127.0.0.1");
-    eip.setInstanceId("i-INST2");
+    eip.setInstance(instance);
     eip.setPoolUser(poolUser);
     em.persist(eip);
 

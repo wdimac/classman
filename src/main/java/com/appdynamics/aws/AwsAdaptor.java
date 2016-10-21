@@ -220,7 +220,9 @@ public class AwsAdaptor {
 
     for (String instanceId : ids) {
       Eip target = new Eip();
-      target.setInstanceId(instanceId);
+      models.Instance inst = new models.Instance();
+      inst.setId(instanceId);
+      target.setInstance(inst);
       target = eipDao.findBy(target);
       if (target != null && "standard".equals(target.getDomain())) {
         eips.add(target);
@@ -274,7 +276,9 @@ public class AwsAdaptor {
 
   public void cleanUpEips(String instanceId) {
     Eip qEip = new Eip();
-    qEip.setInstanceId(instanceId);
+    models.Instance inst = new models.Instance();
+    inst.setId(instanceId);
+    qEip.setInstance(inst);
     Eip eip = eipDao.findBy(qEip);
     if (eip != null) {
       this.disassociateEip(eip);
@@ -282,7 +286,7 @@ public class AwsAdaptor {
         this.releaseEips(eip.getRegion(), eip.getAllocationId(), eip.getPublicIp());
         eipDao.delete(eip.getId(), Eip.class);
       } else {
-        eip.setInstanceId(null);
+        eip.setInstance(null);
         eipDao.persist(eip);
       }
     }
@@ -399,8 +403,8 @@ public class AwsAdaptor {
     AsyncHandler<DescribeInstancesRequest, DescribeInstancesResult> asyncHandler = new InstanceStartWaitHandler(eips, this);
     List<String> instanceIds = new ArrayList<>();
     for (Eip eip: eips) {
-      if (eip.getInstanceId() != null)
-        instanceIds.add(eip.getInstanceId());
+      if (eip.getInstance() != null)
+        instanceIds.add(eip.getInstance().getId());
     }
     DescribeInstancesRequest describeInstancesRequest =
         new DescribeInstancesRequest()
@@ -512,25 +516,25 @@ public class AwsAdaptor {
         for (Instance inst :res.getInstances()) {
           if (inst.getState().getName().equals("running")) {
             for (Eip eip: eips) {
-              if (eip.getInstanceId().equals(inst.getInstanceId())) {
+              if (inst.getInstanceId().equals(eip.getInstance().getId())) {
                 log.debug("Associating: " + eip.getPublicIp() + " to instance " + inst.getInstanceId());
                 String assocId = aws.associateEip(eip.getRegion(),
                                  eip.getAllocationId(),
                                  eip.getPublicIp(),
-                                 eip.getInstanceId());
+                                 eip.getInstance().getId());
                 eips.remove(eip);
                 eip.setAssociationId(assocId);
                 aws.updateDuringAsync(eip);
-                request.getInstanceIds().remove(eip.getInstanceId());
+                request.getInstanceIds().remove(eip.getInstance().getId());
               }
             }
           } else if (!inst.getState().getName().equals("pending")) {
             log.error(MessageFormat.format("Instance not starting, abandoning wait: Instance: %s State: %s",
                 inst.getInstanceId(), inst.getState().getName()));
             for (Eip eip: eips) {
-              if (eip.getInstanceId().equals(inst.getInstanceId())) {
+              if (inst.getInstanceId().equals(eip.getInstance().getId())) {
                 eips.remove(eip);
-                request.getInstanceIds().remove(eip.getInstanceId());
+                request.getInstanceIds().remove(eip.getInstance().getId());
               }
             }
           }

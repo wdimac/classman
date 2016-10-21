@@ -11,7 +11,7 @@
   <!-- uncomment the dependency for ninja-servlet -->
   <packaging>jar</packaging>
   <groupId>com.appdynamics</groupId>
-  <version>1.7</version>
+  <version>1.8</version>
 
   <url>http://www.ninjaframework.org</url>
 

@@ -194,6 +194,24 @@ var ClassInfo = React.createClass({
       }.bind(this)
     });
   },
+  handleEip() {
+    $.ajax({
+      url: "/api/admin/classes/" + this.props.clazz.id + "/eips",
+      headers: {'X-AUTH-TOKEN':Auth.getToken()},
+      type:"POST",
+      dataType: 'json',
+      cache: false,
+      success: function(data) {
+        if (this.props.clazz.instances) {
+          this.props.clazz.instances = data;
+        }
+        this.props.updateParent();
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(xhr, status, err.toString());
+      }.bind(this)
+    })  
+  },
   changeAll(state) {
     $.ajax({
       url: "/api/admin/classes/" + this.props.clazz.id + "/aws/" + state,
@@ -422,15 +440,17 @@ var ClassInfo = React.createClass({
 
             <div className="btn-group ">
               <button className="btn btn-sm btn-primary-outline"
-                  title="Launch All"
-                  onClick={this.launch.bind(this, 0)}>
-                <i className="fa fa-rocket"> All</i>
-              </button>
-              <button className="btn btn-sm btn-primary-outline"
                   title="Launch One Instance"
                   onClick={this.launch.bind(this, 1)}>
                 <i className="fa fa-rocket"> 1</i>
               </button>
+              {cl.instances?
+                  <button className={"btn btn-sm " + (cl.instances[0].eip? "btn-danger-outline":"btn-primary-outline")}
+                      title={(cl.instances[0].eip?"Unlink":"Link") + " EIPs"}
+                      onClick={this.handleEip.bind(this)}>
+                    <i className="fa fa-map-marker"> </i>
+                  </button>
+              :""}
             </div>
 
           </div> {/*End button panel*/}
@@ -498,6 +518,7 @@ var InstanceRow = React.createClass({
         btn="btn-secondary";
       }
     }
+    console.log(this.props.inst);
     return (
       <div className="m-b-1"> 
       { this.props.inst.terminated ?
@@ -530,6 +551,9 @@ var InstanceRow = React.createClass({
          </div>
       }
       {this.props.inst.id} : {this.props.inst.description} 
+      <span className="text-primary">&emsp;EIP:&ensp;
+        {this.props.inst.eip ? this.props.inst.eip.publicIp:""}
+      </span>
       {(this.state.showInfo && this.props.info)?
         <InfoCard info={this.props.info} close={this.toggleInfo}/>
         : ""

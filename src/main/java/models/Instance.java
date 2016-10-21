@@ -5,6 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -32,6 +33,10 @@ public class Instance {
   @JoinColumn(name="class_id", updatable=false)
   @JsonIgnoreProperties({"instances"})
   private ScheduledClass scheduledClass;
+  
+  @OneToOne(mappedBy="instance")
+  @JsonIgnoreProperties({"instance"})
+  private Eip eip;
 
   public String getRegion() {
     return region;
@@ -66,6 +71,12 @@ public class Instance {
   }
   public void setScheduledClass(ScheduledClass scheduledClass) {
     this.scheduledClass = scheduledClass;
+  }
+  public Eip getEip() {
+    return eip;
+  }
+  public void setEip(Eip eip) {
+    this.eip = eip;
   }
 
 }
