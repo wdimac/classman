@@ -174,8 +174,6 @@ public class ScheduledClassesController {
   public List<models.Instance> startClassInstances(Integer count, ScheduledClass clazz) {
     if (count == 0) count = clazz.getCount();
 
-    List<Eip> usable = getUsableEips(clazz, count);
-
     RunInstancesRequest request = new RunInstancesRequest();
     request.setImageId(clazz.getClassTypeDetail().getImageId());
     request.setInstanceType(InstanceType.valueOf(clazz.getClassTypeDetail().getInstanceType()));
@@ -203,17 +201,6 @@ public class ScheduledClassesController {
       result.add(instance);
     }
 
-
-    int idx = 0;
-    for (models.Instance inst: result) {
-      Eip eip = usable.get(idx);
-      eip.setInstance(inst);
-      eipDao.persist(eip);
-      idx++;
-    }
-
-    eipDao.detach(usable);
-    aws.associateEipWhenReady(usable);
     return result;
   }
 
