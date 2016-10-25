@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -292,9 +293,19 @@ public class AwsAdaptor {
     }
   }
 
-  public List<Instance> getInstances(Region valueOf) {
-    // TODO Auto-generated method stub
-    return null;
+  /**
+   * Return all instances in a region.
+   * 
+   * @param region
+   * @return
+   */
+  public List<Instance> getInstances(Region region) {
+    AmazonEC2Client amazonClient = getClient(region);
+    DescribeInstancesResult result = amazonClient.describeInstances();
+    List<Reservation> reservations = result.getReservations();
+    return reservations.stream()
+      .flatMap((res) ->{return res.getInstances().stream();})
+      .collect(Collectors.toList());
   }
 
   /**
