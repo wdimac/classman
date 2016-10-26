@@ -170,7 +170,7 @@ window.__APP__.VpcPanel = React.createClass({
   formatVpcRow(item) {
     var delThis = this.state.deleting && (item.subnetId == this.state.deleting.subnetId);
     return(
-      <div key={item.vpcId} className="truncate">
+      <div key={item.subnetId} className="truncate">
         <i className={"fa btn btn-sm btn-danger m-r-1 " + (delThis ? "fa-hourglass-half" : "fa-times")}
           onClick={this.del.bind(this, item)}></i>
         <strong>{item.vpcId}:{item.subnetId} </strong> 
