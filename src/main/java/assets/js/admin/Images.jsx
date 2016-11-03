@@ -248,7 +248,17 @@ window.__APP__.Images = React.createClass({
 		var launchClick = function(item){
 			this.launch(item);
 		}.bind(this, item);
-		return(
+		var defunct = item.defunct;
+		if (defunct) {
+		  return(
+		    <div key={item.id} className="truncate">
+		      <i className='fa fa-file-text btn btn-info btn-sm'
+                onClick={boundClick} /> &ensp;Defunct - 
+              <strong className="strike">{item.id}:</strong> {item.description}
+            </div>
+		  );
+		} else {
+		  return(
 			<div key={item.id} className="truncate">
 				<i className='fa fa-file-text btn btn-info btn-sm'
 					onClick={boundClick} /> &ensp;
@@ -256,7 +266,8 @@ window.__APP__.Images = React.createClass({
 					onClick={launchClick} /> &ensp;
 				<strong>{item.id}:</strong> {item.description}
 			</div>
-		)
+		  );
+		}
 	},
 	//Callback for detail panel
 	deleteDetailItem() {

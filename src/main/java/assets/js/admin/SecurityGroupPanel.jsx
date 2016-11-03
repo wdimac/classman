@@ -194,12 +194,33 @@ window.__APP__.SecurityGroupPanel = React.createClass({
       }.bind(this)
     });
   },
+  deleteGroup(secGroup) {
+    if (!confirm("Delete this Security Group?")) {
+        return;
+    }
+    $.ajax({
+      url: "/api/admin/security_groups/" + secGroup.id,
+      headers: { 'X-AUTH-TOKEN':Auth.getToken() },
+      type: 'DELETE',
+      dataType: 'json',
+      cache: false,
+      success: function(data) {
+        this.loadDataFromServer();
+      }.bind(this),
+        error: function(xhr, status, err) {
+        console.error(status, err.toString());
+      }.bind(this)
+    });
+  },
   //Callback for Accordian
   formatGroupRow(item) {
+    var groupClass= item.defunct? "strike text-danger":"";
     return(
       <div key={item.id} className="truncate m-b-1">
         <div className="col-md-6">
-        <strong>{item.id}:&emsp;</strong> 
+        <i className="fa fa-times btn btn-danger"
+            onClick={this.deleteGroup.bind(this, item)}></i>&emsp;
+        <strong className={groupClass}>{item.id}</strong>:&emsp; 
         {item.vpcId ? 
           <span className="text-info">
             {item.vpcId}&ensp;

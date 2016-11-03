@@ -48,7 +48,7 @@ window.__APP__.Launcher = React.createClass({
     var securityOptions = this.props.groups.filter(function(group){
       return this.props.target.region === group.region;
     }.bind(this)).map(function(group){
-      return {name: group.name, value: group.id};
+      return {name: group.name, value: group.id, defunct: group.defunct};
     })
 
     if (securityOptions.length ===0) {

@@ -64,14 +64,14 @@ var DetailRow = React.createClass({
         this.props.selects.images.filter(function(image){
           return image.region === this.props.detail.region;
         }.bind(this)).map(function(image) {
-          return {name:image.description, value:image.id};
+          return {name:image.description, value:image.id, defunct:image.defunct};
         })
       );
       vpcOptions=vpcOptions.concat(
         this.props.selects.vpc.filter(function(vpc){
           return vpc.region === this.props.detail.region;
         }.bind(this)).map(function(vpc) {
-          return {name:vpc.vpcId + " : " + vpc.subnetId, value:vpc.subnetId};
+          return {name:vpc.vpcId + " : " + vpc.subnetId, value:vpc.subnetId, defunct: vpc.defunct};
         })
       );
     }

@@ -14,6 +14,7 @@ public class Vpc {
   @Column(name="vpc_id")
   private String vpcId;
   private String region;
+  private boolean defunct;
 
   public String getVpcId() {
     return vpcId;
@@ -32,6 +33,12 @@ public class Vpc {
   }
   public void setRegion(String region) {
     this.region = region;
+  }
+  public boolean isDefunct() {
+    return defunct;
+  }
+  public void setDefunct(boolean defunct) {
+    this.defunct = defunct;
   }
 
 }

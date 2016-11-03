@@ -12,6 +12,7 @@ public class Images {
 
   private String region;
   private String description;
+  private boolean defunct;
 
   public String getId() {
     return id;
@@ -34,6 +35,12 @@ public class Images {
 
   public void setDescription(String description) {
     this.description = description;
+  }
+  public boolean isDefunct() {
+    return defunct;
+  }
+  public void setDefunct(boolean defunct) {
+    this.defunct = defunct;
   }
 
 }

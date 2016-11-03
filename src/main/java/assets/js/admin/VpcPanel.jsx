@@ -169,11 +169,12 @@ window.__APP__.VpcPanel = React.createClass({
   //Callback for Accordian
   formatVpcRow(item) {
     var delThis = this.state.deleting && (item.subnetId == this.state.deleting.subnetId);
+    var vpcClass = item.defunct ? "strike text-danger":"";
     return(
       <div key={item.subnetId} className="truncate">
         <i className={"fa btn btn-sm btn-danger m-r-1 " + (delThis ? "fa-hourglass-half" : "fa-times")}
           onClick={this.del.bind(this, item)}></i>
-        <strong>{item.vpcId}:{item.subnetId} </strong> 
+        <strong className={vpcClass}>{item.vpcId}:{item.subnetId} </strong> 
         {item.isDefault ? "(default)" : ""}
       </div>
     )

@@ -318,13 +318,18 @@ window.__APP__.EipPanel = React.createClass({
   //Callback for Accordian
   formatEipRow(item) {
     var delThis = this.state.deleting && (item.id == this.state.deleting.id);
+    var ipClass = item.defunct?" strike":"";
     return(
       <div key={item.id} className="truncate">
-        <i className="fa fa-link btn btn-sm btn-success m-r-1"
-          onClick={this.assign.bind(this, item)}></i>
+        { item.defunct?
+          <i className="fa fa-unlink btn btn-sm btn-secondary m-r-1"></i>
+          :
+          <i className="fa fa-link btn btn-sm btn-success m-r-1"
+            onClick={this.assign.bind(this, item)}></i>
+        }
         <i className={"fa btn btn-sm btn-danger m-r-1 " + (delThis ? "fa-hourglass-half" : "fa-times")}
           onClick={this.del.bind(this, item)}></i>
-        <strong>{item.publicIp}: </strong> 
+        <strong className={ipClass}>{item.publicIp}: </strong> 
         {item.instanceId ? item.instanceId : "not assigned"} &thinsp;
         ({item.domain})
         {item.poolUser ? 

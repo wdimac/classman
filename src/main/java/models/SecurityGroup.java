@@ -21,6 +21,7 @@ public class SecurityGroup {
   private String description;
   @Column(name="vpc_id")
   private String vpcId;
+  private boolean defunct;
   
   @ManyToOne
   @JoinColumn(name="user_id")
@@ -68,5 +69,11 @@ public class SecurityGroup {
   }
   public void setVpcId(String vpcId) {
     this.vpcId = vpcId;
+  }
+  public boolean isDefunct() {
+    return defunct;
+  }
+  public void setDefunct(boolean defunct) {
+    this.defunct = defunct;
   }
 }

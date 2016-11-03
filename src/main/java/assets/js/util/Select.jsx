@@ -2,7 +2,7 @@ var Option = React.createClass({
   render() {
     return(
       <option value={this.props.item.value}>
-        {this.props.item.name}
+        {this.props.item.name + (this.props.item.defunct?" *DEFUNCT*":"")}
       </option>
     );
   }

@@ -39,11 +39,13 @@ public class Eip {
   private String networkInterfaceOwnerId;
   @Column(name="private_ip_address")
   private String privateIpAddress;
+  private boolean defunct;
 
   @ManyToOne
   @JoinColumn(name="pool_user_id", updatable=false)
   @JsonIgnoreProperties({"eips"})
   private User poolUser;
+  
 
   public Long getId() {
     return id;
@@ -130,6 +132,12 @@ public class Eip {
     this.setNetworkInterfaceOwnerId(address.getNetworkInterfaceOwnerId());
     this.setPrivateIpAddress(address.getPrivateIpAddress());
     this.setPublicIp(address.getPublicIp());
+  }
+  public boolean isDefunct() {
+    return defunct;
+  }
+  public void setDefunct(boolean defunct) {
+    this.defunct = defunct;
   }
 
 }

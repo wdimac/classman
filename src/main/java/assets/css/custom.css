@@ -46,3 +46,7 @@
 .editable .placeholder {
   color:#BBB;
 }
+
+.strike {
+	text-decoration:line-through;
+}

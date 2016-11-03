@@ -518,7 +518,8 @@ var InstanceRow = React.createClass({
         btn="btn-secondary";
       }
     }
-    console.log(this.props.inst);
+
+    var eipClass = (this.props.inst.eip && this.props.inst.eip.defunct) ? " strike":"";
     return (
       <div className="m-b-1"> 
       { this.props.inst.terminated ?
@@ -552,7 +553,9 @@ var InstanceRow = React.createClass({
       }
       {this.props.inst.id} : {this.props.inst.description} 
       <span className="text-primary">&emsp;EIP:&ensp;
-        {this.props.inst.eip ? this.props.inst.eip.publicIp:""}
+        <span className={eipClass}>
+          {this.props.inst.eip ? this.props.inst.eip.publicIp:""}
+        </span>
       </span>
       {(this.state.showInfo && this.props.info)?
         <InfoCard info={this.props.info} close={this.toggleInfo}/>
@@ -657,7 +660,7 @@ window.__APP__.ClassesPanel = React.createClass({
           options = options
             .filter(filterFunc)
             .map(function(group){
-              return {name:group.description, value:group.id};
+              return {name:group.description, value:group.id, defunct:group.defunct};
             });
           if (options.length <= 0) options = [{name: "No relevant Security Group found"}];
           return options;

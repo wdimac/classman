@@ -110,15 +110,18 @@ window.__APP__.InlineSelect = React.createClass({
           - {fieldName} -
         </span>
       );
+      var defunct = false;
       if (object) {
         this.props.options.forEach(function(option){
           if (option.value && (option.value == object || option.value == object.id)) {
-            label = option.name;
+            label = option.name + (option.defunct?" *DEFUNCT*":"");
+            defunct = option.defunct;
           }
         });
       }
+      var className = "editable " + this.props.className + (defunct?" strike":"");
       return (
-        <div className={"editable " + this.props.className} onClick={this.toggleEdit}>
+        <div className={className} onClick={this.toggleEdit}>
           {label}
         </div>
       );
